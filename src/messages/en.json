@@ -1,0 +1,17 @@
+{
+  "home": "Home",
+  "language_setting": "Ngôn ngữ",
+  "theme_setting": "Giao diện",
+  "profile_setting": "Thông tin tài khoản",
+  "password_setting": "Đổi mật khẩu",
+  "logout": "Đăng xuất",
+
+  "change_language_title": "Chọn ngôn ngữ bạn muốn sử dụng\nvà nhấn nút xác nhận để hoàn thành",
+  "english": "English",
+  "vietnamese": "Vietnamese",
+  "confirm": "Confirm",
+
+  "change_theme_title": "Chọn chế độ mà bạn muốn sử dụng\nvà nhấn nút xác nhận để hoàn thành",
+  "dark_theme": "Dark Theme",
+  "light_theme": "Light Theme"
+}
