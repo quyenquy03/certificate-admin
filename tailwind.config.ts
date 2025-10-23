@@ -56,6 +56,10 @@ export default {
           primary: { dark: "#39394B", light: "#ffffff" },
           secondary: { dark: "#222131", light: "#f1f4fa" },
         },
+        color: {
+          dark: "#e5e7eb",
+          light: "#374151",
+        },
         tundraBrown: "#474244",
       },
       keyframes: {

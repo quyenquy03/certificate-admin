@@ -7,4 +7,7 @@ export const IMAGES = {
     vi: "/flags/vi-flag.jpg",
     en: "/flags/en-flag.jpg",
   },
+  banners: {
+    login: "/banners/login.png",
+  },
 };
