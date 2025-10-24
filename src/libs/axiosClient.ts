@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { envs } from "@/constants";
+import { ACCESS_TOKEN_KEY, envs } from "@/constants";
 import Cookies from "js-cookie";
 
 const axiosClient = axios.create({
@@ -14,7 +14,7 @@ const axiosClient = axios.create({
 axiosClient.interceptors.request.use(
   async function (config) {
     // Do something before request is sent
-    const token = Cookies.get("accessToken");
+    const token = Cookies.get(ACCESS_TOKEN_KEY);
     if (token) config.headers.set("Authorization", `Bearer ${token}`);
     config.headers["Content-Type"] =
       config?.data?.headerContentType || "application/json";

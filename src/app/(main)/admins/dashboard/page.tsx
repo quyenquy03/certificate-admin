@@ -1,4 +1,6 @@
+import { Dashboard } from "@/components";
+
 const AdminDashboardPage = () => {
-  return <div className="bg-red-100">Admin Dashboard</div>;
+  return <Dashboard />;
 };
 export default AdminDashboardPage;

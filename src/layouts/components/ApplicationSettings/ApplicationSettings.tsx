@@ -1,3 +1,5 @@
+"use client";
+
 import { Image } from "@/components/images";
 import { IMAGES } from "@/constants";
 import { Drawer, Tabs } from "@mantine/core";
@@ -9,6 +11,7 @@ import { ProfileSettingTab } from "./ProfileSettingTab";
 import { ThemeSettingTab } from "./ThemeSettingTab";
 import { LanguageSettingTab } from "./LanguageSettingTab";
 import { FaXmark } from "react-icons/fa6";
+import { stores } from "@/stores";
 
 type ApplicationSettingsProps = {
   opened: boolean;
@@ -28,6 +31,7 @@ export const ApplicationSettings = ({
   onClose,
 }: ApplicationSettingsProps) => {
   const t = useTranslations();
+  const { currentUser } = stores.account();
 
   const [currentTab, setCurrentTab] = useState<APPLICATION_SETTING_TABS>(
     APPLICATION_SETTING_TABS.MENU_SETTING_TAB
@@ -90,12 +94,12 @@ export const ApplicationSettings = ({
               <Image
                 wrapperClassName="w-20 h-20 rounded-full"
                 className="w-full h-full rounded-full border-[2px] border-gray-600 dark:border-gray-400"
-                src={IMAGES.default.avatar}
+                src={currentUser?.avatar ?? IMAGES.default.avatar}
                 alt="logo"
               />
               <div className="text-center text-gray-500 dark:text-gray-200">
-                <p className="font-bold text-sm">Nguyễn Tạ Quyền</p>
-                <p className="font-medium text-xs mt-1">ta2k3quyen@gmail.com</p>
+                <p className="font-bold text-sm">{`${currentUser?.firstName} ${currentUser?.lastName}`}</p>
+                <p className="font-medium text-xs mt-1">{currentUser?.email}</p>
               </div>
             </div>
           </div>

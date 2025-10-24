@@ -26,6 +26,7 @@ export const useQueryGetMyProfile = (
     staleTime: QUERY_TIMES.STALE_TIME.GET_MY_PROFILE,
     gcTime: QUERY_TIMES.GC_TIME.GET_MY_PROFILE,
     refetchOnWindowFocus: false,
+    enabled: false,
     ...options,
   });
 };

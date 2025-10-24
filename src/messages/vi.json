@@ -38,5 +38,8 @@
   "required_field": "This field is required",
   "login_error": "Login error",
   "account_not_created": "Account has not created yet",
-  "password_incorrect": "Your password is not correct"
+  "password_incorrect": "Your password is not correct",
+  "dashboard": "Dashboard",
+  "users_management": "Users",
+  "organizations_management": "Organizations"
 }

@@ -1,2 +1,3 @@
-export * from "./BaseResponseType";
+export * from "./baseResponseType";
 export * from "./baseErrorType";
+export * from "./baseSizesType";

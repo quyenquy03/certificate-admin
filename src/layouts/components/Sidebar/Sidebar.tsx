@@ -1,32 +1,47 @@
 "use client";
 
-import { Image } from "@/components/images";
-import { IMAGES } from "@/constants";
+import { Image } from "@/components";
+import { IMAGES, PAGE_URLS } from "@/constants";
 import {
-  TbAdjustments,
   TbCalendarStats,
-  TbFileAnalytics,
   TbGauge,
-  TbLock,
   TbNotes,
-  TbPresentationAnalytics,
   TbSettings,
+  TbAdjustments,
+  TbFileAnalytics,
+  TbLock,
+  TbPresentationAnalytics,
 } from "react-icons/tb";
 import { MenuItem } from "./MenuItem";
+import { stores } from "@/stores";
+import { useTranslations } from "next-intl";
 
 type SidebarProps = {
   onOpenSettings: () => void;
 };
 
 export const Sidebar = ({ onOpenSettings }: SidebarProps) => {
-  const mockdata = [
-    { id: "1", label: "Dashboard", icon: TbGauge, isActive: true },
-    { id: "2", label: "Market news", icon: TbNotes },
-    { id: "3", label: "Releases", icon: TbCalendarStats },
-    { id: "4", label: "Analytics", icon: TbPresentationAnalytics },
-    { id: "5", label: "Contracts", icon: TbFileAnalytics },
-    { id: "6", label: "Settings", icon: TbAdjustments },
-    { id: "7", label: "Security", icon: TbLock },
+  const t = useTranslations();
+  const { currentUser } = stores.account();
+  const mockData = [
+    {
+      id: "1",
+      label: t("dashboard"),
+      icon: TbGauge,
+      link: PAGE_URLS.ADMIN_DASHBOARD,
+    },
+    {
+      id: "2",
+      label: t("users_management"),
+      icon: TbNotes,
+      link: PAGE_URLS.ADMIN_USERS,
+    },
+    {
+      id: "3",
+      label: t("organizations_management"),
+      icon: TbCalendarStats,
+      link: PAGE_URLS.ADMIN_ORGANIZATIONS,
+    },
   ];
   return (
     <div className="fixed w-full max-w-72 h-screen bg-background-primary-light dark:bg-background-primary-dark shadow-gray-400 dark:shadow-gray-500 shadow-inner">
@@ -42,7 +57,7 @@ export const Sidebar = ({ onOpenSettings }: SidebarProps) => {
         </p>
       </div>
       <div className="h-[calc(100vh-112px)] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-gray-600 [&::-webkit-scrollbar-thumb]:bg-gray-800 overflow-y-visible">
-        {mockdata.map((item) => (
+        {mockData.map((item) => (
           <MenuItem key={item.id} {...item} />
         ))}
       </div>
@@ -51,15 +66,15 @@ export const Sidebar = ({ onOpenSettings }: SidebarProps) => {
           <Image
             wrapperClassName="w-9 h-9 rounded-full"
             className="w-full h-full rounded-full border-[2px] border-gray-400"
-            src={IMAGES.default.avatar}
+            src={currentUser?.avatar ?? IMAGES.default.avatar}
             alt="logo"
           />
           <div className="">
             <p className="font-bold text-sm text-gray-500 dark:text-gray-200">
-              Nguyen Ta Quyen
+              {`${currentUser?.firstName} ${currentUser?.lastName}`}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-300 font-semibold">
-              Ta2k3quyen@gmail.com
+              {currentUser?.email}
             </p>
           </div>
         </div>
