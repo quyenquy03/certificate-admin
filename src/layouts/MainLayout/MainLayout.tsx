@@ -62,7 +62,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <div className="flex gap-2 min-h-screen">
       <Sidebar onOpenSettings={() => setOpenedSettings(true)} />
-      <div className="ml-72 p-4">{children}</div>
+      <div className="ml-72 p-4 w-full">{children}</div>
       <ApplicationSettings
         opened={openedSettings}
         onClose={() => setOpenedSettings(false)}

@@ -1,11 +1,17 @@
 const STALE_TIME = {
   DEFAULT: 0,
   GET_MY_PROFILE: 2 * 60 * 60 * 1000,
+  GET_ALL_USERS: 2 * 60 * 60 * 1000,
+  GET_DELETED_USERS: 2 * 60 * 60 * 1000,
+  GET_USER_BY_ID: 2 * 60 * 60 * 1000,
 };
 
 const GC_TIME = {
   DEFAULT: 0,
   GET_MY_PROFILE: 2 * 60 * 60 * 1000,
+  GET_ALL_USERS: 2 * 60 * 60 * 1000,
+  GET_DELETED_USERS: 2 * 60 * 60 * 1000,
+  GET_USER_BY_ID: 2 * 60 * 60 * 1000,
 };
 
 export const QUERY_TIMES = {

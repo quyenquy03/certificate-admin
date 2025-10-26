@@ -18,7 +18,7 @@ type FormInputProps = {
   name_placeholder?: string;
   hasError?: boolean;
   isTranslate?: boolean;
-  errors?: FieldErrors<FieldValues>;
+  errors: FieldErrors<FieldValues>;
   register: UseFormRegister<FieldValues>;
   rules?: RegisterOptions;
   classNames?: {

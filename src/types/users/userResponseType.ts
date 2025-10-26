@@ -13,4 +13,7 @@ export type UserResponseType = {
   phone: string;
   dob: string;
   avatar: string;
+  isLocked: boolean;
+  createdAt: string;
+  updatedAt: string;
 };

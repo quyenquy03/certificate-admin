@@ -1,0 +1,17 @@
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  transition: background-color 5000s;
+  -webkit-text-fill-color: #120f24 !important;
+}
+
+.input-number-no-stepper::-webkit-outer-spin-button,
+.input-number-no-stepper::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input-number-no-stepper[type="number"] {
+  -moz-appearance: textfield;
+}
