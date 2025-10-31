@@ -64,8 +64,16 @@
   "create_user_success_title": "Create user successfully",
   "create_user_success_desc": "You created an user successfully",
   "create_user_fail": "Create user fail",
+  "update_user_success_title": "Update user successfully",
+  "update_user_success_desc": "You updated the user successfully",
+  "update_user_fail": "Update user fail",
   "email_already_exists": "This email is already exists",
   "block": "Blocked",
   "not_block": "Working",
-  "not_updated": "Not updated"
+  "not_updated": "Not updated",
+  "view_detail": "View detail",
+  "update_user": "Update user",
+  "delete_user": "Delete user",
+  "enter_search_keyword": "Enter search keyword",
+  "more": "more"
 }

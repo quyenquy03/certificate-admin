@@ -4,20 +4,43 @@ import { FormDatePicker, FormInput, FormSelect, Image } from "@/components";
 import { BaseModalProps, Modal } from "@/components/modals/bases";
 import { IMAGES, USER_ROLE_OPTIONS } from "@/constants";
 import { USER_ROLES } from "@/enums";
-import { useCreateUser } from "@/mutations";
-import { BaseErrorType, UserRequestType, UserResponseType } from "@/types";
+import { useCreateUser, useUpdateUser } from "@/mutations";
+import {
+  BaseErrorType,
+  UpdateUserRequestType,
+  UserRequestType,
+  UserResponseType,
+} from "@/types";
 import { Box, Flex, Grid } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { isAxiosError } from "axios";
 import { useTranslations } from "next-intl";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { FieldValues, useForm } from "react-hook-form";
+
+const DEFAULT_FORM_VALUES = {
+  email: "",
+  firstName: "",
+  lastName: "",
+  phone: "",
+  dob: null as Date | null,
+  role: USER_ROLES.ORGANIZATION,
+  address: "",
+  avatar: "",
+};
 
 type UserFormModal = {
   selectedUser: UserResponseType | null;
+  onSuccess?: () => void;
 } & BaseModalProps;
 
-export const UserFormModal = ({ onClose, ...args }: UserFormModal) => {
+export const UserFormModal = ({
+  onClose,
+  selectedUser,
+  onSuccess,
+  opened = false,
+  ...args
+}: UserFormModal) => {
   const t = useTranslations();
   const formRef = useRef<HTMLFormElement | null>(null);
 
@@ -28,16 +51,32 @@ export const UserFormModal = ({ onClose, ...args }: UserFormModal) => {
     formState: { errors, isSubmitting },
     reset,
   } = useForm({
-    defaultValues: {
-      email: "",
-      firstName: "",
-      lastName: "",
-      phone: "",
-      dob: null,
-      role: USER_ROLES.ORGANIZATION,
-      address: "",
-    },
+    defaultValues: { ...DEFAULT_FORM_VALUES },
   });
+
+  useEffect(() => {
+    if (!opened) return;
+
+    if (selectedUser) {
+      reset({
+        email: selectedUser.email ?? "",
+        firstName: selectedUser.firstName ?? "",
+        lastName: selectedUser.lastName ?? "",
+        phone: selectedUser.phone ?? "",
+        dob: selectedUser.dob ? new Date(selectedUser.dob) : null,
+        role: selectedUser.role ?? USER_ROLES.ORGANIZATION,
+        address: selectedUser.address ?? "",
+      });
+      return;
+    }
+
+    reset({ ...DEFAULT_FORM_VALUES });
+  }, [opened, selectedUser, reset]);
+
+  const handleCloseModal = () => {
+    onClose();
+    reset({ ...DEFAULT_FORM_VALUES });
+  };
 
   const { mutate: createUser, isPending: isCreatingUser } = useCreateUser({
     onSuccess: () => {
@@ -46,6 +85,8 @@ export const UserFormModal = ({ onClose, ...args }: UserFormModal) => {
         message: t("create_user_success_desc"),
         color: "green",
       });
+      handleCloseModal();
+      onSuccess?.();
     },
     onError: (error) => {
       if (isAxiosError<BaseErrorType>(error)) {
@@ -59,28 +100,73 @@ export const UserFormModal = ({ onClose, ...args }: UserFormModal) => {
     },
   });
 
+  const { mutate: updateUser, isPending: isUpdatingUser } = useUpdateUser({
+    onSuccess: () => {
+      notifications.show({
+        title: t("update_user_success_title"),
+        message: t("update_user_success_desc"),
+        color: "green",
+      });
+      handleCloseModal();
+      onSuccess?.();
+    },
+    onError: (error) => {
+      if (isAxiosError<BaseErrorType>(error)) {
+        const code = error.response?.data?.code;
+        notifications.show({
+          title: t("update_user_fail"),
+          message: t(code || "common_error_message"),
+          color: "red",
+        });
+      }
+    },
+  });
+
   const onSubmit = (data: FieldValues) => {
-    const submitData: UserRequestType = {
-      avatar: data.avatar,
-      email: data.email,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      phone: data.phone,
-      dob: data.dob,
-      role: data.role,
-      address: data.address,
+    const email = (data.email ?? "").trim();
+    const firstName = (data.firstName ?? "").trim();
+    const lastName = (data.lastName ?? "").trim();
+    const phone = (data.phone ?? "").trim();
+    const address = (data.address ?? "").trim();
+    const role = data.role ?? USER_ROLES.ORGANIZATION;
+    const dob = data.dob;
+
+    if (selectedUser) {
+      const updatePayload: UpdateUserRequestType = {
+        ...selectedUser,
+        email,
+        firstName,
+        lastName,
+        phone,
+        dob: dob as string,
+        role,
+        address,
+        isLooked: selectedUser.isLocked,
+      };
+      if (!updatePayload.avatar) updatePayload.avatar = undefined;
+
+      updateUser(updatePayload);
+      return;
+    }
+
+    const createPayload: UserRequestType = {
+      email,
+      firstName,
+      lastName,
+      phone: phone || undefined,
+      dob: dob as string,
+      role,
+      address: address || undefined,
     };
-    createUser(submitData);
+
+    createUser(createPayload);
   };
+
+  const isProcessing = isSubmitting || isCreatingUser || isUpdatingUser;
 
   const handleSubmitForm = () => {
-    if (!formRef.current) return;
-    formRef.current?.requestSubmit();
-  };
-
-  const handleCloseModal = () => {
-    onClose();
-    reset();
+    if (!formRef.current || isProcessing) return;
+    formRef.current.requestSubmit();
   };
 
   return (
@@ -89,10 +175,14 @@ export const UserFormModal = ({ onClose, ...args }: UserFormModal) => {
         showFooter: true,
       }}
       size={"md"}
-      header={t("create_new_user")}
+      header={
+        selectedUser ? t("update_user_information") : t("create_new_user")
+      }
       onConfirm={handleSubmitForm}
       onClose={handleCloseModal}
+      isLoading={isProcessing}
       {...args}
+      opened={opened}
     >
       <form ref={formRef} onSubmit={handleSubmit(onSubmit)}>
         <Flex align="center" justify="center" className="mb-2">

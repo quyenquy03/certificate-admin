@@ -8,3 +8,5 @@ export * from "./modals";
 export * from "./items";
 export * from "./cards";
 export * from "./dropdowns";
+export * from "./skeletons";
+export * from "./paginations";

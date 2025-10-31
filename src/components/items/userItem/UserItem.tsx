@@ -15,9 +15,10 @@ import { BiShow } from "react-icons/bi";
 
 type UserItemProps = {
   user: UserResponseType;
+  onUpdate?: (user: UserResponseType) => void;
 };
 
-export const UserItem = ({ user }: UserItemProps) => {
+export const UserItem = ({ user, onUpdate }: UserItemProps) => {
   const t = useTranslations();
   const dropdownMenus: DropdownMenuItemProps[] = [
     {
@@ -27,7 +28,13 @@ export const UserItem = ({ user }: UserItemProps) => {
     },
     {
       id: "2",
-      label: t("view_detail"),
+      label: t("update_user"),
+      leftIcon: <BiShow />,
+      onClick: () => onUpdate?.(user),
+    },
+    {
+      id: "3",
+      label: t("delete_user"),
       leftIcon: <BiShow />,
     },
   ];

@@ -3,7 +3,7 @@ import { ButtonIcon, ButtonIconType } from "../buttonIcon";
 import { BiDotsHorizontalRounded } from "react-icons/bi";
 
 export const ButtonMore = ({
-  tooltipLabel = "",
+  tooltipLabel = "more",
   showTooltip = false,
   buttonProps,
   ...args

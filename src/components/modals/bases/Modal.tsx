@@ -39,6 +39,7 @@ export type BaseModalProps = {
     cancelButton?: string;
     confirmButton?: string;
   };
+  isLoading?: boolean;
   heightFixed?: boolean;
 } & ModalProps;
 
@@ -53,6 +54,7 @@ export const Modal = ({
   onCancel,
   contentClassNames,
   heightFixed = false,
+  isLoading,
   ...args
 }: BaseModalProps) => {
   const t = useTranslations();
@@ -135,6 +137,7 @@ export const Modal = ({
                   <Button
                     onClick={onConfirm}
                     size="xs"
+                    loading={isLoading}
                     className={contentClassNames?.confirmButton}
                   >
                     {footerProps?.confirmText ?? t("confirm")}

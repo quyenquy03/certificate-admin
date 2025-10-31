@@ -23,14 +23,14 @@ export const PageHeader = ({
       align="center"
       gap={8}
       className={cn(
-        "bg-background-primary-light dark:bg-background-primary-dark w-full min-h-12 px-3 py-2 rounded-md shadow-md dark:shadow-gray-600",
+        "bg-background-primary-light dark:bg-background-primary-dark w-full min-h-14 px-5 py-2 shadow-md dark:shadow-gray-600",
         classNames?.wrapper
       )}
     >
       <Text
         className={cn(
           "text-color-light dark:text-color-dark",
-          classNames?.wrapper
+          classNames?.title
         )}
         fw={600}
         size="xl"
@@ -38,7 +38,13 @@ export const PageHeader = ({
         {title}
       </Text>
       {children && (
-        <Flex justify="end" align="center" className={classNames?.rightBox}>
+        <Flex
+          justify="end"
+          align="center"
+          className={classNames?.rightBox}
+          gap={12}
+          flex={1}
+        >
           {children}
         </Flex>
       )}
