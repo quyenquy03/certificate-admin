@@ -48,6 +48,12 @@ export const Sidebar = ({ onOpenSettings }: SidebarProps) => {
       icon: TbAdjustments,
       link: PAGE_URLS.ADMIN_REGISTRATIONS,
     },
+    {
+      id: "5",
+      label: t("certificate_types_management"),
+      icon: TbFileAnalytics,
+      link: PAGE_URLS.ADMIN_CERTIFICATE_TYPES,
+    },
   ];
   return (
     <div className="fixed w-full max-w-72 h-screen bg-background-primary-light dark:bg-background-primary-dark shadow-gray-400 dark:shadow-gray-500 shadow-inner">

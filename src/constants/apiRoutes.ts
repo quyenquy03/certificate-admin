@@ -26,4 +26,9 @@ export const API_ROUTES = {
     `/organizations/registrations/${id}/approve`,
   REJECT_REGISTRATION: (id: string) =>
     `/organizations/registrations/${id}/reject`,
+
+  // certificates
+  GET_CERTIFICATE_TYPES: "/certificates/types/get-types",
+  GET_CERTIFICATE_TYPE: (id: string) => "/certificates/types/" + id,
+  CREATE_CERTIFICATE_TYPE: "/certificates/types/create",
 };
