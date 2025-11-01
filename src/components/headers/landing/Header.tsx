@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FiMenu, FiX } from "react-icons/fi";
 import { cn } from "@/helpers";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const navItems = [
   { label: "Giới thiệu", id: "gioi-thieu" },
@@ -15,6 +15,8 @@ const navItems = [
 
 export const Header = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const isLandingPage = pathname === "/" || pathname === "";
   const [activeSection, setActiveSection] = useState<string | undefined>(
     navItems[0]?.id
   );
@@ -29,10 +31,16 @@ export const Header = () => {
   }, []);
 
   useEffect(() => {
+    if (!isLandingPage) {
+      setActiveSection(undefined);
+      return;
+    }
+
     const hash =
       typeof window !== "undefined"
         ? window.location.hash.replace("#", "")
         : "";
+
     if (hash) {
       const el = document.getElementById(hash);
       if (el) {
@@ -41,6 +49,8 @@ export const Header = () => {
           el.scrollIntoView({ behavior: "smooth", block: "start" });
         });
       }
+    } else {
+      setActiveSection(navItems[0]?.id);
     }
 
     const observer = new IntersectionObserver(
@@ -60,10 +70,15 @@ export const Header = () => {
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [isLandingPage, pathname]);
 
   const handleNavigate = (id?: string) => {
     if (!id) return;
+    if (!isLandingPage) {
+      router.push(`/#${id}`);
+      setMobileOpen(false);
+      return;
+    }
     const element = document.getElementById(id);
     setActiveSection(id);
     if (typeof window !== "undefined") {
@@ -87,7 +102,7 @@ export const Header = () => {
     >
       <div className="mx-auto flex h-[60px] max-w-6xl items-center justify-between gap-6 px-6 sm:px-8">
         <Link
-          href={`#${navItems[0]?.id}`}
+          href="/"
           className="flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-100"
           onClick={(event) => {
             event.preventDefault();

@@ -5,6 +5,7 @@ export * from "./loadings";
 export * from "./headers";
 export * from "./buttons";
 export * from "./badges";
+export * from "./footers";
 export * from "./modals";
 export * from "./items";
 export * from "./cards";

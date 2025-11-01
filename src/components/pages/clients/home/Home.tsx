@@ -17,6 +17,8 @@ import {
 } from "react-icons/fi";
 import { Button } from "@/components/buttons";
 import { Badge } from "@/components/badges";
+import { landingPartners } from "@/components/footers/landing";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardHeader,
@@ -24,8 +26,6 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/cards";
-import { Separator } from "@/components/separators";
-import { Header as LandingHeader } from "@/components/headers/landing";
 
 const steps = [
   {
@@ -114,26 +114,20 @@ const contactDetails = [
   },
 ];
 
-const partners = [
-  "EduChain Labs",
-  "VeriTrust AI",
-  "Global Accreditor",
-  "SecureHire",
-  "ChainProof Alliance",
-];
-
 export const Home: FC = () => {
+  const router = useRouter();
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
+  const navigateToRegister = () => {
+    router.push("/register-organization");
+  };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <LandingHeader />
-      <main className="pt-0">
+    <div className="pt-0">
         <section
           id="gioi-thieu"
           className="relative overflow-hidden scroll-mt-[80px] text-center"
@@ -185,7 +179,7 @@ export const Home: FC = () => {
                 size="lg"
                 variant="outline"
                 className="h-12 rounded-full border-indigo-400/60 px-8 text-base text-indigo-200 hover:bg-indigo-500/10"
-                onClick={() => scrollToSection("dang-ky-ngay")}
+                onClick={navigateToRegister}
               >
                 <FiUserPlus className="mr-2 h-4 w-4" />
                 Đăng ký ngay
@@ -315,7 +309,7 @@ export const Home: FC = () => {
               Á.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              {partners.map((partner) => (
+              {landingPartners.map((partner) => (
                 <Badge
                   key={partner}
                   variant="outline"
@@ -346,13 +340,18 @@ export const Home: FC = () => {
               Đội ngũ CertifyChain hỗ trợ phân tích nhu cầu, kết nối API và đào tạo vận hành chỉ trong vài ngày.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <Button size="lg" className="h-12 rounded-full px-8 text-base font-medium">
+              <Button
+                size="lg"
+                className="h-12 rounded-full px-8 text-base font-medium"
+                onClick={navigateToRegister}
+              >
                 Đăng ký ngay
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="h-12 rounded-full border-indigo-400/60 px-8 text-base text-indigo-200 hover:bg-indigo-500/10"
+                onClick={() => scrollToSection("lien-he")}
               >
                 Yêu cầu demo
               </Button>
@@ -456,58 +455,6 @@ export const Home: FC = () => {
             </Card>
           </div>
         </section>
-      </main>
-
-      <footer className="border-t border-indigo-500/10 bg-slate-950">
-        <div className="mx-auto max-w-6xl px-6 py-12 sm:px-8">
-          <div className="grid gap-10 md:grid-cols-3">
-            <div>
-              <h3 className="text-xl font-semibold text-slate-100">CertifyChain</h3>
-              <p className="mt-4 text-sm text-slate-400">
-                Giải pháp xác thực văn bằng dựa trên blockchain, mang lại sự minh bạch và uy tín cho hệ sinh thái giáo
-                dục.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-medium text-slate-200">Liên hệ</h4>
-              <ul className="mt-4 space-y-2 text-sm text-slate-400">
-                <li>Email: support@certifychain.io</li>
-                <li>Điện thoại: +84 24 7300 1234</li>
-                <li>Văn phòng: 845 Innovation Drive, Tầng 3</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium text-slate-200">Đối tác tiêu biểu</h4>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {partners.map((partner) => (
-                  <Badge
-                    key={partner}
-                    variant="outline"
-                    className="border-indigo-500/30 bg-transparent text-slate-300"
-                  >
-                    {partner}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
-          <Separator className="my-8 border-indigo-500/10" />
-          <div className="flex flex-col gap-4 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-            <p>&copy; {new Date().getFullYear()} CertifyChain. Giữ mọi quyền.</p>
-            <div className="flex gap-4">
-              <a href="#" className="hover:text-slate-300">
-                Chính sách bảo mật
-              </a>
-              <a href="#" className="hover:text-slate-300">
-                Điều khoản sử dụng
-              </a>
-              <a href="#" className="hover:text-slate-300">
-                Trợ giúp truy cập
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

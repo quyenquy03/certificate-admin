@@ -3,6 +3,8 @@ export type BasePaginationParams = {
   limit: number;
   search?: string;
   additionalQuery?: string;
+  filters?: any;
+  sort?: any;
 };
 
 export type BasePaginationResponse = {

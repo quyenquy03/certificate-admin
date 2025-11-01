@@ -15,4 +15,15 @@ export const API_ROUTES = {
   CREATE_NEW_USER: "/users/create-user",
   UPDATE_USER: "/users/update-user",
   DELETE_USER: "/users/delete-user",
+
+  // organizations
+  GET_ORGANIZATION_REGISTRATION: "/organizations/registrations",
+  GET_ORGANIZATIONS: "/organizations/get-organizations",
+  GET_MY_ORGANIZATION: "/organizations/my-organizations",
+  REGISTER_ORGANIZATION: "/organizations/register",
+  GET_ORGANIZATION_REGISTRATIONS: "/organizations/registrations",
+  APPROVE_REGISTRATION: (id: string) =>
+    `/organizations/registrations/${id}/approve`,
+  REJECT_REGISTRATION: (id: string) =>
+    `/organizations/registrations/${id}/reject`,
 };

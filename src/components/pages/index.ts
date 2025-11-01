@@ -2,3 +2,4 @@ export * from "./forgetPassword";
 export * from "./login";
 export * from "./register";
 export * from "./admins";
+export * from "./clients";

@@ -1,4 +1,4 @@
-import { Home } from "@/components/pages/clients";
+import { Home } from "@/components";
 
 export default function ClientLandingPage() {
   return <Home />;
