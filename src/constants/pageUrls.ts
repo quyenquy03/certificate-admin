@@ -6,4 +6,5 @@ export const PAGE_URLS = {
   ADMIN_DASHBOARD: "/admins/dashboard",
   ADMIN_USERS: "/admins/users",
   ADMIN_ORGANIZATIONS: "/admins/organizations",
+  ADMIN_REGISTRATIONS: "/admins/registrations",
 };

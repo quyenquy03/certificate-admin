@@ -1,0 +1,20 @@
+import { ORGANIZATION_STATUSES } from "@/enums";
+
+export const ORGANIZATION_STATUS_LABELS = {
+  [ORGANIZATION_STATUSES.PENDING]: "org_pending",
+  [ORGANIZATION_STATUSES.APPROVED]: "org_approved",
+  [ORGANIZATION_STATUSES.REJECTED]: "org_rejected",
+};
+
+export const ORGANIZATION_STATUS_COLORS = {
+  [ORGANIZATION_STATUSES.PENDING]: "#FAB005",
+  [ORGANIZATION_STATUSES.APPROVED]: "#40C057",
+  [ORGANIZATION_STATUSES.REJECTED]: "#FA5252",
+};
+
+export const ORGANIZATION_STATUS_OPTIONS = Object.entries(
+  ORGANIZATION_STATUS_LABELS
+).map(([value, label]) => ({
+  value,
+  label,
+}));

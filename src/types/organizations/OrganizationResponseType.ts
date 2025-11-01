@@ -1,4 +1,4 @@
-import { ORGANIZATION_STATUSES } from "@/enums";
+import { COUNTRIES, ORGANIZATION_STATUSES } from "@/enums";
 
 export type OrganizationResponseType = {
   id: string;
@@ -10,8 +10,9 @@ export type OrganizationResponseType = {
   organizationName: string;
   organizationDescription: string;
   website: string;
-  countryCode: string;
+  countryCode: COUNTRIES;
   status: ORGANIZATION_STATUSES;
+  rejectReason?: string | null;
   createdAt: string;
   updatedAt: string;
 };

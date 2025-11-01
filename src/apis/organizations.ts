@@ -5,6 +5,7 @@ import {
   BaseResponseType,
   OrganizationResponseType,
   RegisterOrganizationRequestType,
+  RejectOrganizationRequestType,
 } from "@/types";
 
 const getRegistration = async (
@@ -33,7 +34,7 @@ const registerOrganization = async (
 };
 
 const getOrganizations = async (
-  data: BasePaginationParams
+  data?: BasePaginationParams
 ): Promise<BaseResponseType<OrganizationResponseType[]>> => {
   const response = await axiosClient<
     BaseResponseType<OrganizationResponseType[]>
@@ -59,7 +60,7 @@ const getMyOrganizations = async (
 };
 
 const getRegistrations = async (
-  data: BasePaginationParams
+  data?: BasePaginationParams
 ): Promise<BaseResponseType<OrganizationResponseType[]>> => {
   const response = await axiosClient<
     BaseResponseType<OrganizationResponseType[]>
@@ -84,13 +85,14 @@ const approveRegistration = async (
 };
 
 const rejectRegistration = async (
-  id: string
+  data: RejectOrganizationRequestType
 ): Promise<BaseResponseType<OrganizationResponseType>> => {
   const response = await axiosClient<
     BaseResponseType<OrganizationResponseType>
   >({
     method: AXIOS_METHOD.PUT,
-    url: API_ROUTES.REJECT_REGISTRATION(id),
+    url: API_ROUTES.REJECT_REGISTRATION(data.id),
+    data,
   });
   return response.data;
 };

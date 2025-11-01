@@ -42,6 +42,12 @@ export const Sidebar = ({ onOpenSettings }: SidebarProps) => {
       icon: TbCalendarStats,
       link: PAGE_URLS.ADMIN_ORGANIZATIONS,
     },
+    {
+      id: "4",
+      label: t("registrations_management"),
+      icon: TbAdjustments,
+      link: PAGE_URLS.ADMIN_REGISTRATIONS,
+    },
   ];
   return (
     <div className="fixed w-full max-w-72 h-screen bg-background-primary-light dark:bg-background-primary-dark shadow-gray-400 dark:shadow-gray-500 shadow-inner">
