@@ -19,6 +19,7 @@
     "axios": "^1.12.2",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.18",
+    "framer-motion": "^11.11.17",
     "js-cookie": "^3.0.5",
     "lottie-react": "^2.4.1",
     "moment": "^2.30.1",
