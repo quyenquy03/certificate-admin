@@ -7,7 +7,7 @@ import {
 import { useMutation, type UseMutationOptions } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 
-export const useCreateCertificateType = (
+export const useUpdateCertificateType = (
   option?: UseMutationOptions<
     BaseResponseType<CertificateCategoryType>,
     AxiosError,
@@ -16,7 +16,7 @@ export const useCreateCertificateType = (
   >
 ) => {
   const mutationFn = async (data: CertificateCategoryRequestType) => {
-    const response = await certificateApis.createCertificateType(data);
+    const response = await certificateApis.updateCertificateType(data);
     return response;
   };
 

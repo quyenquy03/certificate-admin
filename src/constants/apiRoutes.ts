@@ -28,7 +28,13 @@ export const API_ROUTES = {
     `/organizations/registrations/${id}/reject`,
 
   // certificates
+  DELETE_CERTIFICATE_TYPE: (id: string) => `/certificates/types/${id}/delete`,
   GET_CERTIFICATE_TYPES: "/certificates/types/get-types",
   GET_CERTIFICATE_TYPE: (id: string) => "/certificates/types/" + id,
   CREATE_CERTIFICATE_TYPE: "/certificates/types/create",
+  UPDATE_CERTIFICATE_TYPE: (id: string) => `/certificates/types/${id}/update`,
+  ACTIVATE_CERTIFICATE_TYPE: (id: string) =>
+    `/certificates/types/${id}/activate`,
+  DEACTIVATE_CERTIFICATE_TYPE: (id: string) =>
+    `/certificates/types/${id}/deactivate`,
 };

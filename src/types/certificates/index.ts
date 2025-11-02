@@ -1,2 +1,2 @@
 export * from "./certificateCategoryType";
-export * from "./createCertificateCategoryType";
+export * from "./certificateCategoryRequestType";

@@ -8,28 +8,47 @@ import {
   CertificateTypeItem,
   CertificateTypeFormModal,
   CertificateTypeDetailModal,
+  ConfirmationModal,
 } from "@/components";
 import { PAGINATION_PARAMS } from "@/constants";
-import { SORTS } from "@/enums";
+import { FORM_MODES, SORTS } from "@/enums";
 import { removeNoneCharacters, useDebounce, useDisclose } from "@/hooks";
 import {
   useQueryGetAllCertificateTypes,
   useQueryGetCertificateType,
 } from "@/queries";
-import { BasePaginationParams, CertificateCategoryType } from "@/types";
+import {
+  BaseErrorType,
+  BasePaginationParams,
+  CertificateCategoryType,
+} from "@/types";
+import {
+  useActivateCertificateType,
+  useDeactivateCertificateType,
+  useDeleteCertificateType,
+} from "@/mutations";
 import { Box, Grid, Input } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { notifications } from "@mantine/notifications";
+import { isAxiosError } from "axios";
+import type { ConfirmationModalType } from "@/components";
 
 export const CertificateTypesManagement = () => {
   const t = useTranslations();
   const detailModal = useDisclose();
-  const createModal = useDisclose();
+  const formModal = useDisclose();
+  const confirmationModal = useDisclose();
+  const [formMode, setFormMode] = useState<FORM_MODES>(FORM_MODES.CREATE);
   const [selectedCertificateType, setSelectedCertificateType] =
     useState<CertificateCategoryType | null>(null);
   const [selectedCertificateTypeId, setSelectedCertificateTypeId] = useState<
     string | null
   >(null);
+  const [confirmationType, setConfirmationType] =
+    useState<ConfirmationModalType | null>(null);
+  const [confirmationTarget, setConfirmationTarget] =
+    useState<CertificateCategoryType | null>(null);
 
   const [searchParams, setSearchParams] = useState<BasePaginationParams>({
     page: PAGINATION_PARAMS.GET_CERTIFICATE_TYPES.page,
@@ -57,6 +76,7 @@ export const CertificateTypesManagement = () => {
   const {
     data: certificateTypeDetail,
     isFetching: isFetchingCertificateTypeDetail,
+    refetch: refetchCertificateTypeDetail,
   } = useQueryGetCertificateType(selectedCertificateTypeId ?? "", {
     enabled: detailModal.isOpen && !!selectedCertificateTypeId,
   } as any);
@@ -79,19 +99,27 @@ export const CertificateTypesManagement = () => {
   ]);
 
   const handleOpenCreateModal = () => {
+    setFormMode(FORM_MODES.CREATE);
     setSelectedCertificateType(null);
     setSelectedCertificateTypeId(null);
-    createModal.onOpen();
+    formModal.onOpen();
   };
 
-  const handleCloseCreateModal = () => {
-    createModal.onClose();
+  const handleCloseFormModal = () => {
+    formModal.onClose();
     setSelectedCertificateType(null);
     setSelectedCertificateTypeId(null);
   };
 
-  const handleSuccessCreate = () => {
+  const handleSuccessForm = () => {
     refetchListCertificateTypes();
+  };
+
+  const handleOpenUpdateModal = (certificateType: CertificateCategoryType) => {
+    setFormMode(FORM_MODES.UPDATE);
+    setSelectedCertificateType(certificateType);
+    setSelectedCertificateTypeId(certificateType.id);
+    formModal.onOpen();
   };
 
   const handleViewDetail = (certificateType: CertificateCategoryType) => {
@@ -104,6 +132,123 @@ export const CertificateTypesManagement = () => {
     detailModal.onClose();
     setSelectedCertificateType(null);
     setSelectedCertificateTypeId(null);
+  };
+
+  const handleOpenConfirmationModal = (
+    type: ConfirmationModalType,
+    certificateType: CertificateCategoryType
+  ) => {
+    setConfirmationType(type);
+    setConfirmationTarget(certificateType);
+    confirmationModal.onOpen();
+  };
+
+  const handleCloseConfirmationModal = () => {
+    confirmationModal.onClose();
+    setConfirmationType(null);
+    setConfirmationTarget(null);
+  };
+
+  const handleMutationError = (error: unknown, failKey: string) => {
+    let message = t("common_error_message");
+
+    if (isAxiosError<BaseErrorType>(error)) {
+      const code = error.response?.data?.code;
+      message = t(code || "common_error_message");
+    }
+
+    notifications.show({
+      title: t(failKey),
+      message,
+      color: "red",
+    });
+  };
+
+  const { mutate: deleteCertificateType, isPending: isDeletingCertificateType } =
+    useDeleteCertificateType({
+      onSuccess: (_data, id) => {
+        notifications.show({
+          title: t("delete_certificate_type_success_title"),
+          message: t("delete_certificate_type_success_desc"),
+          color: "green",
+        });
+
+        if (detailModal.isOpen && selectedCertificateTypeId === id) {
+          handleCloseDetailModal();
+        }
+
+        handleCloseConfirmationModal();
+        refetchListCertificateTypes();
+      },
+      onError: (error) =>
+        handleMutationError(error, "delete_certificate_type_fail"),
+    });
+
+  const {
+    mutate: activateCertificateType,
+    isPending: isActivatingCertificateType,
+  } = useActivateCertificateType({
+    onSuccess: (_data, id) => {
+      notifications.show({
+        title: t("activate_certificate_type_success_title"),
+        message: t("activate_certificate_type_success_desc"),
+        color: "green",
+      });
+      handleCloseConfirmationModal();
+      refetchListCertificateTypes();
+      if (detailModal.isOpen && selectedCertificateTypeId === id) {
+        refetchCertificateTypeDetail();
+      }
+    },
+    onError: (error) =>
+      handleMutationError(error, "activate_certificate_type_fail"),
+  });
+
+  const {
+    mutate: deactivateCertificateType,
+    isPending: isDeactivatingCertificateType,
+  } = useDeactivateCertificateType({
+    onSuccess: (_data, id) => {
+      notifications.show({
+        title: t("deactivate_certificate_type_success_title"),
+        message: t("deactivate_certificate_type_success_desc"),
+        color: "green",
+      });
+      handleCloseConfirmationModal();
+      refetchListCertificateTypes();
+      if (detailModal.isOpen && selectedCertificateTypeId === id) {
+        refetchCertificateTypeDetail();
+      }
+    },
+    onError: (error) =>
+      handleMutationError(error, "deactivate_certificate_type_fail"),
+  });
+
+  const isConfirmationProcessing =
+    isDeletingCertificateType ||
+    isActivatingCertificateType ||
+    isDeactivatingCertificateType;
+
+  const handleConfirmAction = () => {
+    if (!confirmationType || !confirmationTarget?.id) {
+      return;
+    }
+
+    const targetId = confirmationTarget.id;
+
+    if (confirmationType === "delete") {
+      deleteCertificateType(targetId);
+      return;
+    }
+
+    if (confirmationType === "activate") {
+      activateCertificateType(targetId);
+      return;
+    }
+
+    if (confirmationType === "deactivate") {
+      deactivateCertificateType(targetId);
+    }
   };
 
   return (
@@ -162,6 +307,16 @@ export const CertificateTypesManagement = () => {
                 <CertificateTypeItem
                   certificateType={item}
                   onViewDetail={handleViewDetail}
+                  onUpdate={handleOpenUpdateModal}
+                  onActivate={(certificateType) =>
+                    handleOpenConfirmationModal("activate", certificateType)
+                  }
+                  onDeactivate={(certificateType) =>
+                    handleOpenConfirmationModal("deactivate", certificateType)
+                  }
+                  onDelete={(certificateType) =>
+                    handleOpenConfirmationModal("delete", certificateType)
+                  }
                 />
               </Grid.Col>
             ))}
@@ -182,9 +337,11 @@ export const CertificateTypesManagement = () => {
           )}
       </Box>
       <CertificateTypeFormModal
-        opened={createModal.isOpen}
-        onClose={handleCloseCreateModal}
-        onSuccess={handleSuccessCreate}
+        mode={formMode}
+        opened={formModal.isOpen}
+        onClose={handleCloseFormModal}
+        onSuccess={handleSuccessForm}
+        certificateType={selectedCertificateType}
       />
       <CertificateTypeDetailModal
         opened={detailModal.isOpen}
@@ -192,6 +349,32 @@ export const CertificateTypesManagement = () => {
         certificateType={certificateTypeDetailData ?? null}
         isLoading={isCertificateTypeLoading}
         size="lg"
+      />
+      <ConfirmationModal
+        type={confirmationType ?? "delete"}
+        title={
+          confirmationType
+            ? t("certificate_type_confirmation_title", {
+                type: confirmationType,
+              })
+            : ""
+        }
+        description={
+          confirmationType
+            ? t("certificate_type_confirmation_desc", {
+                type: confirmationType,
+                name: (() => {
+                  const trimmed = confirmationTarget?.name?.trim() ?? "";
+                  return trimmed.length > 0 ? trimmed : t("not_updated");
+                })(),
+              })
+            : ""
+        }
+        itemName={confirmationTarget?.name?.trim() ?? ""}
+        opened={confirmationModal.isOpen}
+        onClose={handleCloseConfirmationModal}
+        onConfirm={handleConfirmAction}
+        isLoading={isConfirmationProcessing}
       />
     </Box>
   );

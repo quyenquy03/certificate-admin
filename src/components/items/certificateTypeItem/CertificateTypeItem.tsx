@@ -13,11 +13,22 @@ import {
   HiOutlineCubeTransparent,
   HiOutlineDocumentText,
 } from "react-icons/hi2";
-import { BiCopy, BiShow } from "react-icons/bi";
+import {
+  BiBlock,
+  BiCheckCircle,
+  BiCopy,
+  BiEdit,
+  BiShow,
+  BiTrash,
+} from "react-icons/bi";
 
 type CertificateTypeItemProps = {
   certificateType: CertificateCategoryType;
   onViewDetail?: (certificateType: CertificateCategoryType) => void;
+  onUpdate?: (certificateType: CertificateCategoryType) => void;
+  onActivate?: (certificateType: CertificateCategoryType) => void;
+  onDeactivate?: (certificateType: CertificateCategoryType) => void;
+  onDelete?: (certificateType: CertificateCategoryType) => void;
 };
 
 const normalizeValue = (value?: string | null) => {
@@ -36,6 +47,10 @@ const formatHash = (hash?: string | null) => {
 export const CertificateTypeItem = ({
   certificateType,
   onViewDetail,
+  onUpdate,
+  onActivate,
+  onDeactivate,
+  onDelete,
 }: CertificateTypeItemProps) => {
   const t = useTranslations();
 
@@ -66,8 +81,35 @@ export const CertificateTypeItem = ({
       leftIcon: <BiShow />,
       onClick: () => onViewDetail?.(certificateType),
     },
+    {
+      id: "update",
+      label: t("update_certificate_type"),
+      leftIcon: <BiEdit />,
+      onClick: () => onUpdate?.(certificateType),
+    },
+    certificateType?.isActive
+      ? {
+          id: "deactivate",
+          label: t("deactivate"),
+          leftIcon: <BiBlock />,
+          onClick: () => onDeactivate?.(certificateType),
+        }
+      : {
+          id: "activate",
+          label: t("activate"),
+          leftIcon: <BiCheckCircle />,
+          onClick: () => onActivate?.(certificateType),
+        },
+    {
+      id: "delete",
+      label: t("delete"),
+      leftIcon: <BiTrash />,
+      classNames: {
+        item: "text-red-600 dark:text-red-300 hover:text-red-700 dark:hover:text-red-200",
+      },
+      onClick: () => onDelete?.(certificateType),
+    },
   ];
-
   return (
     <Box className="min-h-[360px] relative cursor-pointer rounded-md bg-background-primary-light p-2 text-color-light shadow-md transition-all dark:bg-background-primary-dark dark:text-color-dark dark:shadow-gray-600">
       <Box
