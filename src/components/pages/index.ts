@@ -1,5 +1,4 @@
-export * from "./forgetPassword";
-export * from "./login";
-export * from "./register";
+export * from "./auths";
 export * from "./admins";
 export * from "./clients";
+export * from "./organizations";

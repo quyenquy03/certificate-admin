@@ -1,8 +1,9 @@
 "use client";
 
 import { Image } from "@/components/images";
-import { IMAGES } from "@/constants";
+import { ACCESS_TOKEN_KEY, IMAGES, PAGE_URLS } from "@/constants";
 import { Drawer, Tabs } from "@mantine/core";
+import Cookies from "js-cookie";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { TbChevronRight, TbGauge, TbLogout } from "react-icons/tb";
@@ -12,6 +13,7 @@ import { ThemeSettingTab } from "./ThemeSettingTab";
 import { LanguageSettingTab } from "./LanguageSettingTab";
 import { FaXmark } from "react-icons/fa6";
 import { stores } from "@/stores";
+import { useRouter } from "next/navigation";
 
 type ApplicationSettingsProps = {
   opened: boolean;
@@ -31,7 +33,8 @@ export const ApplicationSettings = ({
   onClose,
 }: ApplicationSettingsProps) => {
   const t = useTranslations();
-  const { currentUser } = stores.account();
+  const { currentUser, setCurrentUser, setAccessToken } = stores.account();
+  const router = useRouter();
 
   const [currentTab, setCurrentTab] = useState<APPLICATION_SETTING_TABS>(
     APPLICATION_SETTING_TABS.MENU_SETTING_TAB
@@ -61,6 +64,14 @@ export const ApplicationSettings = ({
       },
     ];
   }, []);
+
+  const handleLogout = useCallback(() => {
+    Cookies.remove(ACCESS_TOKEN_KEY);
+    setCurrentUser(null);
+    setAccessToken(null);
+    onClose();
+    router.push(PAGE_URLS.LOGIN);
+  }, [onClose, router, setAccessToken, setCurrentUser]);
 
   const onBack = useCallback(() => {
     setCurrentTab(APPLICATION_SETTING_TABS.MENU_SETTING_TAB);
@@ -121,12 +132,16 @@ export const ApplicationSettings = ({
             ))}
           </div>
           <div className="border-t-[1px] border-gray-300 dark:border-gray-500 p-2 pt-6">
-            <div className="h-10 flex items-center gap-2 bg-gray-300 dark:bg-gray-700 text-red-500 px-2 rounded-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-700 select-none transition-all">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="h-10 w-full flex items-center gap-2 bg-gray-300 dark:bg-gray-700 text-red-500 px-2 rounded-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-700 select-none transition-all"
+            >
               <span className="w-8 flex justify-center items-center">
                 <TbLogout className="h-5 w-5" />
               </span>
               <span className="text-sm font-bold">{t("logout")}</span>
-            </div>
+            </button>
           </div>
         </Tabs.Panel>
 

@@ -89,6 +89,7 @@ export const CertificateTypesManagement = () => {
     isFetchingCertificateTypeDetail && !certificateTypeDetailData;
 
   useEffect(() => {
+    console.log("refetch");
     refetchListCertificateTypes();
   }, [
     refetchListCertificateTypes,
@@ -164,25 +165,27 @@ export const CertificateTypesManagement = () => {
     });
   };
 
-  const { mutate: deleteCertificateType, isPending: isDeletingCertificateType } =
-    useDeleteCertificateType({
-      onSuccess: (_data, id) => {
-        notifications.show({
-          title: t("delete_certificate_type_success_title"),
-          message: t("delete_certificate_type_success_desc"),
-          color: "green",
-        });
+  const {
+    mutate: deleteCertificateType,
+    isPending: isDeletingCertificateType,
+  } = useDeleteCertificateType({
+    onSuccess: (_data, id) => {
+      notifications.show({
+        title: t("delete_certificate_type_success_title"),
+        message: t("delete_certificate_type_success_desc"),
+        color: "green",
+      });
 
-        if (detailModal.isOpen && selectedCertificateTypeId === id) {
-          handleCloseDetailModal();
-        }
+      if (detailModal.isOpen && selectedCertificateTypeId === id) {
+        handleCloseDetailModal();
+      }
 
-        handleCloseConfirmationModal();
-        refetchListCertificateTypes();
-      },
-      onError: (error) =>
-        handleMutationError(error, "delete_certificate_type_fail"),
-    });
+      handleCloseConfirmationModal();
+      refetchListCertificateTypes();
+    },
+    onError: (error) =>
+      handleMutationError(error, "delete_certificate_type_fail"),
+  });
 
   const {
     mutate: activateCertificateType,

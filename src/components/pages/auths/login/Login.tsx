@@ -12,6 +12,9 @@ import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import Cookies from "js-cookie";
 import { ACCESS_TOKEN_KEY, PAGE_URLS } from "@/constants";
 import { useRouter } from "next/navigation";
+import jwt from "jsonwebtoken";
+import { USER_ROLES } from "@/enums";
+
 export const Login = () => {
   const t = useTranslations();
   const {
@@ -31,8 +34,18 @@ export const Login = () => {
         secure: true,
         sameSite: "strict",
       });
+      const decoded: any = jwt.decode(token);
+      let nextUrl = PAGE_URLS.HOME;
 
-      router.push(PAGE_URLS.ADMIN_DASHBOARD);
+      if (decoded?.role === USER_ROLES.ADMIN) {
+        nextUrl = PAGE_URLS.ADMIN_DASHBOARD;
+      }
+
+      if (decoded?.role === USER_ROLES.ORGANIZATION) {
+        nextUrl = PAGE_URLS.ORGANIZATIONS_DASHBOARD;
+      }
+
+      router.push(nextUrl);
     },
     onError: (error) => {
       if (isAxiosError<BaseErrorType>(error)) {
