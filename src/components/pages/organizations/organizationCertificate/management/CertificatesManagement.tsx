@@ -4,12 +4,12 @@ import { Box, Input } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import React from "react";
 
-export const Dashboard = () => {
+export const CertificatesManagement = () => {
   const t = useTranslations();
   return (
     <Box className="w-full relative">
       <PageHeader
-        title={t("dashboard")}
+        title={t("certificates")}
         classNames={{ wrapper: "relative z-10 gap-4" }}
       >
         <Input

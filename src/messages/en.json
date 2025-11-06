@@ -25,6 +25,8 @@
   "not_found_description": "The link might be broken or the page may have been removed. Check the URL or return to the dashboard to continue exploring.",
   "not_found_home_cta": "Back to home",
   "not_found_back_cta": "Go to previous page",
+  "loading_title": "Hold tight, we are preparing your experience.",
+  "loading_description": "Fetching the latest data and setting things up. This only takes a moment.",
 
   "change_theme_title": "Chọn chế độ mà bạn muốn sử dụng\nvà nhấn nút xác nhận để hoàn thành",
   "dark_theme": "Dark Theme",
@@ -240,5 +242,8 @@
 
   "org_pending": "Pending",
   "org_approved": "Approved",
-  "org_rejected": "Rejected"
+  "org_rejected": "Rejected",
+  "my_organization": "My Organization",
+  "members": "Members",
+  "certificates": "Certificates"
 }

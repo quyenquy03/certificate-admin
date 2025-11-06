@@ -3,14 +3,11 @@ import axiosClient from "@/libs/axiosClient";
 import {
   BasePaginationParams,
   BaseResponseType,
-  OrganizationResponseType,
-  RegisterOrganizationRequestType,
-  RejectOrganizationRequestType,
-} from "@/types";
-import {
   CertificateCategoryType,
   CertificateCategoryRequestType,
-} from "@/types/certificates";
+  CreateCertificateRequestType,
+  CertificateResponseType,
+} from "@/types";
 
 const getCertificateTypes = async (
   params?: BasePaginationParams
@@ -99,6 +96,46 @@ const deactivateCertificateType = async (
   return response.data;
 };
 
+const createCertificate = async (
+  data: CreateCertificateRequestType
+): Promise<BaseResponseType<CertificateResponseType>> => {
+  const response = await axiosClient<BaseResponseType<CertificateResponseType>>(
+    {
+      method: AXIOS_METHOD.POST,
+      url: API_ROUTES.CREATE_CERTIFICATE,
+      data,
+    }
+  );
+  return response.data;
+};
+
+const getCertificates = async (
+  data: BasePaginationParams
+): Promise<BaseResponseType<CertificateResponseType[]>> => {
+  const response = await axiosClient<
+    BaseResponseType<CertificateResponseType[]>
+  >({
+    method: AXIOS_METHOD.POST,
+    url: API_ROUTES.GET_CERTIFICATES,
+    data,
+  });
+  return response.data;
+};
+
+const getOrganizationCertificates = async (
+  organizationId: string,
+  data: BasePaginationParams
+): Promise<BaseResponseType<CertificateResponseType[]>> => {
+  const response = await axiosClient<
+    BaseResponseType<CertificateResponseType[]>
+  >({
+    method: AXIOS_METHOD.POST,
+    url: API_ROUTES.GET_ORGANIZATIONS_CERTIFICATES(organizationId),
+    data,
+  });
+  return response.data;
+};
+
 export const certificateApis = {
   getCertificateType,
   getCertificateTypes,
@@ -107,4 +144,7 @@ export const certificateApis = {
   updateCertificateType,
   activateCertificateType,
   deactivateCertificateType,
+  createCertificate,
+  getCertificates,
+  getOrganizationCertificates,
 };

@@ -25,6 +25,8 @@
   "not_found_description": "Liên kết có thể đã sai hoặc trang đã bị xóa. Hãy kiểm tra lại URL hoặc quay về bảng điều khiển để tiếp tục.",
   "not_found_home_cta": "Quay về trang chủ",
   "not_found_back_cta": "Quay lại trang trước",
+  "loading_title": "Chờ một chút, chúng tôi đang chuẩn bị mọi thứ cho bạn.",
+  "loading_description": "Đang tải dữ liệu mới nhất và thiết lập hệ thống. Sẽ xong trong giây lát.",
 
   "change_theme_title": "Chọn chế độ màu bạn muốn sử dụng\nvà nhấn nút xác nhận để hoàn tất.",
   "dark_theme": "Giao diện tối",
@@ -242,5 +244,8 @@
 
   "org_pending": "Chờ duyệt",
   "org_approved": "Đã duyệt",
-  "org_rejected": "Đã từ chối"
+  "org_rejected": "Đã từ chối",
+  "my_organization": "Tổ chức của tôi",
+  "members": "Thành viên",
+  "certificates": "Chứng chỉ"
 }

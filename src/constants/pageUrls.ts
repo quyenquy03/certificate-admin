@@ -18,6 +18,9 @@ export const PAGE_URLS = {
   // organizations
   ORGANIZATIONS: "/organizations/",
   ORGANIZATIONS_DASHBOARD: "/organizations/dashboard",
+  MY_ORGANIZATIONS: "/organizations/my-organization",
+  ORGANIZATIONS_MEMBERS: "/organizations/members",
+  ORGANIZATIONS_CERTIFICATES: "/organizations/certificates",
 };
 
 export const AUTH_PAGE_URLS = [PAGE_URLS.LOGIN, PAGE_URLS.FORGET_PASSWORD];
