@@ -37,8 +37,13 @@ export const API_ROUTES = {
     `/certificates/types/${id}/activate`,
   DEACTIVATE_CERTIFICATE_TYPE: (id: string) =>
     `/certificates/types/${id}/deactivate`,
-  CREATE_CERTIFICATE: "/certificates/create-certificates",
+  CREATE_CERTIFICATE: "/certificates/create-certificate",
   GET_CERTIFICATES: "/certificates/get-certificates",
   GET_ORGANIZATIONS_CERTIFICATES: (id: string) =>
     `/certificates/organization-certificates/${id}`,
+
+  // uploads
+  UPLOAD_AUTHOR_IMAGE: "/uploads/author-image",
+  UPLOAD_PROFILE_IMAGE: "/uploads/profile-image",
+  UPLOAD_AUTHOR_DOCUMENT: "/uploads/author-document",
 };

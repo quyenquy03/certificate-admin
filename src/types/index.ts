@@ -4,3 +4,4 @@ export * from "./users";
 export * from "./accounts";
 export * from "./organizations";
 export * from "./certificates";
+export * from "./uploads";

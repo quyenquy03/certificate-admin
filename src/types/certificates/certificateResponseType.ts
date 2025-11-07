@@ -1,4 +1,6 @@
 import { CERTIFICATE_STATUSES } from "@/enums";
+import { CertificateCategoryType } from "./certificateCategoryType";
+import { CertificateAuthorProfileType } from "./certificateAuthorProfileType";
 
 export type CertificateResponseType = {
   id: string;
@@ -17,4 +19,6 @@ export type CertificateResponseType = {
   signedTxHash: string;
   approvedTxHash: string;
   revokedTxHash: string;
+  certificateType: CertificateCategoryType;
+  authorProfile?: CertificateAuthorProfileType;
 };

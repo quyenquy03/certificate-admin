@@ -52,6 +52,11 @@ export function FormSelect({
   ...args
 }: FormSelectProps) {
   const t = useTranslations();
+  const placeholderLabel = name_placeholder
+    ? isTranslate
+      ? t(name_placeholder)
+      : name_placeholder
+    : undefined;
 
   return (
     <div className={cn("relative flex flex-col", classNames?.wrapper)}>
@@ -70,7 +75,7 @@ export function FormSelect({
             data={data}
             disabled={disabled}
             label={isTranslate && name_label ? t(name_label) : name_label}
-            placeholder={name_placeholder && t(name_placeholder)}
+            placeholder={placeholderLabel}
             checkIconPosition="right"
             classNames={{
               label: cn("text-gray-700 dark:text-gray-200", classNames?.label),

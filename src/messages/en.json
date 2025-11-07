@@ -245,5 +245,9 @@
   "org_rejected": "Rejected",
   "my_organization": "My Organization",
   "members": "Members",
-  "certificates": "Certificates"
+  "certificates": "Certificates",
+  "valid_period": "Valid period",
+  "signed_tx_hash": "Signed transaction hash",
+  "approved_tx_hash": "Approved transaction hash",
+  "revoked_tx_hash": "Revoked transaction hash"
 }

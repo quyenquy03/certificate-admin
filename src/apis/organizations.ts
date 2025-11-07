@@ -47,7 +47,7 @@ const getOrganizations = async (
 };
 
 const getMyOrganizations = async (
-  data: BasePaginationParams
+  data?: BasePaginationParams
 ): Promise<BaseResponseType<OrganizationResponseType[]>> => {
   const response = await axiosClient<
     BaseResponseType<OrganizationResponseType[]>

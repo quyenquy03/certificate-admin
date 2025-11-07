@@ -247,5 +247,9 @@
   "org_rejected": "Đã từ chối",
   "my_organization": "Tổ chức của tôi",
   "members": "Thành viên",
-  "certificates": "Chứng chỉ"
+  "certificates": "Chứng chỉ",
+  "valid_period": "Khoảng thời gian hiệu lực",
+  "signed_tx_hash": "Hash giao dịch ký",
+  "approved_tx_hash": "Hash giao dịch phê duyệt",
+  "revoked_tx_hash": "Hash giao dịch thu hồi"
 }

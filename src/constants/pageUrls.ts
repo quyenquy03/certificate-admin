@@ -21,6 +21,7 @@ export const PAGE_URLS = {
   MY_ORGANIZATIONS: "/organizations/my-organization",
   ORGANIZATIONS_MEMBERS: "/organizations/members",
   ORGANIZATIONS_CERTIFICATES: "/organizations/certificates",
+  ORGANIZATION_CREATE_CERTIFICATE: "/organizations/certificates/create",
 };
 
 export const AUTH_PAGE_URLS = [PAGE_URLS.LOGIN, PAGE_URLS.FORGET_PASSWORD];

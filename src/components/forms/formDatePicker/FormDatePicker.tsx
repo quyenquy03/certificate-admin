@@ -50,6 +50,9 @@ export function FormDatePicker({
   ...args
 }: FormDatePickerProps) {
   const t = useTranslations();
+  const placeholderLabel = isTranslate
+    ? t(name_placeholder)
+    : name_placeholder;
 
   return (
     <div className={cn("relative flex flex-col", classNames?.wrapper)}>
@@ -65,7 +68,7 @@ export function FormDatePicker({
             <DatePickerInput
               {...args}
               {...field}
-              placeholder={t(name_placeholder)}
+              placeholder={placeholderLabel}
               value={field.value}
               onChange={field.onChange}
               size="sm"
