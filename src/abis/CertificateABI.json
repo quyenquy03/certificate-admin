@@ -1,0 +1,520 @@
+[
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_admin", "type": "address" },
+      {
+        "internalType": "address",
+        "name": "_organizationContract",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_certificateTypeContract",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  { "inputs": [], "name": "AccessControlBadConfirmation", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "account", "type": "address" },
+      { "internalType": "bytes32", "name": "neededRole", "type": "bytes32" }
+    ],
+    "name": "AccessControlUnauthorizedAccount",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "approvedBy",
+        "type": "address"
+      }
+    ],
+    "name": "CertificateApproved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "rejectedBy",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "reason",
+        "type": "string"
+      }
+    ],
+    "name": "CertificateRejected",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "removedBy",
+        "type": "address"
+      }
+    ],
+    "name": "CertificateRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "revokedBy",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "reason",
+        "type": "string"
+      }
+    ],
+    "name": "CertificateRevoked",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "organizationId",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "certificateTypeId",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "submittedBy",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "holderIdCard",
+        "type": "string"
+      }
+    ],
+    "name": "CertificateSubmitted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "previousAdminRole",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "newAdminRole",
+        "type": "bytes32"
+      }
+    ],
+    "name": "RoleAdminChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleGranted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleRevoked",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "ADMIN_ROLE",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DEFAULT_ADMIN_ROLE",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ORGANIZATION_MANAGER_ROLE",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ORGANIZATION_OWNER_ROLE",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_certId", "type": "string" }
+    ],
+    "name": "approveCertificate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_certId", "type": "string" }
+    ],
+    "name": "certificateExists",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "certificateTypeContract",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_certId", "type": "string" }
+    ],
+    "name": "getCertificate",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "string", "name": "id", "type": "string" },
+          {
+            "internalType": "string",
+            "name": "organizationId",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "certificateTypeId",
+            "type": "string"
+          },
+          {
+            "internalType": "enum Certificate.CertificateStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "string",
+            "name": "holderIdCard",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "holderCountryCode",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "grantLevel",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "issueTime", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "expireTime",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "ipfsHash", "type": "string" },
+          {
+            "internalType": "string",
+            "name": "rejectionReason",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "revocationReason",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "submittedBy",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct Certificate.CertificateData",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCertificateCount",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_holderIdCard", "type": "string" }
+    ],
+    "name": "getCertificatesByHolder",
+    "outputs": [{ "internalType": "string[]", "name": "", "type": "string[]" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_orgId", "type": "string" }
+    ],
+    "name": "getCertificatesByOrganization",
+    "outputs": [{ "internalType": "string[]", "name": "", "type": "string[]" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum Certificate.CertificateStatus",
+        "name": "_status",
+        "type": "uint8"
+      }
+    ],
+    "name": "getCertificatesByStatus",
+    "outputs": [{ "internalType": "string[]", "name": "", "type": "string[]" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_typeId", "type": "string" }
+    ],
+    "name": "getCertificatesByType",
+    "outputs": [{ "internalType": "string[]", "name": "", "type": "string[]" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" }
+    ],
+    "name": "getRoleAdmin",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "grantRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "hasRole",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_certId", "type": "string" }
+    ],
+    "name": "isCertificateValid",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "organizationContract",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_certId", "type": "string" },
+      { "internalType": "string", "name": "_reason", "type": "string" }
+    ],
+    "name": "rejectCertificate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      {
+        "internalType": "address",
+        "name": "callerConfirmation",
+        "type": "address"
+      }
+    ],
+    "name": "renounceRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_certId", "type": "string" },
+      { "internalType": "string", "name": "_reason", "type": "string" }
+    ],
+    "name": "revokeCertificate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "revokeRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_id", "type": "string" },
+      { "internalType": "string", "name": "_organizationId", "type": "string" },
+      {
+        "internalType": "string",
+        "name": "_certificateTypeId",
+        "type": "string"
+      },
+      { "internalType": "string", "name": "_holderIdCard", "type": "string" },
+      {
+        "internalType": "string",
+        "name": "_holderCountryCode",
+        "type": "string"
+      },
+      { "internalType": "uint256", "name": "_grantLevel", "type": "uint256" },
+      { "internalType": "uint256", "name": "_expireTime", "type": "uint256" },
+      { "internalType": "string", "name": "_ipfsHash", "type": "string" }
+    ],
+    "name": "submitCertificate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" }
+    ],
+    "name": "supportsInterface",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

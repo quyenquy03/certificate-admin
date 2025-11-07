@@ -1,23 +1,46 @@
 "use client";
 
+import CertificateABI from "@/abis/CertificateABI.json";
 import { Modal, type BaseModalProps } from "@/components/modals/bases";
+import { envs } from "@/constants";
 import { CERTIFICATE_STATUSES } from "@/enums";
-import { CertificateResponseType } from "@/types";
 import { formatDate } from "@/helpers";
+import { CertificateResponseType } from "@/types";
 import { Badge, Box, Flex, Text, ActionIcon } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { BrowserProvider, Contract } from "ethers";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { FiCopy } from "react-icons/fi";
 import { HiOutlineQrCode } from "react-icons/hi2";
-import {
-  PiEnvelopeSimple,
-  PiCalendarCheck,
-  PiTrafficConeThin,
-  PiShieldCheck,
-} from "react-icons/pi";
 
 type CertificateDetailModalProps = {
   certificate: CertificateResponseType | null;
 } & Omit<BaseModalProps, "children">;
+
+type Eip1193Provider = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  isMetaMask?: boolean;
+  providers?: Eip1193Provider[];
+};
+
+const getMetaMaskProvider = (): Eip1193Provider | undefined => {
+  if (typeof window === "undefined") return undefined;
+  const anyWindow = window as typeof window & {
+    ethereum?: Eip1193Provider & { providers?: Eip1193Provider[] };
+  };
+  const { ethereum } = anyWindow ?? {};
+
+  if (!ethereum) return undefined;
+
+  if (Array.isArray(ethereum.providers)) {
+    return ethereum.providers.find((provider) => provider?.isMetaMask);
+  }
+
+  if (ethereum.isMetaMask) return ethereum;
+
+  return undefined;
+};
 
 const getDisplayValue = (value?: string | null, fallback?: string) => {
   const trimmed = value?.trim();
@@ -32,6 +55,7 @@ export const CertificateDetailModal = ({
   ...props
 }: CertificateDetailModalProps) => {
   const t = useTranslations();
+  const [isSigning, setIsSigning] = useState(false);
 
   const author = certificate?.authorProfile;
   const authorName = getDisplayValue(author?.authorName, t("not_updated"));
@@ -140,12 +164,124 @@ export const CertificateDetailModal = ({
     },
   ];
 
+  const handleSignCertificate = async () => {
+    if (!certificate || isSigning) return;
+
+    const contractAddress = envs.CONTRACT_ADDRESS?.trim();
+    if (!contractAddress || contractAddress === "no value") {
+      notifications.show({
+        title: "Certificate signing",
+        message: "Contract address is not configured.",
+        color: "red",
+      });
+      return;
+    }
+
+    const provider = getMetaMaskProvider();
+    if (!provider) {
+      notifications.show({
+        title: "Certificate signing",
+        message: "MetaMask wallet is not detected in this browser.",
+        color: "red",
+      });
+      return;
+    }
+
+    const authorProfile = certificate.authorProfile;
+    if (!authorProfile) {
+      notifications.show({
+        title: "Certificate signing",
+        message: "Author profile is missing on this certificate.",
+        color: "red",
+      });
+      return;
+    }
+
+    const certificateId = certificate.id?.trim();
+    const organizationId = certificate.organizationId?.trim();
+    const certificateTypeId = certificate.certificateTypeId?.trim();
+    const holderIdCard = authorProfile.authorIdCard?.trim();
+    const holderCountryCode = authorProfile.authorCountryCode;
+    const rawGrantLevel = Number(authorProfile.grantLevel ?? 0);
+    const normalizedGrantLevel = Number.isFinite(rawGrantLevel)
+      ? Math.trunc(rawGrantLevel)
+      : Number.NaN;
+    const expireTime = certificate.validTo
+      ? Math.floor(new Date(certificate.validTo).getTime() / 1000)
+      : undefined;
+    const ipfsHash = certificate.certificateHash?.trim();
+
+    const missingFields: string[] = [];
+    if (!certificateId) missingFields.push("certificate id");
+    if (!organizationId) missingFields.push("organization id");
+    if (!certificateTypeId) missingFields.push("certificate type");
+    if (!holderIdCard) missingFields.push("holder id card");
+    if (!holderCountryCode) missingFields.push("holder country");
+    if (Number.isNaN(normalizedGrantLevel)) missingFields.push("grant level");
+    if (!expireTime) missingFields.push("expire time");
+    if (!ipfsHash) missingFields.push("certificate hash");
+
+    if (missingFields.length) {
+      notifications.show({
+        title: "Certificate signing",
+        message: `Missing data: ${missingFields.join(", ")}.`,
+        color: "red",
+      });
+      return;
+    }
+
+    try {
+      setIsSigning(true);
+      await provider.request({ method: "eth_requestAccounts" });
+      const browserProvider = new BrowserProvider(provider as any);
+      const signer = await browserProvider.getSigner();
+      const contract = new Contract(contractAddress, CertificateABI, signer);
+
+      const tx = await contract.submitCertificate(
+        certificateId,
+        organizationId,
+        certificateTypeId,
+        holderIdCard,
+        holderCountryCode,
+        BigInt(normalizedGrantLevel),
+        BigInt(expireTime!),
+        ipfsHash
+      );
+
+      await tx.wait();
+
+      notifications.show({
+        title: "Certificate signing",
+        message: `Submitted certificate on-chain. Tx: ${tx.hash}`,
+        color: "green",
+      });
+    } catch (error) {
+      console.error("sign_certificate_error", error);
+      notifications.show({
+        title: "Certificate signing",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unable to sign certificate. Please try again.",
+        color: "red",
+      });
+    } finally {
+      setIsSigning(false);
+    }
+  };
+
   return (
     <Modal
       opened={opened}
       onClose={onClose}
       header={t("certificate_detail")}
       size="lg"
+      footerProps={{
+        showFooter: true,
+        confirmText: "Sign",
+      }}
+      onConfirm={handleSignCertificate}
+      isLoading={isSigning}
       {...props}
     >
       <Flex direction="column" gap={12}>
