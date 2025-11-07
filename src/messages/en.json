@@ -5,7 +5,6 @@
   "profile_setting": "Thông tin tài khoản",
   "password_setting": "Đổi mật khẩu",
   "logout": "Đăng xuất",
-
   "change_language_title": "Chọn ngôn ngữ bạn muốn sử dụng\nvà nhấn nút xác nhận để hoàn thành",
   "english": "English",
   "vietnamese": "Vietnamese",
@@ -27,7 +26,6 @@
   "not_found_back_cta": "Go to previous page",
   "loading_title": "Hold tight, we are preparing your experience.",
   "loading_description": "Fetching the latest data and setting things up. This only takes a moment.",
-
   "change_theme_title": "Chọn chế độ mà bạn muốn sử dụng\nvà nhấn nút xác nhận để hoàn thành",
   "dark_theme": "Dark Theme",
   "light_theme": "Light Theme",
@@ -160,7 +158,6 @@
   "delete_user": "Delete user",
   "enter_search_keyword": "Enter search keyword",
   "more": "more",
-
   "register_org_partner_badge": "Partner with CertifyChain",
   "register_org_hero_title": "Register your organization for trusted credentials",
   "register_org_hero_subtitle": "Share your institutional details and we will configure a pilot tailored to your programs.",
@@ -222,7 +219,6 @@
   "register_org_wallet_step_description": "Connect your organization's wallet to complete the registration.",
   "register_org_wallet_required": "Please connect your organization's wallet.",
   "register_org_wallet_invalid": "Wallet address looks invalid.",
-
   "country_vietnam": "Vietnam",
   "country_united_states": "United States",
   "country_united_kingdom": "United Kingdom",
@@ -239,7 +235,6 @@
   "country_malaysia": "Malaysia",
   "country_philippines": "Philippines",
   "country_india": "India",
-
   "org_pending": "Pending",
   "org_approved": "Approved",
   "org_rejected": "Rejected",
@@ -249,5 +244,12 @@
   "valid_period": "Valid period",
   "signed_tx_hash": "Signed transaction hash",
   "approved_tx_hash": "Approved transaction hash",
-  "revoked_tx_hash": "Revoked transaction hash"
+  "revoked_tx_hash": "Revoked transaction hash",
+  "certificate_detail": "Certificate detail",
+  "certificate_summary": "Certificate summary",
+  "certificate_author_section": "Author information",
+  "certificate_transactions_section": "Transaction hashes",
+  "certificate_code": "Certificate code",
+  "certificate_hash": "Certificate hash",
+  "birthday": "Birthday"
 }

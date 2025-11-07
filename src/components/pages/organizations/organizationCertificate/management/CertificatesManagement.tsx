@@ -5,14 +5,15 @@ import {
   ButtonAdd,
   CertificateItem,
   CertificateItemSkeleton,
+  CertificateDetailModal,
   PageHeader,
   PaginationCustom,
 } from "@/components";
 import { Box, Grid, Group, Input, Select, Stack, Text } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { useDebounce } from "@/hooks";
+import { useDebounce, useDisclose } from "@/hooks";
 import { useQueryGetOrganizationCertificates } from "@/queries";
-import { BasePaginationParams } from "@/types";
+import { BasePaginationParams, CertificateResponseType } from "@/types";
 import { CERTIFICATE_STATUSES, SORTS } from "@/enums";
 import { PAGINATION_PARAMS, PAGE_URLS } from "@/constants";
 import { stores } from "@/stores";
@@ -23,6 +24,9 @@ export const CertificatesManagement = () => {
   const router = useRouter();
   const { currentOrganization } = stores.organization();
   const headerRef = useRef<HTMLDivElement | null>(null);
+  const detailModal = useDisclose();
+  const [selectedCertificate, setSelectedCertificate] =
+    useState<CertificateResponseType | null>(null);
 
   const [searchParams, setSearchParams] = useState<BasePaginationParams>({
     page: PAGINATION_PARAMS.DEFAULT.page,
@@ -108,6 +112,26 @@ export const CertificatesManagement = () => {
 
   const isEmptyState = !isFetching && certificates.length === 0;
 
+  const handleShowCertificateDetail = (
+    certificate: CertificateResponseType
+  ) => {
+    setSelectedCertificate(certificate);
+    detailModal.onOpen();
+  };
+
+  const handleCloseCertificateDetail = () => {
+    detailModal.onClose();
+    setSelectedCertificate(null);
+  };
+
+  const handleUpdateCertificate = (certificate: CertificateResponseType) => {
+    console.log("Update certificate", certificate.id);
+  };
+
+  const handleDeleteCertificate = (certificate: CertificateResponseType) => {
+    console.log("Delete certificate", certificate.id);
+  };
+
   return (
     <Box className="w-full relative flex h-full flex-col">
       <PageHeader
@@ -170,7 +194,12 @@ export const CertificatesManagement = () => {
           <Grid gutter="md">
             {certificates.map((certificate) => (
               <Grid.Col key={certificate.id} span={{ base: 12, md: 6, xl: 4 }}>
-                <CertificateItem certificate={certificate} />
+                <CertificateItem
+                  certificate={certificate}
+                  onShowDetail={handleShowCertificateDetail}
+                  onUpdate={handleUpdateCertificate}
+                  onDelete={handleDeleteCertificate}
+                />
               </Grid.Col>
             ))}
           </Grid>
@@ -183,6 +212,12 @@ export const CertificatesManagement = () => {
             onChange={handlePageChange}
           />
         )}
+
+        <CertificateDetailModal
+          opened={detailModal.isOpen}
+          onClose={handleCloseCertificateDetail}
+          certificate={selectedCertificate}
+        />
       </Box>
     </Box>
   );

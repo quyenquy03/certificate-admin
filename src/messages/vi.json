@@ -5,7 +5,6 @@
   "profile_setting": "Thông tin tài khoản",
   "password_setting": "Đổi mật khẩu",
   "logout": "Đăng xuất",
-
   "change_language_title": "Chọn ngôn ngữ bạn muốn sử dụng\nvà nhấn nút xác nhận để hoàn tất.",
   "english": "Tiếng Anh",
   "vietnamese": "Tiếng Việt",
@@ -27,11 +26,9 @@
   "not_found_back_cta": "Quay lại trang trước",
   "loading_title": "Chờ một chút, chúng tôi đang chuẩn bị mọi thứ cho bạn.",
   "loading_description": "Đang tải dữ liệu mới nhất và thiết lập hệ thống. Sẽ xong trong giây lát.",
-
   "change_theme_title": "Chọn chế độ màu bạn muốn sử dụng\nvà nhấn nút xác nhận để hoàn tất.",
   "dark_theme": "Giao diện tối",
   "light_theme": "Giao diện sáng",
-
   "login": "Đăng nhập",
   "login_badge": "Quản trị chứng chỉ",
   "login_title": "Chào mừng trở lại",
@@ -127,7 +124,6 @@
   "reject_registration_success_desc": "Bạn đã từ chối đăng ký thành công.",
   "reject_registration_fail": "Từ chối đăng ký thất bại",
   "status": "Trạng thái",
-
   "add_new": "Thêm mới",
   "create_new_user": "Tạo người dùng mới",
   "update_user_information": "Cập nhật thông tin người dùng",
@@ -162,7 +158,6 @@
   "delete_user": "Xóa người dùng",
   "enter_search_keyword": "Nhập từ khóa tìm kiếm",
   "more": "Thêm",
-
   "register_org_partner_badge": "Đồng hành cùng CertifyChain",
   "register_org_hero_title": "Đăng ký tổ chức để nhận chứng chỉ đáng tin cậy",
   "register_org_hero_subtitle": "Chia sẻ thông tin đơn vị, chúng tôi sẽ cấu hình giải pháp phù hợp.",
@@ -224,7 +219,6 @@
   "register_org_wallet_step_description": "Kết nối ví của tổ chức để hoàn tất đăng ký.",
   "register_org_wallet_required": "Vui lòng kết nối ví của tổ chức.",
   "register_org_wallet_invalid": "Địa chỉ ví không hợp lệ.",
-
   "country_vietnam": "Việt Nam",
   "country_united_states": "Hoa Kỳ",
   "country_united_kingdom": "Vương quốc Anh",
@@ -241,7 +235,6 @@
   "country_malaysia": "Malaysia",
   "country_philippines": "Philippines",
   "country_india": "Ấn Độ",
-
   "org_pending": "Chờ duyệt",
   "org_approved": "Đã duyệt",
   "org_rejected": "Đã từ chối",
@@ -251,5 +244,12 @@
   "valid_period": "Khoảng thời gian hiệu lực",
   "signed_tx_hash": "Hash giao dịch ký",
   "approved_tx_hash": "Hash giao dịch phê duyệt",
-  "revoked_tx_hash": "Hash giao dịch thu hồi"
+  "revoked_tx_hash": "Hash giao dịch thu hồi",
+  "certificate_detail": "Chi tiết chứng chỉ",
+  "certificate_summary": "Thông tin chứng chỉ",
+  "certificate_author_section": "Thông tin tác giả",
+  "certificate_transactions_section": "Giao dịch blockchain",
+  "certificate_code": "Mã chứng chỉ",
+  "certificate_hash": "Hash chứng chỉ",
+  "birthday": "Ngày sinh"
 }

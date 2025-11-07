@@ -1,8 +1,20 @@
 import { CERTIFICATE_STATUSES } from "@/enums";
 import { CertificateResponseType } from "@/types";
-import { ActionIcon, Badge, Box, Flex, Text, Tooltip } from "@mantine/core";
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Flex,
+  Text,
+  Tooltip,
+} from "@mantine/core";
 import dayjs from "dayjs";
 import { useTranslations } from "next-intl";
+import {
+  ButtonMore,
+  DropdownMenu,
+  DropdownMenuItemProps,
+} from "@/components";
 import { HiOutlineQrCode } from "react-icons/hi2";
 import {
   PiEnvelopeSimple,
@@ -10,11 +22,15 @@ import {
   PiTrafficConeThin,
   PiShieldCheck,
 } from "react-icons/pi";
+import { BiShow, BiEdit, BiTrash } from "react-icons/bi";
 import { FiCopy } from "react-icons/fi";
 
 type CertificateItemProps = {
   certificate: CertificateResponseType;
   onClick?: (certificate: CertificateResponseType) => void;
+  onShowDetail?: (certificate: CertificateResponseType) => void;
+  onUpdate?: (certificate: CertificateResponseType) => void;
+  onDelete?: (certificate: CertificateResponseType) => void;
 };
 
 const STATUS_COLOR: Partial<Record<CERTIFICATE_STATUSES, string>> = {
@@ -26,7 +42,13 @@ const formatDate = (value?: string | null) => {
   return dayjs(value).format("DD/MM/YYYY");
 };
 
-export const CertificateItem = ({ certificate, onClick }: CertificateItemProps) => {
+export const CertificateItem = ({
+  certificate,
+  onClick,
+  onShowDetail,
+  onUpdate,
+  onDelete,
+}: CertificateItemProps) => {
   const t = useTranslations();
   const author = certificate.authorProfile;
 
@@ -50,6 +72,32 @@ export const CertificateItem = ({ certificate, onClick }: CertificateItemProps) 
     { key: "revoked", label: t("revoked_tx_hash"), value: certificate.revokedTxHash },
   ];
 
+  const actionMenuItems: DropdownMenuItemProps[] = [];
+  if (onShowDetail) {
+    actionMenuItems.push({
+      id: "detail",
+      label: t("view_detail"),
+      leftIcon: <BiShow />,
+      onClick: () => onShowDetail(certificate),
+    });
+  }
+  if (onUpdate) {
+    actionMenuItems.push({
+      id: "update",
+      label: t("update"),
+      leftIcon: <BiEdit />,
+      onClick: () => onUpdate(certificate),
+    });
+  }
+  if (onDelete) {
+    actionMenuItems.push({
+      id: "delete",
+      label: t("delete"),
+      leftIcon: <BiTrash />,
+      onClick: () => onDelete(certificate),
+    });
+  }
+
   const copyToClipboard = async (value?: string | null) => {
     if (!value) return;
     try {
@@ -64,6 +112,16 @@ export const CertificateItem = ({ certificate, onClick }: CertificateItemProps) 
       className="min-h-28 relative rounded-lg bg-background-primary-light p-3 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg dark:bg-background-primary-dark dark:shadow-slate-800"
       onClick={() => onClick?.(certificate)}
     >
+      {actionMenuItems.length > 0 && (
+        <DropdownMenu items={actionMenuItems} position="bottom-end">
+          <Box
+            className="absolute top-3 right-3 z-10"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <ButtonMore />
+          </Box>
+        </DropdownMenu>
+      )}
       <Box
         className="absolute inset-x-0 top-0 h-1 w-full rounded-t-lg"
         style={{
