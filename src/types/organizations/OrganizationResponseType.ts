@@ -2,17 +2,14 @@ import { COUNTRIES, ORGANIZATION_STATUSES } from "@/enums";
 
 export type OrganizationResponseType = {
   id: string;
-  walletAddress: string;
-  ownerFirstName: string;
-  ownerLastName: string;
-  email: string;
-  phoneNumber: string;
-  organizationName: string;
-  organizationDescription: string;
+  name: string;
+  description: string;
   website: string;
   countryCode: COUNTRIES;
-  status: ORGANIZATION_STATUSES;
-  rejectReason?: string | null;
+  changeOwnerTxHash: string | null;
+  initTxHash: string | null;
+  isActive: boolean;
+  isOwner: boolean;
   createdAt: string;
   updatedAt: string;
 };

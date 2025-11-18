@@ -1,25 +1,28 @@
-import { OrganizationStatusCard } from "@/components";
 import { ORGANIZATION_STATUS_COLORS } from "@/constants";
 import { OrganizationResponseType } from "@/types";
-import { Box, Flex, Text } from "@mantine/core";
+import { ActionIcon, Box, Flex, Text, Tooltip } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import {
-  HiOutlineBuildingOffice2,
-  HiOutlineEnvelope,
-  HiOutlineUser,
+  HiOutlineCheck,
+  HiOutlineDocumentDuplicate,
+  HiOutlineGlobeAlt,
+  HiOutlineSparkles,
 } from "react-icons/hi2";
+import { ORGANIZATION_STATUSES } from "@/enums";
+import { FiCopy } from "react-icons/fi";
 
 type OrganizationItemProps = {
   organization: OrganizationResponseType;
   onClick?: (organization: OrganizationResponseType) => void;
+  isCurrent?: boolean;
 };
 
 export const OrganizationItem = ({
   organization,
   onClick,
+  isCurrent = false,
 }: OrganizationItemProps) => {
   const t = useTranslations();
-  console.log(organization);
 
   const trimmedOrEmpty = (value?: string | null) => {
     const trimmed = value?.trim();
@@ -27,44 +30,43 @@ export const OrganizationItem = ({
   };
 
   const organizationName =
-    trimmedOrEmpty(organization.organizationName) || t("not_updated");
+    trimmedOrEmpty(organization.name) || t("not_updated");
+  const organizationDescription =
+    trimmedOrEmpty(organization.description) || t("not_updated");
 
-  const registrantName =
-    [
-      trimmedOrEmpty(organization.ownerFirstName),
-      trimmedOrEmpty(organization.ownerLastName),
-    ]
-      .filter(Boolean)
-      .join(" ") || t("not_updated");
+  const organizationInitial = organizationName?.charAt(0)?.toUpperCase() || "O";
 
-  const organizationInitial =
-    organizationName?.charAt(0)?.toUpperCase() ||
-    registrantName?.charAt(0)?.toUpperCase() ||
-    "O";
+  const accentStatus = organization.isActive
+    ? ORGANIZATION_STATUSES.APPROVED
+    : ORGANIZATION_STATUSES.REJECTED;
+  const accentColor = ORGANIZATION_STATUS_COLORS[accentStatus] ?? "#6366F1";
+  const statusLabel = organization.isActive ? t("active") : t("inactive");
+  const websiteValue = trimmedOrEmpty(organization.website) || t("not_updated");
+  const initTxHash = trimmedOrEmpty(organization.initTxHash);
+  const displayInitTxHash = initTxHash || t("not_updated");
+  const canCopyInitTxHash = Boolean(initTxHash);
+  const currentLabel = isCurrent
+    ? t("organization_dashboard_current_org")
+    : t("organization_not_current_org");
+  const currentAccent = isCurrent ? "#0EA5E9" : "#94A3B8";
 
-  const accentColor =
-    ORGANIZATION_STATUS_COLORS[organization.status] ?? "#6366F1";
+  const infoCardClass =
+    "w-full rounded-md border border-gray-200 px-3 py-3 text-left dark:border-gray-600";
+  const iconWrapperClass =
+    "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-700/40 dark:text-slate-200";
+  const labelClass =
+    "text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300";
+  const valueClass =
+    "truncate text-sm font-medium text-gray-900 dark:text-gray-100";
 
-  const infoItems = [
-    {
-      key: "email",
-      label: t("email"),
-      value: trimmedOrEmpty(organization.email) || t("not_updated"),
-      icon: <HiOutlineEnvelope className="h-4 w-4" />,
-    },
-    {
-      key: "registrant",
-      label: t("registration_registrant"),
-      value: registrantName,
-      icon: <HiOutlineUser className="h-4 w-4" />,
-    },
-    {
-      key: "organization",
-      label: t("registration_organization_name"),
-      value: organizationName,
-      icon: <HiOutlineBuildingOffice2 className="h-4 w-4" />,
-    },
-  ];
+  const copyToClipboard = async (value?: string | null) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch (error) {
+      console.error("copy_error", error);
+    }
+  };
 
   return (
     <Box
@@ -94,32 +96,76 @@ export const OrganizationItem = ({
               {organizationName}
             </Text>
             <Text className="truncate text-xs text-gray-500 dark:text-gray-300">
-              {registrantName}
+              {organizationDescription}
             </Text>
           </Flex>
         </Flex>
-        <OrganizationStatusCard status={organization.status} />
       </Flex>
       <Flex gap={8} direction="column">
-        {infoItems.map((item) => (
-          <Flex
-            key={item.key}
-            gap={12}
-            className="w-full rounded-md border border-gray-200 px-3 py-3 text-left dark:border-gray-600"
-          >
-            <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-700/40 dark:text-slate-200">
-              {item.icon}
+        <Flex gap={8} className="flex-col sm:flex-row">
+          <Flex gap={12} className={`${infoCardClass} flex-1`}>
+            <Box className={iconWrapperClass}>
+              <HiOutlineCheck className="h-4 w-4" />
             </Box>
-            <Flex direction="column" gap={4} className="min-w-0 flex-1">
-              <Text className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300">
-                {item.label}
-              </Text>
-              <Text className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
-                {item.value}
+            <Flex direction="column" className="min-w-0 flex-1">
+              <Text
+                className="text-sm font-semibold text-gray-900 dark:text-gray-100"
+                style={{ color: currentAccent }}
+              >
+                {currentLabel}
               </Text>
             </Flex>
           </Flex>
-        ))}
+          <Flex gap={12} className={`${infoCardClass} flex-1`}>
+            <Box className={iconWrapperClass}>
+              <HiOutlineSparkles className="h-4 w-4" />
+            </Box>
+            <Flex direction="column" className="min-w-0 flex-1">
+              <Box
+                className="text-xs px-4 py-1 rounded-full font-semibold w-fit"
+                style={{
+                  color: accentColor,
+                  backgroundColor: `${accentColor}20`,
+                }}
+              >
+                {statusLabel}
+              </Box>
+            </Flex>
+          </Flex>
+        </Flex>
+        <Flex gap={12} className={infoCardClass}>
+          <Box className={iconWrapperClass}>
+            <HiOutlineGlobeAlt className="h-4 w-4" />
+          </Box>
+          <Flex direction="column" gap={4} className="min-w-0 flex-1">
+            <Text className={labelClass}>{t("registration_website")}</Text>
+            <Text className={valueClass}>{websiteValue}</Text>
+          </Flex>
+        </Flex>
+        <Flex gap={12} align="center" className={infoCardClass}>
+          <Box className={iconWrapperClass}>
+            <HiOutlineDocumentDuplicate className="h-4 w-4" />
+          </Box>
+          <Flex direction="column" gap={4} className="min-w-0 flex-1">
+            <Text className={labelClass}>{t("organization_init_tx_hash")}</Text>
+            <Text className={valueClass} title={initTxHash || undefined}>
+              {displayInitTxHash}
+            </Text>
+          </Flex>
+          <Tooltip label={t("copy")} withArrow disabled={!canCopyInitTxHash}>
+            <ActionIcon
+              variant="subtle"
+              color="blue"
+              disabled={!canCopyInitTxHash}
+              onClick={(event) => {
+                event.stopPropagation();
+                copyToClipboard(initTxHash);
+              }}
+            >
+              <FiCopy />
+            </ActionIcon>
+          </Tooltip>
+        </Flex>
       </Flex>
     </Box>
   );

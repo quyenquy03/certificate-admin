@@ -14,7 +14,8 @@ import React, { useMemo, useState } from "react";
 
 export const MyOrganization = () => {
   const t = useTranslations();
-  const { organizations, isLoading } = stores.organization();
+  const { organizations, isLoading, currentOrganization } =
+    stores.organization();
   const [searchKeyword, setSearchKeyword] = useState("");
 
   const debouncedSearch = useDebounce(searchKeyword, 500);
@@ -28,12 +29,7 @@ export const MyOrganization = () => {
     }
 
     return organizations.filter((organization) => {
-      const searchableContent = [
-        organization.organizationName,
-        organization.ownerFirstName,
-        organization.ownerLastName,
-        organization.email,
-      ]
+      const searchableContent = [organization.description, organization.name]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -91,7 +87,10 @@ export const MyOrganization = () => {
                   xl: 4,
                 }}
               >
-                <OrganizationItem organization={organization} />
+                <OrganizationItem
+                  organization={organization}
+                  isCurrent={organization.id === currentOrganization?.id}
+                />
               </Grid.Col>
             ))}
           </Grid>

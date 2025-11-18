@@ -4,7 +4,7 @@ import { Modal, type BaseModalProps } from "@/components/modals/bases";
 import { LoadingOverlay, OrganizationStatusCard } from "@/components";
 import { cn, formatDate } from "@/helpers";
 import { ORGANIZATION_STATUSES } from "@/enums";
-import { OrganizationResponseType } from "@/types";
+import { RegistrationResponseType } from "@/types";
 import { ActionIcon, Box, Button, Flex, Text } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import { BiCopy } from "react-icons/bi";
@@ -12,9 +12,9 @@ import { ReactNode } from "react";
 import { COUNTRY_LABELS } from "@/constants";
 
 type RegistrationDetailModalProps = {
-  registration: OrganizationResponseType | null;
-  onApprove?: (registration: OrganizationResponseType) => void;
-  onReject?: (registration: OrganizationResponseType) => void;
+  registration: RegistrationResponseType | null;
+  onApprove?: (registration: RegistrationResponseType) => void;
+  onReject?: (registration: RegistrationResponseType) => void;
   isLoading?: boolean;
 } & Omit<BaseModalProps, "children">;
 

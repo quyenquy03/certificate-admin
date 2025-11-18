@@ -1,7 +1,7 @@
 import { organizationApis } from "@/apis";
 import {
   BaseResponseType,
-  OrganizationResponseType,
+  RegistrationResponseType,
   RejectOrganizationRequestType,
 } from "@/types";
 import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
@@ -9,7 +9,7 @@ import type { AxiosError } from "axios";
 
 export const useRejectRegistration = (
   option?: UseMutationOptions<
-    BaseResponseType<OrganizationResponseType>,
+    BaseResponseType<RegistrationResponseType>,
     AxiosError,
     RejectOrganizationRequestType,
     unknown

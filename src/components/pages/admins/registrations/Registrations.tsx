@@ -17,7 +17,7 @@ import {
   useQueryGetAllRegistrations,
   useQueryGetRegistration,
 } from "@/queries";
-import { BasePaginationParams, OrganizationResponseType } from "@/types";
+import { BasePaginationParams, RegistrationResponseType } from "@/types";
 import { Box, Grid, Input, Select } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -28,7 +28,7 @@ export const RegistrationsManagement = () => {
   const approveModal = useDisclose();
   const rejectModal = useDisclose();
   const [selectedRegistration, setSelectedRegistration] =
-    useState<OrganizationResponseType | null>(null);
+    useState<RegistrationResponseType | null>(null);
   const [selectedRegistrationId, setSelectedRegistrationId] = useState<
     string | null
   >(null);
@@ -75,7 +75,7 @@ export const RegistrationsManagement = () => {
     searchDebouncedValue,
   ]);
 
-  const handleViewDetail = (registration: OrganizationResponseType) => {
+  const handleViewDetail = (registration: RegistrationResponseType) => {
     setSelectedRegistration(registration);
     setSelectedRegistrationId(registration.id);
     approveModal.onClose();
@@ -89,7 +89,7 @@ export const RegistrationsManagement = () => {
     setSelectedRegistrationId(null);
   };
 
-  const handleOpenApproveModal = (registration: OrganizationResponseType) => {
+  const handleOpenApproveModal = (registration: RegistrationResponseType) => {
     setSelectedRegistration(registration);
     detailModal.onClose();
     rejectModal.onClose();
@@ -101,7 +101,7 @@ export const RegistrationsManagement = () => {
     setSelectedRegistration(null);
   };
 
-  const handleOpenRejectModal = (registration: OrganizationResponseType) => {
+  const handleOpenRejectModal = (registration: RegistrationResponseType) => {
     setSelectedRegistration(registration);
     detailModal.onClose();
     approveModal.onClose();

@@ -2,7 +2,7 @@
 
 import { Modal, type BaseModalProps } from "@/components/modals/bases";
 import { useApproveRegistration } from "@/mutations";
-import { BaseErrorType, OrganizationResponseType } from "@/types";
+import { BaseErrorType, RegistrationResponseType } from "@/types";
 import { Box, Stack, Text, ThemeIcon } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { isAxiosError } from "axios";
@@ -11,7 +11,7 @@ import { Fragment, useMemo } from "react";
 import { PiCheckCircleBold } from "react-icons/pi";
 
 type RegistrationApproveModalProps = {
-  registration: OrganizationResponseType | null;
+  registration: RegistrationResponseType | null;
   refetchListRegistrations?: () => void;
 } & Omit<BaseModalProps, "onConfirm" | "isLoading">;
 
@@ -39,7 +39,11 @@ export const RegistrationApproveModal = ({
       <Fragment key={`approve-confirmation-${index}`}>
         {part}
         {index < fragments.length - 1 && (
-          <Text span fw={600} className="text-emerald-600 dark:text-emerald-300">
+          <Text
+            span
+            fw={600}
+            className="text-emerald-600 dark:text-emerald-300"
+          >
             {organizationName}
           </Text>
         )}
@@ -134,7 +138,10 @@ export const RegistrationApproveModal = ({
           </Text>
         </Stack>
         <Box className="rounded-lg border border-emerald-100/70 bg-emerald-50/80 px-4 py-3 text-center dark:border-emerald-900/40 dark:bg-emerald-950/40">
-          <Text fw={600} className="text-sm text-emerald-700 dark:text-emerald-300">
+          <Text
+            fw={600}
+            className="text-sm text-emerald-700 dark:text-emerald-300"
+          >
             {organizationName}
           </Text>
         </Box>

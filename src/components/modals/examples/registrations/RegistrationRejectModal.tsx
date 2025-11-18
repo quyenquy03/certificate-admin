@@ -2,7 +2,7 @@
 
 import { Modal, type BaseModalProps } from "@/components/modals/bases";
 import { useRejectRegistration } from "@/mutations";
-import { BaseErrorType, OrganizationResponseType } from "@/types";
+import { BaseErrorType, RegistrationResponseType } from "@/types";
 import { Box, Stack, Text, Textarea, ThemeIcon } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
@@ -11,7 +11,7 @@ import { isAxiosError } from "axios";
 import { PiWarningCircleBold } from "react-icons/pi";
 
 type RegistrationRejectModalProps = {
-  registration: OrganizationResponseType | null;
+  registration: RegistrationResponseType | null;
   refetchListRegistrations?: () => void;
 } & Omit<BaseModalProps, "onConfirm" | "isLoading">;
 

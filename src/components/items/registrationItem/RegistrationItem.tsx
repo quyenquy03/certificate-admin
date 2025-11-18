@@ -6,7 +6,7 @@ import {
 } from "@/components";
 import { ORGANIZATION_STATUS_COLORS } from "@/constants";
 import { ORGANIZATION_STATUSES } from "@/enums";
-import { OrganizationResponseType } from "@/types";
+import { RegistrationResponseType } from "@/types";
 import { Box, Flex, Text } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import { ReactNode } from "react";
@@ -19,10 +19,10 @@ import {
 } from "react-icons/hi2";
 
 type RegistrationItemProps = {
-  registration: OrganizationResponseType;
-  onViewDetail?: (registration: OrganizationResponseType) => void;
-  onApprove?: (registration: OrganizationResponseType) => void;
-  onReject?: (registration: OrganizationResponseType) => void;
+  registration: RegistrationResponseType;
+  onViewDetail?: (registration: RegistrationResponseType) => void;
+  onApprove?: (registration: RegistrationResponseType) => void;
+  onReject?: (registration: RegistrationResponseType) => void;
 };
 
 export const RegistrationItem = ({

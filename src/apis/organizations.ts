@@ -3,16 +3,17 @@ import axiosClient from "@/libs/axiosClient";
 import {
   BasePaginationParams,
   BaseResponseType,
-  OrganizationResponseType,
+  RegistrationResponseType,
   RegisterOrganizationRequestType,
   RejectOrganizationRequestType,
+  OrganizationResponseType,
 } from "@/types";
 
 const getRegistration = async (
   id: string
-): Promise<BaseResponseType<OrganizationResponseType>> => {
+): Promise<BaseResponseType<RegistrationResponseType>> => {
   const response = await axiosClient<
-    BaseResponseType<OrganizationResponseType>
+    BaseResponseType<RegistrationResponseType>
   >({
     method: AXIOS_METHOD.GET,
     url: API_ROUTES.GET_ORGANIZATION_REGISTRATION + "/" + id,
@@ -22,9 +23,9 @@ const getRegistration = async (
 
 const registerOrganization = async (
   data: RegisterOrganizationRequestType
-): Promise<BaseResponseType<OrganizationResponseType>> => {
+): Promise<BaseResponseType<RegistrationResponseType>> => {
   const response = await axiosClient<
-    BaseResponseType<OrganizationResponseType>
+    BaseResponseType<RegistrationResponseType>
   >({
     method: AXIOS_METHOD.POST,
     url: API_ROUTES.REGISTER_ORGANIZATION,
@@ -61,9 +62,9 @@ const getMyOrganizations = async (
 
 const getRegistrations = async (
   data?: BasePaginationParams
-): Promise<BaseResponseType<OrganizationResponseType[]>> => {
+): Promise<BaseResponseType<RegistrationResponseType[]>> => {
   const response = await axiosClient<
-    BaseResponseType<OrganizationResponseType[]>
+    BaseResponseType<RegistrationResponseType[]>
   >({
     method: AXIOS_METHOD.POST,
     url: API_ROUTES.GET_ORGANIZATION_REGISTRATIONS,
@@ -74,9 +75,9 @@ const getRegistrations = async (
 
 const approveRegistration = async (
   id: string
-): Promise<BaseResponseType<OrganizationResponseType>> => {
+): Promise<BaseResponseType<RegistrationResponseType>> => {
   const response = await axiosClient<
-    BaseResponseType<OrganizationResponseType>
+    BaseResponseType<RegistrationResponseType>
   >({
     method: AXIOS_METHOD.PUT,
     url: API_ROUTES.APPROVE_REGISTRATION(id),
@@ -86,9 +87,9 @@ const approveRegistration = async (
 
 const rejectRegistration = async (
   data: RejectOrganizationRequestType
-): Promise<BaseResponseType<OrganizationResponseType>> => {
+): Promise<BaseResponseType<RegistrationResponseType>> => {
   const response = await axiosClient<
-    BaseResponseType<OrganizationResponseType>
+    BaseResponseType<RegistrationResponseType>
   >({
     method: AXIOS_METHOD.PUT,
     url: API_ROUTES.REJECT_REGISTRATION(data.id),

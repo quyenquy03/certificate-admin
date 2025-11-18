@@ -5,7 +5,7 @@ import { QUERY_KEYS, QUERY_TIMES } from "@/constants";
 import {
   BasePaginationParams,
   BaseResponseType,
-  OrganizationResponseType,
+  RegistrationResponseType,
 } from "@/types";
 import { organizationApis } from "@/apis";
 
@@ -14,7 +14,7 @@ export const useQueryGetAllRegistrations = (
   options?: UseQueryOptions<
     unknown,
     AxiosError,
-    BaseResponseType<OrganizationResponseType[]>,
+    BaseResponseType<RegistrationResponseType[]>,
     QueryKey
   >
 ) => {

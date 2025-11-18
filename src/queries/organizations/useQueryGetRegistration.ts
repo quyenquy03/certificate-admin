@@ -3,14 +3,14 @@ import { AxiosError } from "axios";
 
 import { organizationApis } from "@/apis";
 import { QUERY_KEYS, QUERY_TIMES } from "@/constants";
-import { BaseResponseType, OrganizationResponseType } from "@/types";
+import { BaseResponseType, RegistrationResponseType } from "@/types";
 
 export const useQueryGetRegistration = (
   id?: string,
   options?: UseQueryOptions<
-    BaseResponseType<OrganizationResponseType>,
+    BaseResponseType<RegistrationResponseType>,
     AxiosError,
-    BaseResponseType<OrganizationResponseType>,
+    BaseResponseType<RegistrationResponseType>,
     QueryKey
   >
 ) => {
