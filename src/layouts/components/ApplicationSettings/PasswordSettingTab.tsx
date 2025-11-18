@@ -8,12 +8,7 @@ import { notifications } from "@mantine/notifications";
 import { isAxiosError } from "axios";
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import {
-  TbCheck,
-  TbChevronLeft,
-  TbShieldLock,
-  TbRefresh,
-} from "react-icons/tb";
+import { TbCheck, TbChevronLeft, TbShieldLock } from "react-icons/tb";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 
 type PasswordSettingTab = {
@@ -72,7 +67,7 @@ export const PasswordSettingTab = ({ onBack }: PasswordSettingTab) => {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center gap-3  p-1.5 text-slate-600 shadow-sm  dark:bg-slate-900/70 dark:text-slate-200">
+      <div className="sticky top-0 z-20 flex items-center gap-3  p-1.5 text-slate-600 shadow-sm bg-white dark:bg-slate-900/70 dark:text-slate-200">
         <button
           type="button"
           onClick={onBack}

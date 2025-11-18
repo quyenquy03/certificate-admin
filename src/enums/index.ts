@@ -6,3 +6,4 @@ export * from "./countries";
 export * from "./sorts";
 export * from "./formModes";
 export * from "./certificateStatuses";
+export * from "./genders";

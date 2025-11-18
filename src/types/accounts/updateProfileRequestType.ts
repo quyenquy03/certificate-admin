@@ -1,9 +1,12 @@
+import { GENDERS } from "@/enums";
+
 export type UpdateProfileRequestType = {
-  email: string;
+  id: string;
   firstName: string;
   lastName: string;
   address?: string;
   phone?: string;
   dob: string;
+  gender: GENDERS;
   avatar?: string;
 };

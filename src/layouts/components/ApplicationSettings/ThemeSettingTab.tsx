@@ -1,12 +1,16 @@
 "use client";
 
 import { THEMES } from "@/enums";
-import { cn } from "@/helpers";
 import { useTheme } from "@/providers";
 import { Button, Radio } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { TbChevronLeft, TbMoonStars, TbSunHigh } from "react-icons/tb";
+import {
+  TbChevronLeft,
+  TbMoonStars,
+  TbSunHigh,
+  TbSparkles,
+} from "react-icons/tb";
 
 type ThemeSettingTabProps = {
   onBack: () => void;
@@ -15,62 +19,128 @@ type ThemeSettingTabProps = {
 export const ThemeSettingTab = ({ onBack }: ThemeSettingTabProps) => {
   const t = useTranslations();
   const { theme, setTheme } = useTheme();
-  const themes = useMemo(() => {
-    return [
-      {
-        id: THEMES.DARK,
-        label: "dark_theme",
-        icon: <TbMoonStars className="w-16 h-16" />,
-      },
+
+  const themes = useMemo(
+    () => [
       {
         id: THEMES.LIGHT,
         label: "light_theme",
-        icon: <TbSunHigh className="w-16 h-16" />,
+        icon: <TbSunHigh className="h-6 w-6" />,
+        helper: "Best for bright spaces and daytime use.",
       },
-    ];
-  }, []);
-  const handleChangeTheme = (theme: THEMES) => {
-    setTheme(theme);
+      {
+        id: THEMES.DARK,
+        label: "dark_theme",
+        icon: <TbMoonStars className="h-6 w-6" />,
+        helper: "Gentle on the eyes in low-light environments.",
+      },
+    ],
+    []
+  );
+
+  const handleChangeTheme = (nextTheme: THEMES) => {
+    setTheme(nextTheme);
   };
+
   return (
-    <div>
-      <div className="flex items-center h-12 rounded-lg px-2 gap-2 bg-gray-300 dark:bg-gray-800 text-gray-600 dark:text-gray-200">
-        <span
+    <div className="flex flex-col gap-5">
+      <div className="sticky top-0 z-20 flex items-center gap-3  p-1.5 text-slate-600 shadow-sm bg-white dark:bg-slate-900/70 dark:text-slate-200">
+        <button
+          type="button"
           onClick={onBack}
-          className="w-8 h-8 select-none bg-gray-200 dark:bg-gray-700 cursor-pointer shadow-sm shadow-gray-300 dark:shadow-gray-500 hover:bg-gray-400 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-700 flex items-center justify-center rounded-md transition-all"
+          aria-label={t("not_found_back_cta")}
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:-translate-x-0.5 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
         >
           <TbChevronLeft className="w-5 h-5" />
-        </span>
-        <p className="flex-1 text-center font-semibold">{t("theme_setting")}</p>
-      </div>
-      <div className="mt-6 px-2 py-4 min-h-20 bg-gray-300 dark:bg-gray-800 rounded-md">
-        <p className="text-center whitespace-pre-line font-medium text-gray-600 dark:text-gray-200">
-          {t("change_theme_title")}
-        </p>
-        <div className="flex gap-2 mt-4">
-          {themes.map((item) => (
-            <div
-              onClick={() => handleChangeTheme(item.id)}
-              key={item.id}
-              className={cn(
-                "flex flex-col h-36 items-center cursor-pointer select-none w-full bg-slate-200 dark:bg-slate-700 rounded-md border-2 border-gray-400 dark:border-gray-600",
-                item.id === theme && "border-gray-500 dark:border-gray-400"
-              )}
-            >
-              <span className="flex-1 flex items-center justify-center text-gray-600 dark:text-gray-200">
-                {item.icon}
-              </span>
-              <span className="bg-gray-400 dark:bg-gray-800 flex items-center justify-center w-full h-10 rounded-b-md">
-                <Radio
-                  className="cursor-pointer"
-                  checked={item.id === theme}
-                  readOnly
-                />
-              </span>
-            </div>
-          ))}
+        </button>
+        <div className="flex-1 text-center">
+          <p className="text-base font-semibold text-slate-900 dark:text-white">
+            {t("theme_setting")}
+          </p>
         </div>
-        <Button className="mt-4 w-full">{t("confirm")}</Button>
+      </div>
+
+      <div className="space-y-5 px-4">
+        <div className="relative overflow-hidden rounded-md border border-slate-200/40 bg-gradient-to-r from-indigo-600 via-purple-600 to-slate-900 p-5 text-white shadow-lg dark:border-slate-700/50">
+          <span className="absolute -right-6 top-6 h-32 w-32 rounded-full bg-white/20 blur-3xl" />
+          <div className="relative flex items-center gap-4">
+            <span className="flex h-12 w-12 items-center justify-center rounded-md bg-white/20 text-white shadow-inner">
+              <TbSparkles className="h-6 w-6" />
+            </span>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
+                {t("theme_setting")}
+              </p>
+              <p className="mt-1 text-base text-white/90">
+                {t("change_theme_title")}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          {themes.map((item) => {
+            const isActive = item.id === theme;
+            return (
+              <button
+                type="button"
+                key={item.id}
+                onClick={() => handleChangeTheme(item.id)}
+                className={`group relative flex flex-col gap-4 rounded-md border px-5 py-5 text-left transition-all ${
+                  isActive
+                    ? "border-indigo-500/80 bg-indigo-50 shadow-md shadow-indigo-500/30 dark:border-indigo-400/80 dark:bg-indigo-500/10"
+                    : "border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/40 dark:border-slate-700 dark:bg-slate-900"
+                }`}
+              >
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={`flex h-12 w-12 items-center justify-center rounded-md ${
+                        isActive
+                          ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-200"
+                          : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                      }`}
+                    >
+                      {item.icon}
+                    </span>
+                    <div>
+                      <p
+                        className={`text-sm font-semibold ${
+                          isActive
+                            ? "text-indigo-600 dark:text-indigo-300"
+                            : "text-slate-900 dark:text-slate-100"
+                        }`}
+                      >
+                        {t(item.label)}
+                      </p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                        <span>{item.helper}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <Radio checked={isActive} readOnly />
+                </div>
+                <span
+                  className={`pointer-events-none absolute inset-px rounded-md border border-white/60 transition-opacity ${
+                    isActive
+                      ? "opacity-100"
+                      : "opacity-0 group-hover:opacity-100 dark:border-white/20"
+                  }`}
+                />
+              </button>
+            );
+          })}
+        </div>
+
+        <Button
+          size="md"
+          radius="md"
+          variant="gradient"
+          gradient={{ from: "indigo", to: "violet" }}
+          className="w-full"
+        >
+          {t("confirm")}
+        </Button>
       </div>
     </div>
   );
