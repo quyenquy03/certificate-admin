@@ -3,10 +3,9 @@
 import CertificateABI from "@/abis/CertificateABI.json";
 import { Modal, type BaseModalProps } from "@/components/modals/bases";
 import { envs } from "@/constants";
-import { CERTIFICATE_STATUSES } from "@/enums";
 import { formatDate } from "@/helpers";
 import { CertificateResponseType } from "@/types";
-import { Badge, Box, Flex, Text, ActionIcon } from "@mantine/core";
+import { Box, Flex, Text, ActionIcon } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { BrowserProvider, Contract } from "ethers";
 import { useTranslations } from "next-intl";
@@ -22,6 +21,18 @@ type Eip1193Provider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
   isMetaMask?: boolean;
   providers?: Eip1193Provider[];
+};
+
+const ARBITRUM_TESTNET_PARAMS = {
+  chainId: "0x66eee",
+  chainName: "Arbitrum Sepolia",
+  nativeCurrency: {
+    name: "Ether",
+    symbol: "ETH",
+    decimals: 18,
+  },
+  rpcUrls: ["https://sepolia-rollup.arbitrum.io/rpc"],
+  blockExplorerUrls: ["https://sepolia-explorer.arbitrum.io"],
 };
 
 const getMetaMaskProvider = (): Eip1193Provider | undefined => {
@@ -46,6 +57,62 @@ const getDisplayValue = (value?: string | null, fallback?: string) => {
   const trimmed = value?.trim();
   if (trimmed && trimmed.length > 0) return trimmed;
   return fallback ?? "";
+};
+
+const isInsufficientFundsError = (error: unknown) => {
+  const code = (error as { code?: string | number })?.code;
+  if (
+    code === "INSUFFICIENT_FUNDS" ||
+    code === "INSUFFICIENT_FUNDS_ERROR" ||
+    code === -32000
+  ) {
+    return true;
+  }
+
+  const message = (error as { message?: string })?.message?.toLowerCase();
+  return message?.includes("insufficient funds") ?? false;
+};
+
+const getSigningErrorMessage = (error: unknown) => {
+  if (isInsufficientFundsError(error)) {
+    return "Bạn không đủ ETH trong tài khoản để thanh toán phí gas trên Arbitrum testnet.";
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "Unable to sign certificate. Please try again.";
+};
+
+const ensureArbitrumTestnet = async (provider: Eip1193Provider) => {
+  const targetChainId = ARBITRUM_TESTNET_PARAMS.chainId;
+  const currentChainId = (await provider.request({
+    method: "eth_chainId",
+  })) as string | undefined;
+
+  if (currentChainId?.toLowerCase() === targetChainId.toLowerCase()) {
+    return;
+  }
+
+  try {
+    await provider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: targetChainId }],
+    });
+  } catch (error) {
+    const requestError = error as { code?: number };
+    if (requestError?.code === 4902) {
+      await provider.request({
+        method: "wallet_addEthereumChain",
+        params: [ARBITRUM_TESTNET_PARAMS],
+      });
+      await provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: targetChainId }],
+      });
+      return;
+    }
+    throw error;
+  }
 };
 
 export const CertificateDetailModal = ({
@@ -233,6 +300,7 @@ export const CertificateDetailModal = ({
     try {
       setIsSigning(true);
       await provider.request({ method: "eth_requestAccounts" });
+      await ensureArbitrumTestnet(provider);
       const browserProvider = new BrowserProvider(provider as any);
       const signer = await browserProvider.getSigner();
       const contract = new Contract(contractAddress, CertificateABI, signer);
@@ -259,10 +327,7 @@ export const CertificateDetailModal = ({
       console.error("sign_certificate_error", error);
       notifications.show({
         title: "Certificate signing",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Unable to sign certificate. Please try again.",
+        message: getSigningErrorMessage(error),
         color: "red",
       });
     } finally {
