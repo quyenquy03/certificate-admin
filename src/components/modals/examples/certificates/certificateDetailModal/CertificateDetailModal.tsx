@@ -2,7 +2,12 @@
 
 import CertificateABI from "@/abis/CertificateABI.json";
 import { Modal, type BaseModalProps } from "@/components/modals/bases";
-import { envs } from "@/constants";
+import {
+  ARBITRUM_SEPOLIA_RPC_URL,
+  ARBITRUM_SEPOLIA_URL,
+  envs,
+} from "@/constants";
+import { CERTIFICATE_STATUSES } from "@/enums";
 import { formatDate } from "@/helpers";
 import { CertificateResponseType } from "@/types";
 import { Box, Flex, Text, ActionIcon } from "@mantine/core";
@@ -15,6 +20,7 @@ import { HiOutlineQrCode } from "react-icons/hi2";
 
 type CertificateDetailModalProps = {
   certificate: CertificateResponseType | null;
+  onSignSucess?: () => void;
 } & Omit<BaseModalProps, "children">;
 
 type Eip1193Provider = {
@@ -31,8 +37,8 @@ const ARBITRUM_TESTNET_PARAMS = {
     symbol: "ETH",
     decimals: 18,
   },
-  rpcUrls: ["https://sepolia-rollup.arbitrum.io/rpc"],
-  blockExplorerUrls: ["https://sepolia-explorer.arbitrum.io"],
+  rpcUrls: [ARBITRUM_SEPOLIA_RPC_URL],
+  blockExplorerUrls: [ARBITRUM_SEPOLIA_URL],
 };
 
 const getMetaMaskProvider = (): Eip1193Provider | undefined => {
@@ -119,6 +125,7 @@ export const CertificateDetailModal = ({
   certificate,
   opened,
   onClose,
+  onSignSucess,
   ...props
 }: CertificateDetailModalProps) => {
   const t = useTranslations();
@@ -306,7 +313,7 @@ export const CertificateDetailModal = ({
       const contract = new Contract(contractAddress, CertificateABI, signer);
 
       const tx = await contract.submitCertificate(
-        certificateId,
+        certificate.code,
         organizationId,
         certificateTypeId,
         holderIdCard,
@@ -317,6 +324,8 @@ export const CertificateDetailModal = ({
       );
 
       await tx.wait();
+
+      onSignSucess?.();
 
       notifications.show({
         title: "Certificate signing",
@@ -344,6 +353,7 @@ export const CertificateDetailModal = ({
       footerProps={{
         showFooter: true,
         confirmText: "Sign",
+        hideConfirmButton: certificate.status !== CERTIFICATE_STATUSES.CREATED,
       }}
       onConfirm={handleSignCertificate}
       isLoading={isSigning}

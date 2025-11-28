@@ -9,7 +9,7 @@ import {
   PageHeader,
 } from "@/components";
 import { COUNTRY_OPTIONS, PAGE_URLS } from "@/constants";
-import { COUNTRIES } from "@/enums";
+import { CERTIFICATE_ADDITIONAL_FIELD, COUNTRIES } from "@/enums";
 import { useCreateCertificate, useUploadAuthorImage } from "@/mutations";
 import { useQueryGetAllCertificateTypes } from "@/queries";
 import { BaseErrorType, CreateCertificateRequestType } from "@/types";
@@ -35,6 +35,11 @@ type CreateCertificateFormValues = {
   authorImage: string;
   authorCountryCode: COUNTRIES;
   grantLevel: number;
+  domain?: string;
+  [CERTIFICATE_ADDITIONAL_FIELD.ADDRESS]?: string;
+  [CERTIFICATE_ADDITIONAL_FIELD.SIGNER]?: string;
+  [CERTIFICATE_ADDITIONAL_FIELD.SERIAL_NUMBER]?: string;
+  [CERTIFICATE_ADDITIONAL_FIELD.REG_NO]?: string;
 };
 
 const DEFAULT_VALUES: CreateCertificateFormValues = {
@@ -98,6 +103,7 @@ export const CreateCertificate = () => {
             : trimmedCode.length > 0
             ? trimmedCode
             : t("not_updated"),
+        code: trimmedCode,
       };
     });
   }, [certificateTypesResponse?.data, t]);
@@ -210,6 +216,22 @@ export const CreateCertificate = () => {
       }
     }
 
+    const certificateType = certificateTypeOptions.find(
+      (item) => item.value === values.certificateTypeId.trim()
+    );
+
+    const additionalInformation = {
+      [CERTIFICATE_ADDITIONAL_FIELD.ADDRESS]:
+        values[CERTIFICATE_ADDITIONAL_FIELD.ADDRESS]?.trim(),
+      [CERTIFICATE_ADDITIONAL_FIELD.SIGNER]:
+        values[CERTIFICATE_ADDITIONAL_FIELD.SIGNER]?.trim(),
+      [CERTIFICATE_ADDITIONAL_FIELD.SERIAL_NUMBER]:
+        values[CERTIFICATE_ADDITIONAL_FIELD.SERIAL_NUMBER]?.trim(),
+      [CERTIFICATE_ADDITIONAL_FIELD.REG_NO]:
+        values[CERTIFICATE_ADDITIONAL_FIELD.REG_NO]?.trim(),
+      [CERTIFICATE_ADDITIONAL_FIELD.CERTIFICATE_TYPE]: certificateType?.code,
+    };
+
     const payload: CreateCertificateRequestType = {
       validFrom: values.validFrom.toISOString(),
       validTo: values.validTo.toISOString(),
@@ -224,6 +246,8 @@ export const CreateCertificate = () => {
         authorDocuments: [],
         authorCountryCode: values.authorCountryCode,
         grantLevel: Number(values.grantLevel ?? 0),
+        additionalInfo: JSON.stringify(additionalInformation),
+        domain: values.domain?.trim(),
       },
     };
 
@@ -591,6 +615,92 @@ export const CreateCertificate = () => {
                         rightSection={
                           isLoadingCertificateTypes ? undefined : null
                         }
+                        rules={{
+                          required: t("required_field"),
+                        }}
+                      />
+                    </Grid.Col>
+
+                    <Grid.Col span={12}>
+                      <FormInput
+                        name="domain"
+                        name_label={t("signer_label")}
+                        name_placeholder={t("signer_placeholder")}
+                        register={register as any}
+                        errors={errors}
+                        isTranslate={false}
+                        rules={{
+                          required: t("required_field"),
+                        }}
+                      />
+                    </Grid.Col>
+                  </Grid>
+                </Stack>
+              </Paper>
+              <Paper
+                withBorder
+                radius="lg"
+                shadow="sm"
+                className="p-6 bg-white/80 dark:bg-slate-950/80 mt-6"
+              >
+                <Stack gap="lg">
+                  <Stack gap="xs">
+                    <Text className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                      Additions information
+                    </Text>
+                    <Text className="text-sm text-slate-500 dark:text-slate-400">
+                      Fill in the basic information for the new certificate.
+                    </Text>
+                  </Stack>
+
+                  <Grid gutter="md">
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <FormInput
+                        name={CERTIFICATE_ADDITIONAL_FIELD.SIGNER}
+                        name_label={t("signer_label")}
+                        name_placeholder={t("signer_placeholder")}
+                        register={register as any}
+                        errors={errors}
+                        isTranslate={false}
+                        rules={{
+                          required: t("required_field"),
+                        }}
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <FormInput
+                        name={CERTIFICATE_ADDITIONAL_FIELD.ADDRESS}
+                        name_label={t("address_label")}
+                        name_placeholder={t("address_placeholder")}
+                        register={register as any}
+                        errors={errors}
+                        isTranslate={false}
+                        rules={{
+                          required: t("required_field"),
+                        }}
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <FormInput
+                        name={CERTIFICATE_ADDITIONAL_FIELD.SERIAL_NUMBER}
+                        name_label={t("serial_number_label")}
+                        name_placeholder={t("serial_number_placeholder")}
+                        register={register as any}
+                        errors={errors}
+                        isTranslate={false}
+                        rules={{
+                          required: t("required_field"),
+                        }}
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <FormInput
+                        name={CERTIFICATE_ADDITIONAL_FIELD.REG_NO}
+                        name_label={t("reg_no_label")}
+                        name_placeholder={t("reg_no_placeholder")}
+                        register={register as any}
+                        errors={errors}
+                        isTranslate={false}
                         rules={{
                           required: t("required_field"),
                         }}

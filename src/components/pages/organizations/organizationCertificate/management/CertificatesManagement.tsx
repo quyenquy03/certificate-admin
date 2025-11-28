@@ -132,6 +132,11 @@ export const CertificatesManagement = () => {
     console.log("Delete certificate", certificate.id);
   };
 
+  const handleSignSuccess = () => {
+    detailModal.onClose();
+    refetch();
+  };
+
   return (
     <Box className="w-full relative flex h-full flex-col">
       <PageHeader

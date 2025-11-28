@@ -1,4 +1,4 @@
-import { API_ROUTES, AXIOS_METHOD } from "@/constants";
+import { API_ROUTES, AXIOS_METHOD, envs } from "@/constants";
 import axiosClient from "@/libs/axiosClient";
 import {
   BasePaginationParams,
@@ -8,6 +8,7 @@ import {
   CreateCertificateRequestType,
   CertificateResponseType,
 } from "@/types";
+import axios from "axios";
 
 const getCertificateTypes = async (
   params?: BasePaginationParams
@@ -136,6 +137,14 @@ const getOrganizationCertificates = async (
   return response.data;
 };
 
+const getCertificateDetailOnBlockchain = async (ipfsHash: string) => {
+  const response = await axios({
+    method: AXIOS_METHOD.GET,
+    url: `${envs.IPFS_URL}/ipfs/${ipfsHash}`,
+  });
+  return response.data;
+};
+
 export const certificateApis = {
   getCertificateType,
   getCertificateTypes,
@@ -147,4 +156,5 @@ export const certificateApis = {
   createCertificate,
   getCertificates,
   getOrganizationCertificates,
+  getCertificateDetailOnBlockchain,
 };

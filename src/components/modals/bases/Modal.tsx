@@ -55,6 +55,7 @@ export const Modal = ({
   contentClassNames,
   heightFixed = false,
   isLoading,
+  fullScreen = false,
   ...args
 }: BaseModalProps) => {
   const t = useTranslations();
@@ -66,6 +67,7 @@ export const Modal = ({
       }}
       opened={opened}
       onClose={onClose}
+      fullScreen={fullScreen}
       {...args}
     >
       <Box className={cn("relative", contentClassNames?.wrapper)}>
@@ -103,7 +105,8 @@ export const Modal = ({
         <Box
           className={cn(
             "p-3 min-h-20 max-h-[75vh] overflow-y-auto",
-            heightFixed && "h-[75vh]"
+            heightFixed && "h-[75vh]",
+            fullScreen && "max-h-screen"
           )}
         >
           {children}

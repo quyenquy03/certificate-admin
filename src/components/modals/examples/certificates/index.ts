@@ -1,1 +1,2 @@
-export * from "./CertificateDetailModal";
+export * from "./certificateDetailModal";
+export * from "./certificateImageModal";

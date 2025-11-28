@@ -9,4 +9,6 @@ export type CertificateAuthorProfileType = {
   authorDocuments: string[];
   authorCountryCode: COUNTRIES;
   grantLevel: number;
+  domain?: string;
+  additionalInfo?: string;
 };

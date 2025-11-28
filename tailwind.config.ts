@@ -15,6 +15,7 @@ export default {
           ...defaultTheme.fontFamily.sans,
         ],
         manrope: ["var(--manrope)"],
+        times: ['"Times New Roman"', "Times", "serif"],
       },
       colors: {
         blue: {

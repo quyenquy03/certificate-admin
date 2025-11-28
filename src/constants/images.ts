@@ -10,4 +10,8 @@ export const IMAGES = {
   banners: {
     login: "/banners/login.png",
   },
+  certificates: {
+    leftCertificate: "/certificates/left-certificate.png",
+    rightCertificate: "/certificates/right-certificate.png",
+  },
 };
