@@ -7,6 +7,9 @@ import {
   CertificateCategoryRequestType,
   CreateCertificateRequestType,
   CertificateResponseType,
+  SubmitCertificateRequestType,
+  CertificateRequestType,
+  RejectCertificateRequestType,
 } from "@/types";
 import axios from "axios";
 
@@ -145,6 +148,66 @@ const getCertificateDetailOnBlockchain = async (ipfsHash: string) => {
   return response.data;
 };
 
+const submitCertificateToVerify = async (
+  data: SubmitCertificateRequestType
+): Promise<BaseResponseType<CertificateRequestType>> => {
+  const response = await axiosClient<BaseResponseType<CertificateRequestType>>({
+    method: AXIOS_METHOD.POST,
+    url: API_ROUTES.SUBMIT_CERTIFICATE_TO_VERIFY,
+    data,
+  });
+  return response.data;
+};
+
+const getAllCertificateRequests = async (
+  data?: BasePaginationParams
+): Promise<BaseResponseType<CertificateRequestType[]>> => {
+  const response = await axiosClient<
+    BaseResponseType<CertificateRequestType[]>
+  >({
+    method: AXIOS_METHOD.POST,
+    url: API_ROUTES.GET_CERTIFICATE_REQUESTS,
+    data,
+  });
+  return response.data;
+};
+
+const getCertificateRequestsSpecific = async (
+  id: string,
+  data?: BasePaginationParams
+): Promise<BaseResponseType<CertificateRequestType[]>> => {
+  const response = await axiosClient<
+    BaseResponseType<CertificateRequestType[]>
+  >({
+    method: AXIOS_METHOD.POST,
+    url: API_ROUTES.GET_CERTIFICATE_REQUESTS_SPECIFIC(id),
+    data,
+  });
+  return response.data;
+};
+
+const approveCertificateRequest = async (
+  id: string
+): Promise<BaseResponseType<CertificateRequestType>> => {
+  const response = await axiosClient<BaseResponseType<CertificateRequestType>>({
+    method: AXIOS_METHOD.PUT,
+    url: API_ROUTES.APPROVE_CERTIFICATE_REQUEST(id),
+  });
+  return response.data;
+};
+
+const rejectCertificateRequest = async (
+  id: string,
+  data: RejectCertificateRequestType
+): Promise<BaseResponseType<CertificateRequestType>> => {
+  const response = await axiosClient<BaseResponseType<CertificateRequestType>>({
+    method: AXIOS_METHOD.PUT,
+    url: API_ROUTES.REJECT_CERTIFICATE_REQUEST(id),
+    data,
+  });
+  return response.data;
+};
+
 export const certificateApis = {
   getCertificateType,
   getCertificateTypes,
@@ -157,4 +220,9 @@ export const certificateApis = {
   getCertificates,
   getOrganizationCertificates,
   getCertificateDetailOnBlockchain,
+  submitCertificateToVerify,
+  getAllCertificateRequests,
+  getCertificateRequestsSpecific,
+  approveCertificateRequest,
+  rejectCertificateRequest,
 };

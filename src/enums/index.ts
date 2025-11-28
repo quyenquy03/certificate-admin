@@ -10,3 +10,5 @@ export * from "./genders";
 export * from "./certificateAdditionalFields";
 export * from "./certificateTypes";
 export * from "./certificateLevels";
+export * from "./certificateRequestStatuses";
+export * from "./certificateRequestTypes";

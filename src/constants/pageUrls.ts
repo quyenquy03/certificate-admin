@@ -16,6 +16,7 @@ export const PAGE_URLS = {
   ADMIN_ORGANIZATIONS: "/admins/organizations",
   ADMIN_REGISTRATIONS: "/admins/registrations",
   ADMIN_CERTIFICATE_TYPES: "/admins/certificate-types",
+  ADMIN_CERTIFICATE_REQUESTS: "/admins/certificate-requests",
 
   // organizations
   ORGANIZATIONS: "/organizations/",

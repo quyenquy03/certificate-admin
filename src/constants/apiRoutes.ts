@@ -41,6 +41,14 @@ export const API_ROUTES = {
   GET_CERTIFICATES: "/certificates/get-certificates",
   GET_ORGANIZATIONS_CERTIFICATES: (id: string) =>
     `/certificates/organization-certificates/${id}`,
+  GET_CERTIFICATE_REQUESTS: "/certificates/certificate-requests",
+  GET_CERTIFICATE_REQUESTS_SPECIFIC: (id: string) =>
+    `/certificates/certificate-requests/${id}/certificate`,
+  SUBMIT_CERTIFICATE_TO_VERIFY: "/certificates/submit-certificate",
+  APPROVE_CERTIFICATE_REQUEST: (id: string) =>
+    `/certificates/certificate-requests/${id}/approve`,
+  REJECT_CERTIFICATE_REQUEST: (id: string) =>
+    `/certificates/certificate-requests/${id}/reject`,
 
   // uploads
   UPLOAD_AUTHOR_IMAGE: "/uploads/author-image",

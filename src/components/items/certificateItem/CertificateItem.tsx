@@ -1,19 +1,12 @@
 import { CERTIFICATE_STATUSES } from "@/enums";
 import { CertificateResponseType } from "@/types";
-import {
-  ActionIcon,
-  Badge,
-  Box,
-  Flex,
-  Text,
-  Tooltip,
-} from "@mantine/core";
-import dayjs from "dayjs";
+import { Badge, Box, Flex, Text } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import {
   ButtonMore,
   DropdownMenu,
   DropdownMenuItemProps,
+  InfoRowItem,
 } from "@/components";
 import { HiOutlineQrCode } from "react-icons/hi2";
 import {
@@ -23,7 +16,7 @@ import {
   PiShieldCheck,
 } from "react-icons/pi";
 import { BiShow, BiEdit, BiTrash } from "react-icons/bi";
-import { FiCopy } from "react-icons/fi";
+import { formatDate } from "@/helpers";
 
 type CertificateItemProps = {
   certificate: CertificateResponseType;
@@ -35,11 +28,6 @@ type CertificateItemProps = {
 
 const STATUS_COLOR: Partial<Record<CERTIFICATE_STATUSES, string>> = {
   [CERTIFICATE_STATUSES.CREATED]: "#2563EB",
-};
-
-const formatDate = (value?: string | null) => {
-  if (!value) return "";
-  return dayjs(value).format("DD/MM/YYYY");
 };
 
 export const CertificateItem = ({
@@ -62,14 +50,28 @@ export const CertificateItem = ({
     certificate.code?.charAt(0)?.toUpperCase() ||
     "C";
 
-  const authorIdCard = normalize(author?.authorIdCard) || t("not_updated");
-  const authorEmail = normalize(author?.authorEmail) || t("not_updated");
-  const authorDob = formatDate(author?.authorDob) || t("not_updated");
-
   const txItems = [
-    { key: "signed", label: t("signed_tx_hash"), value: certificate.signedTxHash },
-    { key: "approved", label: t("approved_tx_hash"), value: certificate.approvedTxHash },
-    { key: "revoked", label: t("revoked_tx_hash"), value: certificate.revokedTxHash },
+    {
+      key: "signed",
+      label: t("signed_tx_hash"),
+      value: certificate.signedTxHash ?? t("not_updated"),
+      icon: HiOutlineQrCode,
+      disabledCopyButton: !Boolean(certificate.signedTxHash),
+    },
+    {
+      key: "approved",
+      label: t("approved_tx_hash"),
+      value: certificate.approvedTxHash ?? t("not_updated"),
+      icon: HiOutlineQrCode,
+      disabledCopyButton: !Boolean(certificate.approvedTxHash),
+    },
+    {
+      key: "revoked",
+      label: t("revoked_tx_hash"),
+      value: certificate.revokedTxHash ?? t("not_updated"),
+      icon: HiOutlineQrCode,
+      disabledCopyButton: !Boolean(certificate.revokedTxHash),
+    },
   ];
 
   const actionMenuItems: DropdownMenuItemProps[] = [];
@@ -97,15 +99,6 @@ export const CertificateItem = ({
       onClick: () => onDelete(certificate),
     });
   }
-
-  const copyToClipboard = async (value?: string | null) => {
-    if (!value) return;
-    try {
-      await navigator.clipboard.writeText(value);
-    } catch (error) {
-      console.error("copy_error", error);
-    }
-  };
 
   return (
     <Box
@@ -153,67 +146,38 @@ export const CertificateItem = ({
               {authorName}
             </Text>
             <Text className="truncate text-xs text-slate-500 dark:text-slate-400">
-              {authorIdCard}
+              {author?.authorIdCard ?? t("not_updated")}
             </Text>
           </Flex>
         </Flex>
       </Flex>
 
       <Flex gap={8} direction="column">
-        <Flex
-          gap={10}
-          className="rounded-md border border-slate-200 px-3 py-3 dark:border-slate-700"
-        >
-          <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800/60 dark:text-slate-200">
-            <PiEnvelopeSimple className="h-4 w-4" />
-          </Box>
-          <Flex direction="column" gap={4} className="min-w-0 flex-1">
-            <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              {t("email")}
-            </Text>
-            <Text className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
-              {authorEmail}
-            </Text>
-          </Flex>
-        </Flex>
-
-        <Flex
-          gap={10}
-          className="rounded-md border border-slate-200 px-3 py-3 dark:border-slate-700"
-        >
-          <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800/60 dark:text-slate-200">
-            <PiCalendarCheck className="h-4 w-4" />
-          </Box>
-          <Flex direction="column" gap={4} className="min-w-0 flex-1">
-            <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              {t("valid_period")}
-            </Text>
-            <Text className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
-              {(formatDate(certificate.validFrom) || t("not_updated")) +
-                " - " +
-                (formatDate(certificate.validTo) || t("not_updated"))}
-            </Text>
-          </Flex>
-        </Flex>
+        <InfoRowItem
+          icon={PiEnvelopeSimple}
+          label={t("email")}
+          value={author?.authorEmail ?? t("not_updated")}
+        />
+        <InfoRowItem
+          icon={PiCalendarCheck}
+          label={t("valid_period")}
+          value={`${formatDate(certificate.validFrom) || t("not_updated")} - ${
+            formatDate(certificate.validTo) || t("not_updated")
+          }`}
+        />
 
         <Flex gap={12} wrap="wrap">
-          <Flex
-            gap={10}
-            className="flex-1 min-w-[200px] items-center rounded-md border border-slate-200 px-3 py-3 dark:border-slate-700"
-          >
-            <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800/60 dark:text-slate-200">
-              <PiTrafficConeThin className="h-4 w-4" />
-            </Box>
-            <Flex direction="column" gap={4} className="min-w-0 flex-1">
-              <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                {t("birthday")}
-              </Text>
-              <Text className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
-                {authorDob}
-              </Text>
-            </Flex>
-          </Flex>
-
+          <div className="flex-1">
+            <InfoRowItem
+              icon={PiTrafficConeThin}
+              label={t("birthday")}
+              value={
+                author?.authorDob
+                  ? formatDate(author.authorDob)
+                  : t("not_updated")
+              }
+            />
+          </div>
           <Flex
             gap={10}
             className="flex-1 min-w-[200px] items-center rounded-md border border-slate-200 px-3 py-3 dark:border-slate-700"
@@ -242,50 +206,18 @@ export const CertificateItem = ({
         </Flex>
       </Flex>
 
-      <Flex direction="column" gap={8} className="mt-3">
-        {txItems.map((item) => {
-          const displayValue = normalize(item.value) || t("not_updated");
-          const disabled = !normalize(item.value);
-
-          return (
-            <Flex
-              key={item.key}
-              gap={10}
-              align="center"
-              className="rounded-md border border-slate-200 px-3 py-3 dark:border-slate-700"
-            >
-              <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800/60 dark:text-slate-200">
-                <HiOutlineQrCode className="h-4 w-4" />
-              </Box>
-              <Flex direction="column" gap={4} className="min-w-0 flex-1">
-                <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                  {item.label}
-                </Text>
-                <Text className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
-                  {displayValue}
-                </Text>
-              </Flex>
-              <Tooltip label={t("copy")} withArrow disabled={disabled}>
-                <ActionIcon
-                  variant="subtle"
-                  color="blue"
-                  disabled={disabled}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    copyToClipboard(item.value);
-                  }}
-                >
-                  <FiCopy />
-                </ActionIcon>
-              </Tooltip>
-            </Flex>
-          );
-        })}
+      <Flex direction="column" gap={8} className="mt-2">
+        {txItems.map((tx) => (
+          <InfoRowItem
+            key={tx.key}
+            label={tx.label}
+            value={tx.value}
+            icon={tx.icon}
+            showCopyButton
+            disabledCopyButton={tx.disabledCopyButton}
+          />
+        ))}
       </Flex>
     </Box>
   );
 };
-
-
-
-

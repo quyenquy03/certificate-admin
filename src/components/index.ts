@@ -14,3 +14,4 @@ export * from "./skeletons";
 export * from "./paginations";
 export * from "./separators";
 export * from "./wrappers";
+export * from "./infoRowItem";

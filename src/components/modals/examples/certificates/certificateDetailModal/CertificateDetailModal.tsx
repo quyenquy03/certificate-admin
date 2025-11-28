@@ -1,26 +1,27 @@
 "use client";
 
 import CertificateABI from "@/abis/CertificateABI.json";
-import { Modal, type BaseModalProps } from "@/components/modals/bases";
+import { Modal, type BaseModalProps, InfoRowItem } from "@/components";
 import {
   ARBITRUM_SEPOLIA_RPC_URL,
   ARBITRUM_SEPOLIA_URL,
   envs,
 } from "@/constants";
-import { CERTIFICATE_STATUSES } from "@/enums";
+import { CERTIFICATE_REQUEST_TYPES, CERTIFICATE_STATUSES } from "@/enums";
 import { formatDate } from "@/helpers";
+import { useSubmitCertificateForVerify } from "@/mutations";
 import { CertificateResponseType } from "@/types";
-import { Box, Flex, Text, ActionIcon } from "@mantine/core";
+import { Box, Flex, Text, ActionIcon, Grid, GridCol } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { BrowserProvider, Contract } from "ethers";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FiCopy } from "react-icons/fi";
 import { HiOutlineQrCode } from "react-icons/hi2";
 
 type CertificateDetailModalProps = {
   certificate: CertificateResponseType | null;
-  onSignSucess?: () => void;
+  onSignSuccess?: () => void;
 } & Omit<BaseModalProps, "children">;
 
 type Eip1193Provider = {
@@ -57,12 +58,6 @@ const getMetaMaskProvider = (): Eip1193Provider | undefined => {
   if (ethereum.isMetaMask) return ethereum;
 
   return undefined;
-};
-
-const getDisplayValue = (value?: string | null, fallback?: string) => {
-  const trimmed = value?.trim();
-  if (trimmed && trimmed.length > 0) return trimmed;
-  return fallback ?? "";
 };
 
 const isInsufficientFundsError = (error: unknown) => {
@@ -125,18 +120,13 @@ export const CertificateDetailModal = ({
   certificate,
   opened,
   onClose,
-  onSignSucess,
+  onSignSuccess,
   ...props
 }: CertificateDetailModalProps) => {
   const t = useTranslations();
   const [isSigning, setIsSigning] = useState(false);
 
   const author = certificate?.authorProfile;
-  const authorName = getDisplayValue(author?.authorName, t("not_updated"));
-  const authorEmail = getDisplayValue(author?.authorEmail, t("not_updated"));
-  const authorIdCard = getDisplayValue(author?.authorIdCard, t("not_updated"));
-  const authorDob =
-    (author?.authorDob && formatDate(author.authorDob)) ?? t("not_updated");
 
   const copyToClipboard = async (value?: string | null) => {
     if (!value) return;
@@ -147,96 +137,65 @@ export const CertificateDetailModal = ({
     }
   };
 
-  const renderCopyableRow = (
-    label: string,
-    value?: string | null,
-    options?: { allowCopy?: boolean }
-  ) => {
-    const displayValue = getDisplayValue(value, t("not_updated"));
-    const allowCopy = options?.allowCopy && !!value && value.trim().length > 0;
+  const { mutateAsync: submitCertificateForVerify, isPending: isSubmitting } =
+    useSubmitCertificateForVerify();
 
-    return (
-      <Flex
-        gap={8}
-        align="center"
-        className="rounded-lg border border-slate-200 px-3 py-3 dark:border-slate-700"
-      >
-        <Flex direction="column" gap={4} className="flex-1 min-w-0">
-          <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            {label}
-          </Text>
-          <Text className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
-            {displayValue}
-          </Text>
-        </Flex>
-        {allowCopy && (
-          <ActionIcon
-            variant="subtle"
-            color="blue"
-            onClick={() => copyToClipboard(value)}
-          >
-            <FiCopy />
-          </ActionIcon>
-        )}
-      </Flex>
-    );
-  };
+  const summaryItems = useMemo(() => {
+    if (!certificate) return [];
+    return [
+      {
+        key: "code",
+        label: t("certificate_code"),
+        value: certificate.code ? `${certificate.code}` : t("not_updated"),
+        allowCopy: Boolean(certificate.code),
+      },
+      {
+        key: "hash",
+        label: t("certificate_hash"),
+        value: certificate.certificateHash,
+        allowCopy: Boolean(certificate.certificateHash),
+      },
+      {
+        key: "certificateType",
+        label: t("certificate_type_name"),
+        value: certificate.certificateType?.name,
+      },
+      {
+        key: "validDate",
+        label: t("valid_period"),
+        value: `${formatDate(certificate.validFrom) || t("not_updated")} - ${
+          formatDate(certificate.validTo) || t("not_updated")
+        }`,
+      },
+    ];
+  }, [certificate]);
 
-  if (!certificate) {
-    return (
-      <Modal
-        opened={opened}
-        onClose={onClose}
-        header={t("certificate_detail")}
-        {...props}
-      >
-        <Text className="text-sm text-slate-500 dark:text-slate-400">
-          {t("not_updated")}
-        </Text>
-      </Modal>
-    );
-  }
-
-  const summaryItems = [
-    {
-      key: "code",
-      label: t("certificate_code"),
-      value: certificate.code ? `${certificate.code}` : t("not_updated"),
-      allowCopy: Boolean(certificate.code),
-    },
-    {
-      key: "hash",
-      label: t("certificate_hash"),
-      value:
-        getDisplayValue(certificate.certificateHash, t("not_updated")) ?? "",
-      allowCopy: Boolean(certificate.certificateHash),
-    },
-    {
-      key: "certificateType",
-      label: t("certificate_type_name"),
-      value:
-        getDisplayValue(certificate.certificateType?.name, t("not_updated")) ??
-        "",
-    },
-  ];
-
-  const txItems = [
-    {
-      key: "signed",
-      label: t("signed_tx_hash"),
-      value: certificate.signedTxHash,
-    },
-    {
-      key: "approved",
-      label: t("approved_tx_hash"),
-      value: certificate.approvedTxHash,
-    },
-    {
-      key: "revoked",
-      label: t("revoked_tx_hash"),
-      value: certificate.revokedTxHash,
-    },
-  ];
+  const txItems = useMemo(() => {
+    if (!certificate) return [];
+    return [
+      {
+        key: "signed",
+        label: t("signed_tx_hash"),
+        value: certificate.signedTxHash ?? t("not_updated"),
+        icon: HiOutlineQrCode,
+        disabledCopyButton: !Boolean(certificate.signedTxHash),
+      },
+      {
+        key: "approved",
+        label: t("approved_tx_hash"),
+        value: certificate.approvedTxHash ?? t("not_updated"),
+        icon: HiOutlineQrCode,
+        disabledCopyButton: !Boolean(certificate.approvedTxHash),
+      },
+      {
+        key: "revoked",
+        label: t("revoked_tx_hash"),
+        value: certificate.revokedTxHash ?? t("not_updated"),
+        icon: HiOutlineQrCode,
+        disabledCopyButton: !Boolean(certificate.revokedTxHash),
+      },
+    ];
+  }, [certificate]);
 
   const handleSignCertificate = async () => {
     if (!certificate || isSigning) return;
@@ -325,7 +284,13 @@ export const CertificateDetailModal = ({
 
       await tx.wait();
 
-      onSignSucess?.();
+      await submitCertificateForVerify({
+        certificateId: certificate.id,
+        revokeReason: "",
+        requestType: CERTIFICATE_REQUEST_TYPES.SIGNUP,
+      });
+
+      onSignSuccess?.();
 
       notifications.show({
         title: "Certificate signing",
@@ -344,6 +309,26 @@ export const CertificateDetailModal = ({
     }
   };
 
+  const handleClickConfirmButton = useCallback(() => {
+    if (!certificate || !certificate?.status) return;
+    switch (certificate.status) {
+      case CERTIFICATE_STATUSES.CREATED:
+        handleSignCertificate();
+        return;
+      default:
+        return;
+    }
+  }, [certificate]);
+
+  const modalConfirmText = useMemo(() => {
+    switch (certificate?.status) {
+      case CERTIFICATE_STATUSES.CREATED:
+        return "sign_certificate";
+      default:
+        return "";
+    }
+  }, [certificate?.status]);
+
   return (
     <Modal
       opened={opened}
@@ -352,111 +337,82 @@ export const CertificateDetailModal = ({
       size="lg"
       footerProps={{
         showFooter: true,
-        confirmText: "Sign",
-        hideConfirmButton: certificate.status !== CERTIFICATE_STATUSES.CREATED,
+        confirmText: modalConfirmText !== "" ? t(modalConfirmText) : "",
+        hideConfirmButton: modalConfirmText === "",
       }}
-      onConfirm={handleSignCertificate}
-      isLoading={isSigning}
+      onConfirm={handleClickConfirmButton}
+      isLoading={isSigning || props.isLoading}
       {...props}
     >
       <Flex direction="column" gap={12}>
-        <Box className="space-y-3 rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/60">
-          <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            {t("certificate_summary")}
-          </Text>
-          <Flex gap={8} wrap="wrap">
-            {summaryItems.map((item) => (
-              <Flex
-                key={item.key}
-                gap={8}
-                className="flex-1 min-w-[180px] rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700"
-              >
-                <Flex direction="column" gap={2} className="min-w-0 flex-1">
-                  <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    {item.label}
-                  </Text>
-                  <Text className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
-                    {item.value}
-                  </Text>
-                </Flex>
-                {item.allowCopy && (
-                  <ActionIcon
-                    variant="subtle"
-                    color="blue"
-                    onClick={() => copyToClipboard(item.value)}
-                  >
-                    <FiCopy />
-                  </ActionIcon>
-                )}
-              </Flex>
-            ))}
-            <Flex
-              gap={8}
-              className="flex-1 min-w-[180px] rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700"
-            >
-              <Flex direction="column" gap={2} className="min-w-0 flex-1">
+        {certificate ? (
+          <>
+            <Box className="space-y-3 rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/60">
+              <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                {t("certificate_summary")}
+              </Text>
+              <Grid columns={2}>
+                {summaryItems.map((item) => (
+                  <GridCol span={1} key={item.key}>
+                    <InfoRowItem
+                      label={item.label}
+                      value={item.value}
+                      showCopyButton={item.allowCopy}
+                    />
+                  </GridCol>
+                ))}
+              </Grid>
+            </Box>
+            <Box className="space-y-3 rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/60">
+              <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                {t("certificate_author_section")}
+              </Text>
+              <InfoRowItem
+                label={t("author_name")}
+                value={author?.authorName ?? t("not_updated")}
+              />
+              <InfoRowItem
+                label={t("author_id_card")}
+                value={author?.authorIdCard ?? t("not_updated")}
+                showCopyButton
+              />
+              <InfoRowItem
+                label={t("email")}
+                value={author?.authorEmail ?? t("not_updated")}
+                showCopyButton
+              />
+              <InfoRowItem
+                label={t("birthday")}
+                value={
+                  author?.authorDob
+                    ? formatDate(author.authorDob)
+                    : t("not_updated")
+                }
+              />
+            </Box>
+            <Flex gap={10}>
+              <Box className="flex-1 w-full space-y-3 rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/60">
                 <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                  {t("valid_period")}
+                  {t("certificate_transactions_section")}
                 </Text>
-                <Text className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                  {(formatDate(certificate.validFrom) || t("not_updated")) +
-                    " - " +
-                    (formatDate(certificate.validTo) || t("not_updated"))}
-                </Text>
-              </Flex>
+                {txItems.map((tx) => (
+                  <InfoRowItem
+                    key={tx.key}
+                    label={tx.label}
+                    value={tx.value}
+                    icon={tx.icon}
+                    showCopyButton
+                    disabledCopyButton={tx.disabledCopyButton}
+                  />
+                ))}
+              </Box>
             </Flex>
-          </Flex>
-        </Box>
-
-        <Box className="space-y-3 rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/60">
-          <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            {t("certificate_author_section")}
+          </>
+        ) : (
+          <Text className="text-sm text-slate-500 dark:text-slate-400">
+            {t("not_updated")}
           </Text>
-          {renderCopyableRow(t("author_name"), authorName)}
-          {renderCopyableRow(t("author_id_card"), authorIdCard, {
-            allowCopy: Boolean(author?.authorIdCard),
-          })}
-          {renderCopyableRow(t("email"), authorEmail, {
-            allowCopy: Boolean(author?.authorEmail),
-          })}
-          {renderCopyableRow(t("birthday"), authorDob)}
-        </Box>
-
-        <Flex gap={10}>
-          <Box className="flex-1 space-y-3 rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/60">
-            <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              {t("certificate_transactions_section")}
-            </Text>
-            {txItems.map((tx) => (
-              <Flex
-                key={tx.key}
-                gap={8}
-                align="center"
-                className="rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700"
-              >
-                <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800/60 dark:text-slate-200">
-                  <HiOutlineQrCode className="h-4 w-4" />
-                </Box>
-                <Flex direction="column" gap={2} className="min-w-0 flex-1">
-                  <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    {tx.label}
-                  </Text>
-                  <Text className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
-                    {getDisplayValue(tx.value, t("not_updated"))}
-                  </Text>
-                </Flex>
-                <ActionIcon
-                  variant="subtle"
-                  color="blue"
-                  disabled={!tx.value}
-                  onClick={() => tx.value && copyToClipboard(tx.value)}
-                >
-                  <FiCopy />
-                </ActionIcon>
-              </Flex>
-            ))}
-          </Box>
-        </Flex>
+        )}
       </Flex>
     </Modal>
   );

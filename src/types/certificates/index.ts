@@ -5,3 +5,7 @@ export * from "./createCertificateRequestType";
 export * from "./certificateResponseType";
 export * from "./getOrganizationCertificatesParams";
 export * from "./certificateDetailType";
+export * from "./rejectCertificateRequestType";
+export * from "./submitCertificateRequestType";
+export * from "./certificateRequestType";
+export * from "./getCertificateRequestSpecificParams";

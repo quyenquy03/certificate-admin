@@ -13,11 +13,21 @@ import { Box, Grid, Group, Input, Select, Stack, Text } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import { useDebounce, useDisclose } from "@/hooks";
 import { useQueryGetOrganizationCertificates } from "@/queries";
-import { BasePaginationParams, CertificateResponseType } from "@/types";
-import { CERTIFICATE_STATUSES, SORTS } from "@/enums";
+import {
+  BasePaginationParams,
+  CertificateResponseType,
+  SubmitCertificateRequestType,
+} from "@/types";
+import {
+  CERTIFICATE_REQUEST_TYPES,
+  CERTIFICATE_STATUSES,
+  SORTS,
+} from "@/enums";
 import { PAGINATION_PARAMS, PAGE_URLS } from "@/constants";
 import { stores } from "@/stores";
 import { useRouter } from "next/navigation";
+import { notifications } from "@mantine/notifications";
+import { useSubmitCertificateForVerify } from "@/mutations";
 
 export const CertificatesManagement = () => {
   const t = useTranslations();
@@ -50,6 +60,7 @@ export const CertificatesManagement = () => {
   const {
     data: certificatesResponse,
     isFetching,
+    isLoading,
     refetch,
   } = useQueryGetOrganizationCertificates(
     {
@@ -167,7 +178,7 @@ export const CertificatesManagement = () => {
         />
       </PageHeader>
       <Box className="flex-1 overflow-y-auto h-[calc(100vh-56px)] p-4">
-        {isFetching ? (
+        {isLoading ? (
           <Grid gutter="md">
             {Array.from({ length: searchParams.limit }).map((_, index) => (
               <Grid.Col key={index} span={{ base: 12, md: 6, xl: 4 }}>
@@ -222,6 +233,7 @@ export const CertificatesManagement = () => {
           opened={detailModal.isOpen}
           onClose={handleCloseCertificateDetail}
           certificate={selectedCertificate}
+          onSignSuccess={handleSignSuccess}
         />
       </Box>
     </Box>
