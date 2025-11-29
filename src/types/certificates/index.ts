@@ -9,3 +9,4 @@ export * from "./rejectCertificateRequestType";
 export * from "./submitCertificateRequestType";
 export * from "./certificateRequestType";
 export * from "./getCertificateRequestSpecificParams";
+export * from "./certificateItemFormType";

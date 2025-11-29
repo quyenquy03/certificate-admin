@@ -7,7 +7,7 @@ import { FiCopy } from "react-icons/fi";
 
 type InfoRowItemProps = {
   label?: string;
-  value?: string | null;
+  value?: string | number | null;
   showCopyButton?: boolean;
   disabledCopyButton?: boolean;
   icon?: IconType;

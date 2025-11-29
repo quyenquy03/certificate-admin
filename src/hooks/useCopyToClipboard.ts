@@ -5,10 +5,10 @@ import { useEffect, useState } from "react";
 export const useCopyToClipboard = () => {
   const [isCopied, setIsCopied] = useState(false);
 
-  const handleCopy = async (value?: string | null) => {
+  const handleCopy = async (value?: string | number | null) => {
     if (!value || isCopied) return;
     try {
-      await navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(value as string);
       setIsCopied(true);
     } catch (error) {
       console.error("copy_error", error);
