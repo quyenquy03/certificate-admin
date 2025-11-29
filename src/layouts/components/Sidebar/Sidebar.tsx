@@ -95,11 +95,11 @@ export const Sidebar = ({ onOpenSettings }: SidebarProps) => {
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-full max-w-72 px-2.5 py-3">
-      <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-slate-200/60 bg-gradient-to-b from-white/95 via-slate-50/80 to-slate-100/65 shadow-[0_18px_48px_-28px_rgba(30,64,175,0.25)] ring-1 ring-slate-900/5 backdrop-blur-xl dark:border-slate-800/60 dark:bg-gradient-to-b dark:from-slate-950 dark:via-slate-900/85 dark:to-slate-950 dark:shadow-[0_24px_54px_-36px_rgba(15,23,42,0.75)] dark:ring-slate-900/80">
+      <div className="relative flex h-full flex-col overflow-hidden rounded-sm border border-slate-200/60 bg-gradient-to-b from-white/95 via-slate-50/80 to-slate-100/65 shadow-[0_18px_48px_-28px_rgba(30,64,175,0.25)] ring-1 ring-slate-900/5 backdrop-blur-xl dark:border-slate-800/60 dark:bg-gradient-to-b dark:from-slate-950 dark:via-slate-900/85 dark:to-slate-950 dark:shadow-[0_24px_54px_-36px_rgba(15,23,42,0.75)] dark:ring-slate-900/80">
         <div className="pointer-events-none absolute inset-x-6 top-0 h-32 rounded-full bg-gradient-to-r from-blue-400/35 via-sky-400/25 to-cyan-300/20 blur-3xl dark:from-sky-600/14 dark:via-blue-500/12 dark:to-indigo-500/10" />
 
         <div className="relative px-3 pt-4 pb-3">
-          <div className="flex items-center gap-3 rounded-2xl border border-white/55 bg-white/85 p-3 shadow-sm shadow-slate-200/60 dark:border-slate-800/70 dark:bg-slate-900/80 dark:shadow-[0_18px_38px_-30px_rgba(15,23,42,0.7)]">
+          <div className="flex items-center gap-3 rounded-md border border-white/55 bg-white/85 p-3 shadow-sm shadow-slate-200/60 dark:border-slate-800/70 dark:bg-slate-900/80 dark:shadow-[0_18px_38px_-30px_rgba(15,23,42,0.7)]">
             <Image
               wrapperClassName="h-11 w-11 rounded-2xl border border-slate-200/80 bg-white/90 p-1 dark:border-slate-800/70 dark:bg-slate-900/75"
               className="h-full w-full object-contain"
@@ -113,7 +113,7 @@ export const Sidebar = ({ onOpenSettings }: SidebarProps) => {
         </div>
 
         <div className="relative flex-1 overflow-y-auto px-3 pb-3">
-          <nav className="mt-3 flex flex-col gap-3">
+          <nav className="mt-3 flex flex-col gap-2">
             {(currentUser?.role === USER_ROLES.ADMIN
               ? adminMenus
               : orgMenus

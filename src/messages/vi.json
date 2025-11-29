@@ -149,6 +149,7 @@
   "organization_init_tx_hash": "Mã giao dịch khởi tạo",
   "registration_created_at": "Tạo lúc",
   "registration_updated_at": "Cập nhật lúc",
+  "requested_at": "Yêu cầu lúc",
   "registration_approve_title": "Phê duyệt đăng ký",
   "registration_approve_confirmation": "Bạn có chắc muốn phê duyệt?",
   "registration_reject_title": "Từ chối đăng ký",
@@ -362,5 +363,7 @@
   "certificate_lookup_code_hint": "Dinh dang goi y: CERT-2024-AX9F-21",
   "certificate_lookup_code_placeholder": "Nhap ma chung chi",
   "certificate_lookup_cta_search": "Tim kiem",
-  "certificate_lookup_cta_back_qr": "Quay lai quet QR"
+  "certificate_lookup_cta_back_qr": "Quay lai quet QR",
+  "no_data_default_title": "Không tìm thấy dữ liệu",
+  "no_data_default_description": "Chúng tôi không tìm thấy dữ liệu tương ứng."
 }

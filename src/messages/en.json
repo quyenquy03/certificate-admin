@@ -149,6 +149,7 @@
   "organization_init_tx_hash": "Init transaction hash",
   "registration_created_at": "Created at",
   "registration_updated_at": "Updated at",
+  "requested_at": "Requested at",
   "registration_approve_title": "Approve registration",
   "registration_approve_confirmation": "Are you sure you want to approve?",
   "registration_reject_title": "Reject registration",
@@ -362,5 +363,7 @@
   "certificate_lookup_code_hint": "Suggested format: CERT-2024-AX9F-21",
   "certificate_lookup_code_placeholder": "Enter certificate code",
   "certificate_lookup_cta_search": "Search",
-  "certificate_lookup_cta_back_qr": "Back to QR scan"
+  "certificate_lookup_cta_back_qr": "Back to QR scan",
+  "no_data_default_title": "Not found data",
+  "no_data_default_description": "We couldn't find any matching data."
 }

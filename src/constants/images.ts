@@ -2,6 +2,7 @@ export const IMAGES = {
   logo: "/logos/logo.svg",
   default: {
     avatar: "/defaults/avt-default.jpg",
+    noData: "/defaults/no-data.png",
   },
   flags: {
     vi: "/flags/vi-flag.jpg",

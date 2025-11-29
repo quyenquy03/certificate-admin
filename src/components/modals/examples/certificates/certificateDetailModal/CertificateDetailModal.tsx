@@ -128,15 +128,6 @@ export const CertificateDetailModal = ({
 
   const author = certificate?.authorProfile;
 
-  const copyToClipboard = async (value?: string | null) => {
-    if (!value) return;
-    try {
-      await navigator.clipboard.writeText(value);
-    } catch (error) {
-      console.error("copy_error", error);
-    }
-  };
-
   const { mutateAsync: submitCertificateForVerify, isPending: isSubmitting } =
     useSubmitCertificateForVerify();
 

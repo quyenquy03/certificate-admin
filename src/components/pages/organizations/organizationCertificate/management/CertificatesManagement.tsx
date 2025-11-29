@@ -8,6 +8,7 @@ import {
   CertificateDetailModal,
   PageHeader,
   PaginationCustom,
+  NoData,
 } from "@/components";
 import { Box, Grid, Group, Input, Select, Stack, Text } from "@mantine/core";
 import { useTranslations } from "next-intl";
@@ -26,8 +27,6 @@ import {
 import { PAGINATION_PARAMS, PAGE_URLS } from "@/constants";
 import { stores } from "@/stores";
 import { useRouter } from "next/navigation";
-import { notifications } from "@mantine/notifications";
-import { useSubmitCertificateForVerify } from "@/mutations";
 
 export const CertificatesManagement = () => {
   const t = useTranslations();
@@ -154,7 +153,7 @@ export const CertificatesManagement = () => {
         title={t("certificates")}
         classNames={{
           wrapper:
-            "sticky top-0 z-20 gap-4 bg-white/90 backdrop-blur dark:bg-slate-950/90",
+            "sticky top-0 z-20 gap-4 bg-white/90 backdrop-blur dark:bg-slate-950/90 rounded-sm",
         }}
       >
         <Select
@@ -187,25 +186,7 @@ export const CertificatesManagement = () => {
             ))}
           </Grid>
         ) : isEmptyState ? (
-          <Stack
-            gap="sm"
-            align="center"
-            justify="center"
-            className="py-16 text-center"
-          >
-            <Text className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-              {t("no_certificates_found")}
-            </Text>
-            <Text className="text-sm text-slate-500 dark:text-slate-400">
-              {t("try_adjusting_your_filters")}
-            </Text>
-            <ButtonAdd
-              showTooltip={false}
-              onClick={() =>
-                router.push(PAGE_URLS.ORGANIZATION_CREATE_CERTIFICATE)
-              }
-            />
-          </Stack>
+          <NoData />
         ) : (
           <Grid gutter="md">
             {certificates.map((certificate) => (
