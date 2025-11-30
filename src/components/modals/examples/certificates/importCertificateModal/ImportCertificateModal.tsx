@@ -1,6 +1,9 @@
 "use client";
 
 import { ButtonIcon, Modal, type BaseModalProps } from "@/components";
+import { COUNTRIES } from "@/enums";
+import { excelDateToJSDate } from "@/helpers";
+import { CertificateItemFormType } from "@/types";
 import {
   Badge,
   Box,
@@ -11,15 +14,33 @@ import {
   Text,
   ThemeIcon,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { type ChangeEvent, type DragEvent, useRef, useState } from "react";
 import { FiFileText, FiTrash2, FiUploadCloud } from "react-icons/fi";
+import * as XLSX from "xlsx";
 
-type ImportCertificateModalProps = {} & Omit<BaseModalProps, "children">;
+type CertificateRow = {
+  stt?: number | string;
+  personal_identification?: string | number;
+  fullname?: string | number;
+  birthday?: string | number | Date | null;
+  email?: string | number;
+  domain?: string | number;
+  gpa: string | number;
+  serial_number?: string | number;
+  reg_no?: string | number;
+  country_code?: COUNTRIES;
+};
+
+type ImportCertificateModalProps = {
+  onImportCertificate: (certificates: CertificateItemFormType[]) => void;
+} & Omit<BaseModalProps, "children">;
 
 export const ImportCertificateModal = ({
   opened,
   onClose,
+  onImportCertificate,
   ...props
 }: ImportCertificateModalProps) => {
   const t = useTranslations();
@@ -29,8 +50,94 @@ export const ImportCertificateModal = ({
   const [isDragging, setIsDragging] = useState(false);
   const hasFile = Boolean(selectedFile);
 
-  const handleConfirm = () => {
-    // confirm import
+  const handleConfirm = async () => {
+    if (!selectedFile) return;
+
+    try {
+      const { read, utils } = XLSX;
+      const buffer = await selectedFile.arrayBuffer();
+      const workbook = read(buffer, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+
+      if (!sheetName) {
+        console.warn("No sheets found in uploaded file");
+        return;
+      }
+
+      const worksheet = workbook.Sheets[sheetName];
+      const rows = utils.sheet_to_json<CertificateRow>(worksheet, {
+        header: [
+          "stt",
+          "personal_identification",
+          "fullname",
+          "birthday",
+          "email",
+          "domain",
+          "gpa",
+          "serial_number",
+          "reg_no",
+          "country_code",
+        ],
+        range: 1,
+        defval: "",
+      });
+
+      const certificates: CertificateItemFormType[] = rows
+        .map((row, index) => {
+          let birthday = row.birthday;
+          if (!birthday) birthday = null;
+          else if (typeof birthday === "number")
+            birthday = excelDateToJSDate(birthday);
+
+          return {
+            stt: row.stt ?? index + 1,
+            authorIdCard: String(row.personal_identification ?? "").trim(),
+            authorName: String(row.fullname ?? "").trim(),
+            authorDob: birthday,
+            authorEmail: String(row.email ?? "").trim(),
+            domain: String(row.domain ?? "").trim(),
+            grantLevel: row.gpa,
+            serial_number: String(row.serial_number ?? "").trim(),
+            reg_no: String(row.reg_no ?? "").trim(),
+            authorCountryCode: row.country_code?.trim() as COUNTRIES,
+          };
+        })
+        .filter((row) =>
+          Object.values(row).some((value) => {
+            if (value === null || value === undefined) return false;
+            if (typeof value === "number") return true;
+            if (value instanceof Date) return true;
+            if (typeof value !== "string") return false;
+            return value.trim().length > 0;
+          })
+        );
+
+      for (const i in certificates) {
+        const checkIdCard = certificates.some(
+          (item, index) =>
+            item.authorIdCard === certificates[i].authorIdCard && +i !== index
+        );
+        if (checkIdCard) {
+          notifications.show({
+            title: "Tạo chứng chỉ thất bại!",
+            message: `Có một số bản ghi có cùng mã định danh: ${certificates[i].authorIdCard}`,
+            color: "red",
+          });
+          return;
+        }
+      }
+
+      onImportCertificate(certificates);
+      onClose();
+      setSelectedFile(null);
+      notifications.show({
+        title: "Thêm mới chứng chỉ thành công",
+        message: `Đã thêm thành công ${certificates.length} chứng chỉ`,
+        color: "green",
+      });
+    } catch (error) {
+      console.error("Failed to read file", error);
+    }
   };
 
   const formatFileSize = (file?: File | null) => {

@@ -6,7 +6,7 @@ export type CertificateItemFormType = {
   authorDob: Date | null | string;
   authorEmail: string;
   authorCountryCode: COUNTRIES;
-  grantLevel: number;
+  grantLevel: string | number;
   domain?: string;
 
   // additional field

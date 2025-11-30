@@ -23,3 +23,11 @@ export const formatFullDate = (date: string, locale: "en" | "vi" = "vi") => {
     "YYYY"
   )}`;
 };
+
+export const excelDateToJSDate = (serial: number) => {
+  // 25569 là số ngày từ 1/1/1900 đến 1/1/1970
+  const utc_days = Math.floor(serial - 25569);
+  const utc_value = utc_days * 86400;
+  const date_info = new Date(utc_value * 1000);
+  return date_info;
+};

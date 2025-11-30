@@ -1,5 +1,5 @@
 export enum COUNTRIES {
-  VIETNAM = "VN",
+  VIETNAM = "vietnam",
   UNITED_STATES = "united_states",
   UNITED_KINGDOM = "united_kingdom",
   JAPAN = "japan",

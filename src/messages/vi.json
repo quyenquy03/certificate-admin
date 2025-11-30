@@ -399,5 +399,10 @@
   "import_certificate_no_file": "Chưa có file nào được chọn.",
   "no_data_default_title": "Không tìm thấy dữ liệu",
   "no_data_default_description": "Chúng tôi không tìm thấy dữ liệu tương ứng.",
-  "import": "Import"
+  "import": "Import",
+  "signed": "Signed",
+  "created": "Created",
+  "signer_label": "Signer",
+  "signer_placeholder": "Enter signer of certificate",
+  "address_label": "Sign address"
 }

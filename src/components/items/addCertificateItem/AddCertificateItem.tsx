@@ -13,7 +13,7 @@ import { HiOutlineQrCode } from "react-icons/hi2";
 import { PiCalendarCheck, PiShieldCheck } from "react-icons/pi";
 import { BiEdit, BiTrash } from "react-icons/bi";
 import { FiGlobe } from "react-icons/fi";
-import { formatDate } from "@/helpers";
+import { formatDate, getLastWordCapitalized } from "@/helpers";
 import { useMemo, useState } from "react";
 
 type AddCertificateItemProps = {
@@ -37,7 +37,8 @@ export const AddCertificateItem = ({
   const badgeColor = BADGE_COLOR;
 
   const authorName = certificate.authorName.trim() || t("not_updated");
-  const authorInitial = authorName.charAt(0)?.toUpperCase() || "C";
+  const authorInitial =
+    getLastWordCapitalized(authorName).charAt(0)?.toUpperCase() || "C";
   const dobValue =
     certificate.authorDob instanceof Date
       ? certificate.authorDob.toISOString()

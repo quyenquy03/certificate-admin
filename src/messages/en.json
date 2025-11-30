@@ -399,5 +399,10 @@
   "import_certificate_no_file": "No file selected yet.",
   "no_data_default_title": "Not found data",
   "no_data_default_description": "We couldn't find any matching data.",
-  "import": "Import"
+  "import": "Import",
+  "signed": "Signed",
+  "created": "Created",
+  "signer_label": "Signer",
+  "signer_placeholder": "Enter signer of certificate",
+  "address_label": "Sign address"
 }

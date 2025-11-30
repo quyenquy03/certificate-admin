@@ -13,13 +13,23 @@ import {
   PageContentWrapper,
   PageHeader,
   ImportCertificateModal,
+  PaginationCustom,
 } from "@/components";
 import { PAGE_URLS } from "@/constants";
 import { CERTIFICATE_ADDITIONAL_FIELD, COUNTRIES, FORM_MODES } from "@/enums";
 import { useCreateCertificate } from "@/mutations";
 import { useQueryGetAllCertificateTypes } from "@/queries";
 import { BaseErrorType, CertificateItemFormType } from "@/types";
-import { Box, Flex, Grid, Group, Paper, Stack, Text } from "@mantine/core";
+import {
+  Box,
+  Flex,
+  Grid,
+  Group,
+  Input,
+  Paper,
+  Stack,
+  Text,
+} from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
@@ -28,7 +38,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { FiArrowLeft } from "react-icons/fi";
 import { stores } from "@/stores";
-import { useDisclose } from "@/hooks";
+import { useDebounce, useDisclose } from "@/hooks";
 
 type CreateCertificateFormValues = {
   validFrom: Date | null;
@@ -58,6 +68,13 @@ export const CreateCertificate = () => {
   >([]);
   const [currentCertificate, setCurrentCertificate] =
     useState<CertificateItemFormType | null>(null);
+
+  const [searchParams, setSearchParams] = useState({
+    pageSize: 10,
+    page: 1,
+    search: "",
+  });
+  const debouncedSearch = useDebounce(searchParams.search.trim(), 300);
 
   const {
     register,
@@ -228,6 +245,58 @@ export const CreateCertificate = () => {
     });
   };
 
+  const handleImportCertificates = (
+    certificates: CertificateItemFormType[]
+  ) => {
+    setListCertificates((prev) => [...prev, ...certificates]);
+  };
+
+  const handleSearchCertificate = (keyword: string) => {
+    setSearchParams((prev) => ({ ...prev, search: keyword, page: 1 }));
+  };
+
+  const handleChangePage = (page: number) => {
+    setSearchParams((prev) => ({ ...prev, page }));
+  };
+
+  const filteredCertificates = useMemo(() => {
+    const keyword = debouncedSearch.toLowerCase();
+    if (!keyword) return listCertificates;
+
+    return listCertificates.filter((certificate) => {
+      return [
+        certificate.authorName,
+        certificate.authorIdCard,
+        certificate.authorEmail,
+        certificate.domain,
+        certificate.serial_number,
+        certificate.reg_no,
+      ]
+        .filter(Boolean)
+        .some((value) =>
+          String(value).toLowerCase().includes(keyword.toLowerCase())
+        );
+    });
+  }, [debouncedSearch, listCertificates]);
+
+  const totalPages = useMemo(() => {
+    const pages = Math.ceil(
+      filteredCertificates.length / searchParams.pageSize
+    );
+    return pages < 1 ? 1 : pages;
+  }, [filteredCertificates.length, searchParams.pageSize]);
+
+  const paginatedCertificates = useMemo(() => {
+    const start = (searchParams.page - 1) * searchParams.pageSize;
+    return filteredCertificates.slice(start, start + searchParams.pageSize);
+  }, [filteredCertificates, searchParams.page, searchParams.pageSize]);
+
+  useEffect(() => {
+    if (searchParams.page > totalPages) {
+      setSearchParams((prev) => ({ ...prev, page: totalPages }));
+    }
+  }, [searchParams.page, totalPages]);
+
   useEffect(() => {
     if (currentOrganization?.id) {
       setValue("organizationId", currentOrganization.id, {
@@ -387,24 +456,32 @@ export const CreateCertificate = () => {
                   className="border-b-2"
                 >
                   <Text className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                    List certificates
+                    List certificates ({filteredCertificates.length})
                   </Text>
-                  <Group>
+                  <Group wrap="nowrap" gap={"xs"}>
+                    <Input
+                      placeholder={t("enter_search_keyword")}
+                      className="w-full max-w-[150px]"
+                      value={searchParams.search}
+                      onChange={(event) =>
+                        handleSearchCertificate(event.currentTarget.value)
+                      }
+                    />
                     <ButtonImport onClick={importCertificateModal.onOpen} />
                     <ButtonAdd onClick={handleCreateCertificate} />
                   </Group>
                 </Flex>
 
                 <Box
-                  className="h-[calc(100vh-150px)] overflow-y-auto scrollbar"
+                  className="relative h-[calc(100vh-150px)] overflow-y-auto scrollbar"
                   px={16}
                   py={10}
                 >
-                  {listCertificates.length === 0 ? (
+                  {filteredCertificates.length === 0 ? (
                     <NoData />
                   ) : (
                     <Grid gutter="md">
-                      {listCertificates.map((certificate) => (
+                      {paginatedCertificates.map((certificate) => (
                         <Grid.Col
                           span={{ base: 12, md: 6 }}
                           key={certificate.authorIdCard}
@@ -417,6 +494,17 @@ export const CreateCertificate = () => {
                         </Grid.Col>
                       ))}
                     </Grid>
+                  )}
+
+                  {totalPages > 1 && (
+                    <PaginationCustom
+                      value={searchParams.page}
+                      total={totalPages}
+                      onChange={handleChangePage}
+                      customClassNames={{
+                        paginationWrapper: "relative bottom-0 mt-3 opacity-80",
+                      }}
+                    />
                   )}
                 </Box>
               </Paper>
@@ -436,6 +524,7 @@ export const CreateCertificate = () => {
       <ImportCertificateModal
         opened={importCertificateModal.isOpen}
         onClose={importCertificateModal.onClose}
+        onImportCertificate={handleImportCertificates}
       />
     </Box>
   );
