@@ -14,7 +14,7 @@ export const PageContentWrapper = ({
   return (
     <Box
       className={cn(
-        "flex-1 overflow-y-auto h-[calc(100vh-56px)] p-4",
+        "overflow-y-auto scrollbar h-[calc(100vh-76px)] p-4 scrollbar",
         className
       )}
     >

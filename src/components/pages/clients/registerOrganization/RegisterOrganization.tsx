@@ -121,9 +121,9 @@ export const RegisterOrganization = () => {
 
   const fieldClassNames = useMemo(
     () => ({
-      label: "text-sm font-medium text-slate-200",
+      label: "text-sm font-medium text-slate-900 dark:text-slate-200",
       input:
-        "rounded-lg border border-indigo-500/20 bg-slate-950/60 text-sm text-slate-100 placeholder:text-slate-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40",
+        "rounded-lg border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-indigo-500/20 dark:bg-slate-950/60 dark:text-slate-100",
     }),
     []
   );
@@ -200,18 +200,18 @@ export const RegisterOrganization = () => {
   }, [getMetaMaskProvider, setValue, translate]);
 
   return (
-    <div className="pb-16">
-      <section className="relative overflow-hidden border-b border-indigo-500/10 bg-gradient-to-br from-indigo-500/15 via-slate-950 to-slate-950">
+    <div className="pb-16 bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
+      <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-br from-indigo-500/15 via-white to-slate-50 dark:border-indigo-500/10 dark:via-slate-950 dark:to-slate-950">
         <div className="absolute -left-24 top-[-10rem] h-[28rem] w-[28rem] rounded-full bg-indigo-500/20 blur-3xl" />
         <div className="absolute -right-32 bottom-[-8rem] h-[30rem] w-[30rem] rounded-full bg-indigo-500/10 blur-3xl" />
         <div className="relative mx-auto max-w-5xl px-6 py-20 text-center sm:px-8 md:py-24">
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-indigo-200/80">
+          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-indigo-700 dark:text-indigo-200/80">
             {translate("partner_badge")}
           </p>
-          <h1 className="mt-4 text-4xl font-semibold leading-tight text-slate-100 sm:text-5xl">
+          <h1 className="mt-4 text-4xl font-semibold leading-tight text-slate-900 dark:text-slate-100 sm:text-5xl">
             {translate("hero_title")}
           </h1>
-          <p className="mt-4 text-lg text-slate-300 sm:text-xl">
+          <p className="mt-4 text-lg text-slate-700 dark:text-slate-300 sm:text-xl">
             {translate("hero_subtitle")}
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
@@ -225,7 +225,7 @@ export const RegisterOrganization = () => {
             </Button>
             <a
               href="mailto:support@certifychain.io"
-              className="inline-flex h-12 items-center rounded-full border border-indigo-400/60 px-8 text-base font-medium text-indigo-200 transition hover:bg-indigo-500/10"
+              className="inline-flex h-12 items-center rounded-full border border-indigo-300 px-8 text-base font-medium text-indigo-700 transition hover:bg-indigo-50 dark:border-indigo-400/60 dark:text-indigo-200 dark:hover:bg-indigo-500/10"
             >
               {translate("cta_contact")}
             </a>
@@ -237,10 +237,10 @@ export const RegisterOrganization = () => {
         <div className="grid gap-12 lg:grid-cols-[1fr,1.15fr]">
           <div className="space-y-8">
             <div className="space-y-4">
-              <h2 className="text-3xl font-semibold text-slate-100 sm:text-4xl">
+              <h2 className="text-3xl font-semibold text-slate-900 dark:text-slate-100 sm:text-4xl">
                 {translate("section_reason_title")}
               </h2>
-              <p className="text-base text-slate-300 sm:text-lg">
+              <p className="text-base text-slate-700 dark:text-slate-300 sm:text-lg">
                 {translate("section_reason_desc")}
               </p>
             </div>
@@ -250,16 +250,16 @@ export const RegisterOrganization = () => {
                 return (
                   <div
                     key={item.key}
-                    className="flex items-start gap-4 rounded-2xl border border-indigo-500/10 bg-slate-900/40 p-5"
+                    className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-indigo-500/10 dark:bg-slate-900/40"
                   >
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-200">
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-200">
                       <Icon className="h-5 w-5" />
                     </span>
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-wide text-indigo-200/90">
+                      <p className="text-sm font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-200/90">
                         {translate(`highlight_${item.key}_title`)}
                       </p>
-                      <p className="mt-1 text-sm text-slate-300">
+                      <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
                         {translate(`highlight_${item.key}_desc`)}
                       </p>
                     </div>
@@ -267,18 +267,18 @@ export const RegisterOrganization = () => {
                 );
               })}
             </div>
-            <div className="rounded-2xl border border-indigo-500/20 bg-slate-900/30 p-5">
-              <p className="text-sm text-slate-300">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-indigo-500/20 dark:bg-slate-900/30">
+              <p className="text-sm text-slate-700 dark:text-slate-300">
                 {translate("contact_prefer_text")}
               </p>
-              <div className="mt-3 space-y-1 text-sm text-slate-200">
+              <div className="mt-3 space-y-1 text-sm text-slate-900 dark:text-slate-200">
                 {contactDetails.map((item) => (
                   <p key={item.label}>
                     {item.label}: {item.value}
                   </p>
                 ))}
               </div>
-              <p className="mt-3 text-xs text-slate-500">
+              <p className="mt-3 text-xs text-slate-600 dark:text-slate-500">
                 {translate("contact_response_time")}
               </p>
             </div>
@@ -286,22 +286,22 @@ export const RegisterOrganization = () => {
 
           <div
             id="registration-form"
-            className="rounded-3xl border border-indigo-500/20 bg-slate-950/70 p-6 shadow-lg shadow-indigo-500/10 backdrop-blur"
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-indigo-500/10 backdrop-blur dark:border-indigo-500/20 dark:bg-slate-950/70"
           >
             <div>
-              <h3 className="text-2xl font-semibold text-slate-100">
+              <h3 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
                 {translate("form_title")}
               </h3>
-              <p className="mt-2 text-sm text-slate-300">
+              <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
                 {translate("form_description")}
               </p>
               {status === "success" && feedback && (
-                <div className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+                <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200">
                   {feedback}
                 </div>
               )}
               {status === "error" && feedback && (
-                <div className="mt-4 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
                   {feedback}
                 </div>
               )}
@@ -310,10 +310,10 @@ export const RegisterOrganization = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-8">
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-lg font-semibold text-slate-100">
+                  <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                     {translate("personal_info_title")}
                   </h4>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-slate-700 dark:text-slate-400">
                     {translate("personal_info_description")}
                   </p>
                 </div>
@@ -404,10 +404,10 @@ export const RegisterOrganization = () => {
 
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-lg font-semibold text-slate-100">
+                  <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                     {translate("organization_info_title")}
                   </h4>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-slate-700 dark:text-slate-400">
                     {translate("organization_info_description")}
                   </p>
                 </div>
@@ -453,7 +453,7 @@ export const RegisterOrganization = () => {
                 />
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-200">
+                  <label className="text-sm font-medium text-slate-900 dark:text-slate-200">
                     {translate("programs_label")}
                   </label>
                   <Textarea
@@ -499,10 +499,10 @@ export const RegisterOrganization = () => {
 
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-lg font-semibold text-slate-100">
+                  <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                     {translate("wallet_step_title")}
                   </h4>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-slate-700 dark:text-slate-400">
                     {translate("wallet_step_description")}
                   </p>
                 </div>
@@ -555,7 +555,7 @@ export const RegisterOrganization = () => {
                   ? translate("form_submit_processing")
                   : translate("form_submit")}
               </Button>
-              <p className="text-center text-xs text-slate-500">
+              <p className="text-center text-xs text-slate-600 dark:text-slate-500">
                 {translate("form_disclaimer")}
               </p>
             </form>

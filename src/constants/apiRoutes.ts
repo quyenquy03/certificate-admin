@@ -38,6 +38,7 @@ export const API_ROUTES = {
   DEACTIVATE_CERTIFICATE_TYPE: (id: string) =>
     `/certificates/types/${id}/deactivate`,
   CREATE_CERTIFICATE: "/certificates/create-certificate",
+  IMPORT_CERTIFICATES: "/certificates/import-certificates",
   GET_CERTIFICATES: "/certificates/get-certificates",
   GET_ORGANIZATIONS_CERTIFICATES: (id: string) =>
     `/certificates/organization-certificates/${id}`,

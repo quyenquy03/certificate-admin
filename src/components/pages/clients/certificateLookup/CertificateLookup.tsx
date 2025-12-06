@@ -129,12 +129,12 @@ export const CertificateLookup = () => {
   return (
     <div className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.2),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(99,102,241,0.12),transparent_30%),radial-gradient(circle_at_50%_80%,rgba(56,189,248,0.12),transparent_32%)]" />
-      <Box className="relative mx-auto max-w-4xl px-6 py-14 text-center sm:px-8 md:py-20">
+      <Box className="relative mx-auto max-w-4xl px-6 py-14 text-center text-slate-900 dark:text-slate-100 sm:px-8 md:py-20">
         <Stack gap="md" align="center">
           <Badge color="indigo" variant="light" radius="xl">
             {t("certificate_lookup_badge")}
           </Badge>
-          <Title order={1} className="text-4xl font-semibold text-slate-100 sm:text-5xl">
+          <Title order={1} className="text-4xl font-semibold text-slate-900 dark:text-slate-100 sm:text-5xl">
             {t("certificate_lookup_title")}
           </Title>
           <Text size="lg" c="dimmed" maw={720}>
@@ -145,12 +145,12 @@ export const CertificateLookup = () => {
         <Paper
           radius="xl"
           shadow="xl"
-          className="relative mt-10 border border-indigo-500/20 bg-slate-950/80"
+          className="relative mt-10 border border-slate-200 bg-white text-left dark:border-indigo-500/20 dark:bg-slate-950/80"
         >
           <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent" />
           <Stack gap="lg" className="p-6 sm:p-8">
             <Stack gap="xs" align="center">
-              <Title order={3} className="text-2xl text-slate-100">
+              <Title order={3} className="text-2xl text-slate-900 dark:text-slate-100">
                 {isQrMode ? t("certificate_lookup_qr_mode_title") : t("certificate_lookup_code_mode_title")}
               </Title>
               <Text c="dimmed" className="max-w-2xl">
@@ -168,10 +168,10 @@ export const CertificateLookup = () => {
 
             {isQrMode ? (
               <Stack gap="lg" align="center">
-                <div className="relative overflow-hidden rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-slate-900/70 via-slate-950 to-slate-950 p-6 shadow-inner shadow-indigo-500/10">
+                <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-slate-100 p-6 shadow-inner shadow-indigo-500/10 dark:border-indigo-500/20 dark:from-slate-900/70 dark:via-slate-950 dark:to-slate-950">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.16),transparent_30%),radial-gradient(circle_at_80%_60%,rgba(14,165,233,0.16),transparent_28%)]" />
                   <Stack align="center" gap="md" className="relative">
-                    <div className="relative w-full max-w-[300px] overflow-hidden rounded-2xl border border-indigo-500/25 bg-slate-950/80 shadow-inner shadow-indigo-500/10">
+                    <div className="relative w-full max-w-[300px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-inner shadow-indigo-500/10 dark:border-indigo-500/25 dark:bg-slate-950/80">
                       <div className="relative aspect-square">
                         <video
                           ref={videoRef}
@@ -182,7 +182,7 @@ export const CertificateLookup = () => {
                           onPlay={() => setIsCameraReady(true)}
                         />
                         {(!isCameraReady || cameraError || scannerPaused) && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/80 text-center">
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-white/85 via-white to-white/90 text-center dark:from-slate-900/80 dark:via-slate-950/90 dark:to-slate-950/80">
                             <div className="h-12 w-12 animate-pulse rounded-full border border-indigo-500/30 bg-indigo-500/10" />
                             <Text size="sm" c="dimmed" className="px-6">
                               {cameraError ?? t("certificate_lookup_cta_start_camera")}
@@ -194,11 +194,11 @@ export const CertificateLookup = () => {
                             )}
                           </div>
                         )}
-                        <div className="pointer-events-none absolute inset-6 rounded-2xl border-2 border-indigo-400/70 shadow-[0_0_0_9999px_rgba(15,23,42,0.65)]" />
+                        <div className="pointer-events-none absolute inset-6 rounded-2xl border-2 border-indigo-400/70 shadow-[0_0_0_9999px_rgba(255,255,255,0.75)] dark:shadow-[0_0_0_9999px_rgba(15,23,42,0.65)]" />
                       </div>
                     </div>
                     <Stack gap={4} align="center">
-                      <Text fw={600} className="text-slate-100">
+                      <Text fw={600} className="text-slate-900 dark:text-slate-100">
                         {t("certificate_lookup_qr_hint_title")}
                       </Text>
                       <Text size="sm" c="dimmed" maw={520}>
@@ -249,7 +249,7 @@ export const CertificateLookup = () => {
               <form onSubmit={handleSubmitCode}>
                 <Stack gap="md" align="center">
                   <Stack gap={4} align="center">
-                    <Text fw={600} className="text-slate-100">
+                    <Text fw={600} className="text-slate-900 dark:text-slate-100">
                       {t("certificate_lookup_code_label")}
                     </Text>
                     <Text size="xs" c="dimmed">
@@ -264,12 +264,9 @@ export const CertificateLookup = () => {
                     className="w-full max-w-[320px]"
                     size="md"
                     radius="xl"
-                    styles={{
-                      input: {
-                        backgroundColor: "rgb(7 11 23 / 0.8)",
-                        borderColor: "rgba(99,102,241,0.3)",
-                        color: "#e2e8f0",
-                      },
+                    classNames={{
+                      input:
+                        "bg-white border border-slate-200 text-slate-900 placeholder:text-slate-500 dark:border-indigo-500/30 dark:bg-slate-950/80 dark:text-slate-100",
                     }}
                     rightSection={
                       <ActionIcon

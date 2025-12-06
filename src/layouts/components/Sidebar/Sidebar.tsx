@@ -58,12 +58,6 @@ export const Sidebar = ({ onOpenSettings }: SidebarProps) => {
       icon: TbFileAnalytics,
       link: PAGE_URLS.ADMIN_CERTIFICATE_TYPES,
     },
-    {
-      id: "6",
-      label: t("certificate_requests_management"),
-      icon: TbFileAnalytics,
-      link: PAGE_URLS.ADMIN_CERTIFICATE_REQUESTS,
-    },
   ];
 
   const orgMenus = [

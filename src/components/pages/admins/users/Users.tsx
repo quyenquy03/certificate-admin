@@ -7,6 +7,7 @@ import {
   UserItem,
   UserItemSkeleton,
   PaginationCustom,
+  PageContentWrapper,
 } from "@/components";
 import { PAGINATION_PARAMS } from "@/constants";
 import { removeNoneCharacters, useDebounce, useDisclose } from "@/hooks";
@@ -87,7 +88,7 @@ export const UsersManagement = () => {
         />
         <ButtonAdd onClick={handleCreateUser} />
       </PageHeader>
-      <Box className="overflow-y-auto h-[calc(100vh-56px)] p-4">
+      <PageContentWrapper>
         {isFetching ? (
           <Grid gutter="md">
             {new Array(PAGINATION_PARAMS.GET_USERS.limit)
@@ -136,7 +137,7 @@ export const UsersManagement = () => {
               }
             />
           )}
-      </Box>
+      </PageContentWrapper>
 
       <UserFormModal
         opened={userFormModal.isOpen}

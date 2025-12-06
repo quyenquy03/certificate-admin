@@ -387,6 +387,132 @@
   "certificate_lookup_code_placeholder": "Enter certificate code",
   "certificate_lookup_cta_search": "Search",
   "certificate_lookup_cta_back_qr": "Back to QR scan",
+  "certificate_detail_error_title": "Certificate lookup failed",
+  "certificate_detail_error_description": "An error occurred while checking this certificate. Please try again.",
+  "client_header": {
+    "nav": {
+      "gioi-thieu": "Overview",
+      "cach-hoat-dong-loi-ich": "How it works",
+      "doi-tac": "Partners",
+      "lien-he": "Contact"
+    },
+    "toggle_label": "Toggle theme",
+    "mobile_toggle_label": "Toggle navigation",
+    "theme_label": "Theme"
+  },
+  "client_home": {
+    "intro": {
+      "title": "CertifyChain",
+      "tagline": "Blockchain-powered certificate verification",
+      "description": "Enable schools, businesses, and learners to verify credentials in seconds. Every certificate is hashed, stored, and independently verifiable for full transparency and security.",
+      "cta_lookup": "Verify a certificate",
+      "cta_register": "Register now"
+    },
+    "how": {
+      "badge": "How it works & benefits",
+      "title": "Streamlined verification, secure by design",
+      "description": "CertifyChain is built around user trust and end-to-end transparency. From issuance to verification, every record is processed securely on-chain.",
+      "steps_badge": "Three clear steps"
+    },
+    "steps": {
+      "step1": {
+        "marker": "01",
+        "title": "Collect source data",
+        "description": "Schools or training centers submit records via secure APIs or the admin console, ensuring accuracy at the source."
+      },
+      "step2": {
+        "marker": "02",
+        "title": "Hash and anchor on blockchain",
+        "description": "Data is hashed, signed, and recorded on an immutable ledger, creating a unique technical fingerprint for each credential."
+      },
+      "step3": {
+        "marker": "03",
+        "title": "Real-time verification",
+        "description": "Employers or individuals scan a QR or follow a link to check certificate status with instant responses."
+      }
+    },
+    "benefits": {
+      "badge": "Key benefits",
+      "item1": {
+        "title": "Tamper-proof verification",
+        "description": "Every credential has its own signature and hash, preventing edits or duplication."
+      },
+      "item2": {
+        "title": "Transparent audit trail",
+        "description": "24/7 verification with full access history for easy oversight."
+      },
+      "item3": {
+        "title": "Time and cost savings",
+        "description": "Simplify checks and reduce manual workflows, turning days of verification into seconds."
+      },
+      "item4": {
+        "title": "Data security",
+        "description": "Encrypted personal and institutional data with clear access controls aligned to standards."
+      }
+    },
+    "lookup": {
+      "badge": "Certificate lookup",
+      "title": "Verify documents securely in seconds",
+      "description": "Designed for recruiters, HR teams, and students. Enter or scan a code to confirm blockchain-issued credentials.",
+      "features": {
+        "item1": {
+          "title": "Search by code",
+          "description": "Enter the unique identifier to view certificate details and issuance info."
+        },
+        "item2": {
+          "title": "Smart QR scanning",
+          "description": "Use mobile or scanner to read QR codes on certificates with one tap."
+        },
+        "item3": {
+          "title": "Detailed reports",
+          "description": "Track update history, related entities, and verification attempts in one dashboard."
+        }
+      }
+    },
+    "partners": {
+      "badge": "Partners",
+      "title": "Building trust with education and hiring ecosystems",
+      "description": "Trusted by universities, employers, and certifying bodies across the region."
+    },
+    "cta": {
+      "badge": "Register now",
+      "title": "Ready to launch trusted verification?",
+      "description": "CertifyChain tailors onboarding, API setup, and training to your needs.",
+      "request_demo": "Request a demo"
+    },
+    "contact": {
+      "badge": "Contact",
+      "title": "Connect with us for detailed guidance",
+      "support_title": "Immediate support",
+      "support_description": "Get rollout advice, custom onboarding paths, and technical docs for your teams.",
+      "support_email_label": "Email",
+      "support_hotline_label": "Hotline",
+      "support_chat_label": "Live chat",
+      "support_chat_desc": "24/7 support for schools and businesses.",
+      "form_title": "Speak with our specialists",
+      "form_description": "Share your needs and we’ll reach out with tailored recommendations.",
+      "form_name_label": "Full name",
+      "form_name_placeholder": "Nguyen Van A",
+      "form_email_label": "Email",
+      "form_email_placeholder": "email@domain.com",
+      "form_message_label": "Message",
+      "form_message_placeholder": "Tell us about your use case, organization size, or questions...",
+      "form_submit": "Submit request",
+      "response_time": "We respond within 24 working hours."
+    }
+  },
+  "client_footer": {
+    "description": "A blockchain-powered certificate verification platform bringing transparency and trust to education ecosystems.",
+    "contact_title": "Contact",
+    "contact_email": "Email",
+    "contact_phone": "Phone",
+    "contact_office": "Office",
+    "partners_title": "Featured partners",
+    "rights_reserved": "All rights reserved.",
+    "policy_privacy": "Privacy policy",
+    "policy_terms": "Terms of use",
+    "policy_support": "Support center"
+  },
   "import_certificate": "Import certificates",
   "import_certificate_from_excel_title": "Import certificates from Excel",
   "import_certificate_from_excel_desc": "Drag & drop your spreadsheet or browse to upload. We will parse and validate the data before importing.",

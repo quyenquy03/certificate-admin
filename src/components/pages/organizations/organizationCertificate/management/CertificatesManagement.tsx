@@ -9,6 +9,7 @@ import {
   PageHeader,
   PaginationCustom,
   NoData,
+  PageContentWrapper,
 } from "@/components";
 import { Box, Grid, Group, Input, Select, Stack, Text } from "@mantine/core";
 import { useTranslations } from "next-intl";
@@ -38,8 +39,8 @@ export const CertificatesManagement = () => {
     useState<CertificateResponseType | null>(null);
 
   const [searchParams, setSearchParams] = useState<BasePaginationParams>({
-    page: PAGINATION_PARAMS.DEFAULT.page,
-    limit: PAGINATION_PARAMS.DEFAULT.limit,
+    page: PAGINATION_PARAMS.GET_CERTIFICATES.page,
+    limit: PAGINATION_PARAMS.GET_CERTIFICATES.limit,
     search: "",
     sort: { createdAt: SORTS.DESC },
     filters: undefined,
@@ -152,31 +153,35 @@ export const CertificatesManagement = () => {
       <PageHeader
         title={t("certificates")}
         classNames={{
-          wrapper:
-            "sticky top-0 z-20 gap-4 bg-white/90 backdrop-blur dark:bg-slate-950/90 rounded-sm",
+          wrapper: "bg-white/90 backdrop-blur dark:bg-slate-950/90 rounded-sm",
         }}
       >
-        <Select
-          placeholder={t("status")}
-          data={statusOptions}
-          value={(searchParams.filters?.status?.eq as string | null) ?? null}
-          onChange={handleStatusChange}
-          className="w-full max-w-[180px]"
-          allowDeselect
-        />
+        <Group wrap="nowrap">
+          <Select
+            placeholder={t("status")}
+            data={statusOptions}
+            value={(searchParams.filters?.status?.eq as string | null) ?? null}
+            onChange={handleStatusChange}
+            className="w-full max-w-[180px] hidden lg:block"
+            allowDeselect
+          />
 
-        <Input
-          placeholder={t("enter_search_keyword")}
-          value={searchParams.search}
-          onChange={(event) => handleSearchChange(event.currentTarget.value)}
-          className="w-full max-w-[240px]"
-        />
+          <Input
+            placeholder={t("enter_search_keyword")}
+            value={searchParams.search}
+            onChange={(event) => handleSearchChange(event.currentTarget.value)}
+            className="w-full max-w-[240px] hidden lg:block"
+          />
 
-        <ButtonAdd
-          onClick={() => router.push(PAGE_URLS.ORGANIZATION_CREATE_CERTIFICATE)}
-        />
+          <ButtonAdd
+            onClick={() =>
+              router.push(PAGE_URLS.ORGANIZATION_CREATE_CERTIFICATE)
+            }
+          />
+        </Group>
       </PageHeader>
-      <Box className="flex-1 overflow-y-auto h-[calc(100vh-56px)] p-4">
+      <PageContentWrapper>
+        <div ref={headerRef}></div>
         {isLoading ? (
           <Grid gutter="md">
             {Array.from({ length: searchParams.limit }).map((_, index) => (
@@ -216,7 +221,7 @@ export const CertificatesManagement = () => {
           certificate={selectedCertificate}
           onSignSuccess={handleSignSuccess}
         />
-      </Box>
+      </PageContentWrapper>
     </Box>
   );
 };

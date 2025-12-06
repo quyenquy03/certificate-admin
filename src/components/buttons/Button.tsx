@@ -8,12 +8,13 @@ type ButtonSize = "default" | "sm" | "lg" | "icon";
 
 const variantClasses: Record<ButtonVariant, string> = {
   default:
-    "bg-indigo-500 text-white shadow-sm hover:bg-indigo-400 focus-visible:outline-indigo-500/80",
+    "bg-indigo-600 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-indigo-500/80 dark:bg-indigo-500 dark:hover:bg-indigo-400",
   outline:
-    "border border-indigo-500/40 bg-transparent text-indigo-200 hover:bg-indigo-500/10 focus-visible:outline-indigo-500/60",
-  ghost: "bg-transparent text-indigo-200 hover:bg-indigo-500/10",
+    "border border-indigo-500/40 bg-transparent text-indigo-700 hover:bg-indigo-50 focus-visible:outline-indigo-500/60 dark:text-indigo-200 dark:hover:bg-indigo-500/10",
+  ghost:
+    "bg-transparent text-indigo-700 hover:bg-indigo-50 dark:text-indigo-200 dark:hover:bg-indigo-500/10",
   secondary:
-    "bg-slate-800 text-slate-100 hover:bg-slate-700 focus-visible:outline-slate-200/50",
+    "bg-slate-100 text-slate-900 hover:bg-slate-200 focus-visible:outline-slate-600/50 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -50,4 +51,3 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   },
 );
 Button.displayName = "Button";
-

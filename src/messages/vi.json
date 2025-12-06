@@ -386,7 +386,133 @@
   "certificate_lookup_code_hint": "Dinh dang goi y: CERT-2024-AX9F-21",
   "certificate_lookup_code_placeholder": "Nhap ma chung chi",
   "certificate_lookup_cta_search": "Tim kiem",
-  "certificate_lookup_cta_back_qr": "Quay lai quet QR",
+  "certificate_lookup_cta_back_qr": "Quay lại quét QR",
+  "certificate_detail_error_title": "Tra cứu chứng chỉ thất bại",
+  "certificate_detail_error_description": "Có lỗi xảy ra trong quá trình tra cứu chứng chỉ. Vui lòng thử lại.",
+  "client_header": {
+    "nav": {
+      "gioi-thieu": "Giới thiệu",
+      "cach-hoat-dong-loi-ich": "Cách hoạt động",
+      "doi-tac": "Đối tác",
+      "lien-he": "Liên hệ"
+    },
+    "toggle_label": "Chuyển giao diện",
+    "mobile_toggle_label": "Mở/đóng menu",
+    "theme_label": "Giao diện"
+  },
+  "client_home": {
+    "intro": {
+      "title": "CertifyChain",
+      "tagline": "Nền tảng xác thực chứng chỉ trên Blockchain",
+      "description": "Giúp trường học, doanh nghiệp và học viên xác thực văn bằng trong vài giây. Mỗi chứng chỉ được băm, lưu trữ và kiểm chứng độc lập để đảm bảo minh bạch, an toàn.",
+      "cta_lookup": "Tra cứu chứng chỉ",
+      "cta_register": "Đăng ký ngay"
+    },
+    "how": {
+      "badge": "Cách hoạt động & Lợi ích",
+      "title": "Quy trình xác thực gọn nhẹ, an toàn",
+      "description": "CertifyChain được xây dựng xoay quanh niềm tin và tính minh bạch. Từ khâu phát hành tới xác thực, mọi dữ liệu đều được xử lý an toàn trên chuỗi.",
+      "steps_badge": "3 bước rõ ràng"
+    },
+    "steps": {
+      "step1": {
+        "marker": "01",
+        "title": "Thu thập dữ liệu gốc",
+        "description": "Trường học hoặc trung tâm gửi dữ liệu qua API an toàn hoặc bảng điều khiển, đảm bảo tính chính xác ngay từ nguồn."
+      },
+      "step2": {
+        "marker": "02",
+        "title": "Băm và ghi lên blockchain",
+        "description": "Dữ liệu được băm, ký và lưu trên sổ cái bất biến, tạo dấu vân tay kỹ thuật số cho từng chứng chỉ."
+      },
+      "step3": {
+        "marker": "03",
+        "title": "Xác thực tức thời",
+        "description": "Nhà tuyển dụng hoặc cá nhân quét QR hoặc mở liên kết để kiểm tra trạng thái chứng chỉ ngay lập tức."
+      }
+    },
+    "benefits": {
+      "badge": "Lợi ích nổi bật",
+      "item1": {
+        "title": "Chống giả mạo",
+        "description": "Mỗi chứng chỉ có chữ ký và mã băm riêng, ngăn chỉnh sửa hoặc sao chép."
+      },
+      "item2": {
+        "title": "Minh bạch nhật ký",
+        "description": "Xác thực 24/7 cùng lịch sử truy cập đầy đủ để giám sát dễ dàng."
+      },
+      "item3": {
+        "title": "Tiết kiệm thời gian, chi phí",
+        "description": "Giảm thủ tục thủ công, rút ngắn việc kiểm tra từ nhiều ngày xuống vài giây."
+      },
+      "item4": {
+        "title": "Bảo mật dữ liệu",
+        "description": "Mã hóa thông tin cá nhân/tổ chức với phân quyền rõ ràng, tuân thủ tiêu chuẩn."
+      }
+    },
+    "lookup": {
+      "badge": "Tra cứu chứng chỉ",
+      "title": "Kiểm tra văn bằng an toàn trong vài giây",
+      "description": "Dành cho nhà tuyển dụng, HR và sinh viên. Nhập hoặc quét mã để xác nhận chứng chỉ phát hành trên blockchain.",
+      "features": {
+        "item1": {
+          "title": "Tra cứu theo mã",
+          "description": "Nhập mã định danh để xem chi tiết chứng chỉ và thông tin phát hành."
+        },
+        "item2": {
+          "title": "Quét QR thông minh",
+          "description": "Dùng điện thoại hoặc máy quét để đọc mã QR trên chứng chỉ chỉ với một thao tác."
+        },
+        "item3": {
+          "title": "Báo cáo chi tiết",
+          "description": "Theo dõi lịch sử cập nhật, đơn vị liên quan và các lần xác minh trong một bảng điều khiển."
+        }
+      }
+    },
+    "partners": {
+      "badge": "Đối tác",
+      "title": "Đồng hành cùng hệ sinh thái giáo dục và tuyển dụng",
+      "description": "Được tin dùng bởi các trường đại học, doanh nghiệp và tổ chức chứng nhận trong khu vực."
+    },
+    "cta": {
+      "badge": "Đăng ký ngay",
+      "title": "Sẵn sàng triển khai xác thực tin cậy?",
+      "description": "CertifyChain hỗ trợ tùy chỉnh onboarding, kết nối API và đào tạo vận hành theo nhu cầu.",
+      "request_demo": "Yêu cầu demo"
+    },
+    "contact": {
+      "badge": "Liên hệ",
+      "title": "Kết nối để được tư vấn chi tiết",
+      "support_title": "Hỗ trợ tức thì",
+      "support_description": "Nhận tư vấn triển khai, lộ trình onboarding và tài liệu kỹ thuật cho đội ngũ của bạn.",
+      "support_email_label": "Email",
+      "support_hotline_label": "Hotline",
+      "support_chat_label": "Chat trực tuyến",
+      "support_chat_desc": "Hỗ trợ 24/7 dành cho trường học và doanh nghiệp.",
+      "form_title": "Trao đổi với chuyên gia",
+      "form_description": "Chia sẻ nhu cầu, chúng tôi sẽ liên hệ với gợi ý phù hợp.",
+      "form_name_label": "Họ và tên",
+      "form_name_placeholder": "Nguyễn Văn A",
+      "form_email_label": "Email",
+      "form_email_placeholder": "email@domain.com",
+      "form_message_label": "Nội dung",
+      "form_message_placeholder": "Mô tả nhu cầu, quy mô tổ chức hoặc câu hỏi của bạn...",
+      "form_submit": "Gửi yêu cầu",
+      "response_time": "Chúng tôi phản hồi trong vòng 24 giờ làm việc."
+    }
+  },
+  "client_footer": {
+    "description": "Nền tảng xác thực văn bằng trên blockchain, mang lại sự minh bạch và tin cậy cho hệ sinh thái giáo dục.",
+    "contact_title": "Liên hệ",
+    "contact_email": "Email",
+    "contact_phone": "Điện thoại",
+    "contact_office": "Văn phòng",
+    "partners_title": "Đối tác tiêu biểu",
+    "rights_reserved": "Giữ mọi quyền.",
+    "policy_privacy": "Chính sách bảo mật",
+    "policy_terms": "Điều khoản sử dụng",
+    "policy_support": "Trung tâm hỗ trợ"
+  },
   "import_certificate": "Nhập chứng chỉ",
   "import_certificate_from_excel_title": "Nhập chứng chỉ từ Excel",
   "import_certificate_from_excel_desc": "Kéo thả file bảng tính hoặc chọn để tải lên. Chúng tôi sẽ phân tích và kiểm tra dữ liệu trước khi nhập.",

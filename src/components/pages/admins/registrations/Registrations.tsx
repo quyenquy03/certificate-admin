@@ -9,6 +9,7 @@ import {
   RegistrationDetailModal,
   RegistrationApproveModal,
   RegistrationRejectModal,
+  PageContentWrapper,
 } from "@/components";
 import { ORGANIZATION_STATUS_OPTIONS, PAGINATION_PARAMS } from "@/constants";
 import { SORTS } from "@/enums";
@@ -166,7 +167,7 @@ export const RegistrationsManagement = () => {
         <ButtonAdd />
       </PageHeader>
 
-      <Box className="overflow-y-auto h-[calc(100vh-56px)] p-4">
+      <PageContentWrapper>
         {isFetching ? (
           <Grid gutter="md">
             {new Array(PAGINATION_PARAMS.GET_USERS.limit)
@@ -244,7 +245,7 @@ export const RegistrationsManagement = () => {
           registration={selectedRegistration}
           refetchListRegistrations={refetchListRegistrations}
         />
-      </Box>
+      </PageContentWrapper>
     </Box>
   );
 };

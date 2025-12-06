@@ -90,7 +90,6 @@ export const ImportCertificateModal = ({
             birthday = excelDateToJSDate(birthday);
 
           return {
-            stt: row.stt ?? index + 1,
             authorIdCard: String(row.personal_identification ?? "").trim(),
             authorName: String(row.fullname ?? "").trim(),
             authorDob: birthday,

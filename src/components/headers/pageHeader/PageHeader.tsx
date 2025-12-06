@@ -23,7 +23,7 @@ export const PageHeader = ({
       radius="sm"
       shadow="sm"
       className={cn(
-        "sticky top-2 z-30 ml-4 w-[calc(100%-48px)] min-h-12 overflow-hidden border border-slate-200/60 bg-gradient-to-r from-white/95 via-slate-50/80 to-slate-100/65 px-4 py-2 shadow-[0_16px_40px_-32px_rgba(30,64,175,0.25)] ring-1 ring-slate-900/5 backdrop-blur-md dark:border-slate-800/60 dark:bg-gradient-to-r dark:from-slate-950 dark:via-slate-900/85 dark:to-slate-950 dark:shadow-[0_22px_50px_-34px_rgba(15,23,42,0.7)] dark:ring-slate-900/80",
+        "mt-3 ml-4 w-[calc(100%-32px)] min-h-14 overflow-hidden border border-slate-200/60 bg-gradient-to-r from-white/95 via-slate-50/80 to-slate-100/65 px-4 py-2 shadow-[0_16px_40px_-32px_rgba(30,64,175,0.25)] ring-1 ring-slate-900/5 backdrop-blur-md dark:border-slate-800/60 dark:bg-gradient-to-r dark:from-slate-950 dark:via-slate-900/85 dark:to-slate-950 dark:shadow-[0_22px_50px_-34px_rgba(15,23,42,0.7)] dark:ring-slate-900/80",
         classNames?.wrapper
       )}
     >

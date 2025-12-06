@@ -5,6 +5,7 @@ import {
   PageHeader,
   OrganizationItem,
   RegistrationItemSkeleton,
+  PageContentWrapper,
 } from "@/components";
 import { removeNoneCharacters, useDebounce } from "@/hooks";
 import { stores } from "@/stores";
@@ -45,8 +46,7 @@ export const MyOrganization = () => {
       <PageHeader
         title={t("my_organization")}
         classNames={{
-          wrapper:
-            "sticky top-0 z-20 gap-4 bg-white/90 backdrop-blur dark:bg-slate-950/90",
+          wrapper: "bg-white/90 backdrop-blur dark:bg-slate-950/90 rounded-sm",
         }}
       >
         <Input
@@ -58,7 +58,7 @@ export const MyOrganization = () => {
         <ButtonAdd />
       </PageHeader>
 
-      <Box className="flex-1 overflow-y-auto h-[calc(100vh-56px)] p-4">
+      <PageContentWrapper>
         {isLoading ? (
           <Grid gutter="md">
             {new Array(6).fill(0).map((_, index) => (
@@ -101,7 +101,7 @@ export const MyOrganization = () => {
             </Text>
           </Box>
         )}
-      </Box>
+      </PageContentWrapper>
     </Box>
   );
 };

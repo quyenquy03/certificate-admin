@@ -16,10 +16,15 @@ import {
   PaginationCustom,
 } from "@/components";
 import { PAGE_URLS } from "@/constants";
-import { CERTIFICATE_ADDITIONAL_FIELD, COUNTRIES, FORM_MODES } from "@/enums";
-import { useCreateCertificate } from "@/mutations";
+import { CERTIFICATE_ADDITIONAL_FIELD, FORM_MODES } from "@/enums";
+import { useImportCertificates } from "@/mutations";
 import { useQueryGetAllCertificateTypes } from "@/queries";
-import { BaseErrorType, CertificateItemFormType } from "@/types";
+import {
+  AdditionalInfoType,
+  BaseErrorType,
+  CertificateItemFormType,
+  ImportCertificateItem,
+} from "@/types";
 import {
   Box,
   Flex,
@@ -118,8 +123,8 @@ export const CreateCertificate = () => {
     });
   }, [certificateTypesResponse?.data, t]);
 
-  const { mutate: createCertificate, isPending: isCreating } =
-    useCreateCertificate({
+  const { mutate: importCertificates, isPending: isImporting } =
+    useImportCertificates({
       onSuccess: () => {
         notifications.show({
           title: "Certificate created",
@@ -148,7 +153,7 @@ export const CreateCertificate = () => {
       },
     });
 
-  const isProcessing = isSubmitting || isCreating;
+  const isProcessing = isSubmitting || isImporting;
 
   const handleSubmitFromHeader = () => {
     if (isProcessing) return;
@@ -156,7 +161,69 @@ export const CreateCertificate = () => {
   };
 
   const onSubmit: SubmitHandler<CreateCertificateFormValues> = (values) => {
-    console.log(values);
+    try {
+      if (!currentOrganization || !currentOrganization.id) {
+        notifications.show({
+          title: "Lưu chứng chỉ thất bại",
+          message: "Không tìm thấy tổ chức của bạn",
+          color: "red",
+        });
+        return;
+      }
+      const selectedCertificateType = certificateTypeOptions.find(
+        (item) => item.value === values.certificateTypeId
+      );
+      if (!selectedCertificateType) {
+        notifications.show({
+          title: "Lưu chứng chỉ thất bại",
+          message: "Không tìm thấy loại chứng chỉ phù hợp",
+          color: "red",
+        });
+        return;
+      }
+      const certificates: ImportCertificateItem[] = listCertificates.map(
+        (item) => {
+          const additionalInfo: AdditionalInfoType = {
+            signer: values.signer,
+            address: values.address,
+            serial_number: item.serial_number,
+            reg_no: item.reg_no,
+            certificate_type: selectedCertificateType.code,
+          };
+          return {
+            validFrom: values.validFrom?.toISOString() ?? "",
+            validTo: values.validTo?.toISOString() ?? "",
+            authorProfile: {
+              authorName: item.authorName,
+              authorIdCard: item.authorIdCard,
+              authorDob:
+                typeof item.authorDob === "string"
+                  ? item.authorDob
+                  : item.authorDob instanceof Date
+                  ? item.authorDob.toISOString()
+                  : "",
+              authorEmail: item.authorEmail,
+              authorDocuments: [],
+              authorCountryCode: item.authorCountryCode,
+              grantLevel:
+                typeof item.grantLevel === "number"
+                  ? item.grantLevel
+                  : Number(item.grantLevel),
+              domain: item.domain,
+              additionalInfo: JSON.stringify(additionalInfo),
+            },
+          };
+        }
+      );
+
+      importCertificates({
+        certificateTypeId: selectedCertificateType.value,
+        organizationId: currentOrganization?.id,
+        certificates,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleBack = () => {

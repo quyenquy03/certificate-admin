@@ -9,6 +9,7 @@ import {
   CertificateTypeFormModal,
   CertificateTypeDetailModal,
   ConfirmationModal,
+  PageContentWrapper,
 } from "@/components";
 import { PAGINATION_PARAMS } from "@/constants";
 import { FORM_MODES, SORTS } from "@/enums";
@@ -274,7 +275,7 @@ export const CertificateTypesManagement = () => {
         <ButtonAdd onClick={handleOpenCreateModal} />
       </PageHeader>
 
-      <Box className="overflow-y-auto h-[calc(100vh-56px)] p-4">
+      <PageContentWrapper>
         {isFetching ? (
           <Grid gutter="md">
             {new Array(PAGINATION_PARAMS.GET_USERS.limit)
@@ -338,7 +339,7 @@ export const CertificateTypesManagement = () => {
               }
             />
           )}
-      </Box>
+      </PageContentWrapper>
       <CertificateTypeFormModal
         mode={formMode}
         opened={formModal.isOpen}

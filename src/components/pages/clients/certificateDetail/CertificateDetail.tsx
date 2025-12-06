@@ -3,7 +3,6 @@
 import CertificateABI from "@/abis/CertificateABI.json";
 import { certificateApis } from "@/apis";
 import { ARBITRUM_SEPOLIA_RPC_URL, envs } from "@/constants";
-import { COUNTRIES } from "@/enums";
 import { formatDate } from "@/helpers";
 import { CertificateDetailType } from "@/types";
 import { Contract, JsonRpcProvider } from "ethers";
@@ -11,6 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { CertificateImageModal } from "@/components/modals";
 import { useDisclose } from "@/hooks";
+import { NoData } from "@/components/noData";
 
 type CertificateDetailProps = {
   certificateCode: string;
@@ -50,6 +50,8 @@ export const CertificateDetail = ({
         );
         const rawCertificate = await contract.getCertificate(certificateCode);
 
+        console.log(rawCertificate);
+
         if (!rawCertificate) return;
 
         const ipfsHash = rawCertificate.ipfsHash ?? rawCertificate[9];
@@ -64,6 +66,7 @@ export const CertificateDetail = ({
           );
         if (certificateDetailData) setCertificate(certificateDetailData);
       } catch (err) {
+        console.log(err);
         const message =
           err instanceof Error ? err.message : "Failed to load certificate.";
         setError(message);
@@ -122,7 +125,7 @@ export const CertificateDetail = ({
   );
 
   return (
-    <div className="mx-auto max-w-6xl px-6">
+    <div className="mx-auto max-w-[600px] px-4">
       {isLoading && (
         <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200">
           {t("certificate_loading")}
@@ -131,7 +134,11 @@ export const CertificateDetail = ({
 
       {error && (
         <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 shadow-sm dark:border-red-700/40 dark:bg-red-900/30 dark:text-red-100">
-          {error}
+          <NoData
+            title={t("certificate_detail_error_title")}
+            description={t("certificate_detail_error_description")}
+            isTranslation
+          />
         </div>
       )}
 
@@ -147,7 +154,7 @@ export const CertificateDetail = ({
             <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               {t("certificate_summary")}
             </h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4">
               <DetailItem
                 label={t("certificate_code")}
                 value={formattedCertificate.certificateCode}
@@ -176,72 +183,52 @@ export const CertificateDetail = ({
           </div>
 
           {formattedCertificate.author && (
-            <div className="grid gap-6 md:grid-cols-[1fr,2fr]">
-              <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
-                {formattedCertificate.author.authorImage ? (
-                  <img
-                    src={formattedCertificate.author.authorImage}
-                    alt={formattedCertificate.author.authorName}
-                    className="h-40 w-32 rounded-lg object-cover shadow"
-                  />
-                ) : (
-                  <div className="flex h-40 w-32 items-center justify-center rounded-lg border border-dashed border-slate-300 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                    {t("no_image")}
-                  </div>
-                )}
-                <div className="text-center">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    {formattedCertificate.author.authorName}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {formattedCertificate.author.authorEmail}
-                  </p>
-                </div>
+            <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
+              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                {t("certificate_holder_section")}
+              </h3>
+              <div className="grid grid-cols-1 gap-4">
+                <DetailItem
+                  label={t("certificate_holder_name")}
+                  value={formattedCertificate.author.authorName}
+                />
+                <DetailItem
+                  label={t("certificate_holder_email")}
+                  value={formattedCertificate.author.authorEmail}
+                />
+                <DetailItem
+                  label={t("certificate_holder_country_code")}
+                  value={formattedCertificate.author.authorCountryCode}
+                />
+                <DetailItem
+                  label={t("certificate_holder_id_card")}
+                  value={formattedCertificate.author.authorIdCard}
+                />
+                <DetailItem
+                  label={t("certificate_holder_birthday")}
+                  value={formattedCertificate.author.authorDob}
+                />
               </div>
 
-              <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
-                <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                  {t("certificate_holder_section")}
-                </h3>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <DetailItem
-                    label={t("certificate_holder_id_card")}
-                    value={formattedCertificate.author.authorIdCard}
-                  />
-                  <DetailItem
-                    label={t("certificate_holder_country_code")}
-                    value={formattedCertificate.author.authorCountryCode}
-                  />
-                  <DetailItem
-                    label={t("certificate_holder_birthday")}
-                    value={formattedCertificate.author.authorDob}
-                  />
-                  <DetailItem
-                    label={t("certificate_holder_email")}
-                    value={formattedCertificate.author.authorEmail}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    {t("certificate_documents")}
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  {t("certificate_documents")}
+                </p>
+                {formattedCertificate.author.authorDocuments?.length ? (
+                  <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-200">
+                    {formattedCertificate.author.authorDocuments.map(
+                      (doc, index) => (
+                        <li key={`${doc}-${index}`} className="break-all">
+                          {doc}
+                        </li>
+                      )
+                    )}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                    {t("certificate_documents_empty")}
                   </p>
-                  {formattedCertificate.author.authorDocuments?.length ? (
-                    <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-200">
-                      {formattedCertificate.author.authorDocuments.map(
-                        (doc, index) => (
-                          <li key={`${doc}-${index}`} className="break-all">
-                            {doc}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-slate-600 dark:text-slate-300">
-                      {t("certificate_documents_empty")}
-                    </p>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           )}

@@ -5,7 +5,7 @@ export type CertificateAuthorProfileType = {
   authorIdCard: string;
   authorDob: string;
   authorEmail: string;
-  authorImage: string;
+  authorImage?: string;
   authorDocuments: string[];
   authorCountryCode: COUNTRIES;
   grantLevel: number;

@@ -10,6 +10,7 @@ import {
   SubmitCertificateRequestType,
   CertificateRequestType,
   RejectCertificateRequestType,
+  ImportCertificateRequestType,
 } from "@/types";
 import axios from "axios";
 
@@ -107,6 +108,19 @@ const createCertificate = async (
     {
       method: AXIOS_METHOD.POST,
       url: API_ROUTES.CREATE_CERTIFICATE,
+      data,
+    }
+  );
+  return response.data;
+};
+
+const importCertificates = async (
+  data: ImportCertificateRequestType
+): Promise<BaseResponseType<CertificateResponseType>> => {
+  const response = await axiosClient<BaseResponseType<CertificateResponseType>>(
+    {
+      method: AXIOS_METHOD.POST,
+      url: API_ROUTES.IMPORT_CERTIFICATES,
       data,
     }
   );
@@ -217,6 +231,7 @@ export const certificateApis = {
   activateCertificateType,
   deactivateCertificateType,
   createCertificate,
+  importCertificates,
   getCertificates,
   getOrganizationCertificates,
   getCertificateDetailOnBlockchain,

@@ -275,12 +275,6 @@ export const CertificateDetailModal = ({
 
       await tx.wait();
 
-      await submitCertificateForVerify({
-        certificateId: certificate.id,
-        revokeReason: "",
-        requestType: CERTIFICATE_REQUEST_TYPES.SIGNUP,
-      });
-
       onSignSuccess?.();
 
       notifications.show({
