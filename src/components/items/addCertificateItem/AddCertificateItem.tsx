@@ -13,14 +13,20 @@ import { HiOutlineQrCode } from "react-icons/hi2";
 import { PiCalendarCheck, PiShieldCheck } from "react-icons/pi";
 import { BiEdit, BiTrash } from "react-icons/bi";
 import { FiGlobe } from "react-icons/fi";
-import { formatDate, getLastWordCapitalized } from "@/helpers";
+import {
+  calculateIELTSOverall,
+  formatDate,
+  getLastWordCapitalized,
+} from "@/helpers";
 import { useMemo, useState } from "react";
+import { CERTIFICATE_CATEGORIES } from "@/enums";
 
 type AddCertificateItemProps = {
   certificate: CertificateItemFormType;
   onClick?: (certificate: CertificateItemFormType) => void;
   onUpdate?: (certificate: CertificateItemFormType) => void;
   onDelete?: (certificate: CertificateItemFormType) => void;
+  certificateCategory: CERTIFICATE_CATEGORIES | null;
 };
 
 const BADGE_COLOR = "#2563EB";
@@ -30,6 +36,7 @@ export const AddCertificateItem = ({
   onClick,
   onUpdate,
   onDelete,
+  certificateCategory,
 }: AddCertificateItemProps) => {
   const t = useTranslations();
   const [isDelete, setIsDelete] = useState(false);
@@ -65,6 +72,18 @@ export const AddCertificateItem = ({
     return menuItems;
   }, [certificate, onUpdate, setIsDelete, onDelete]);
 
+  const ieltsOverallScore = useMemo(() => {
+    if (!certificate || certificateCategory !== CERTIFICATE_CATEGORIES.IELTS)
+      return null;
+
+    return calculateIELTSOverall({
+      listening: Number(certificate.listening_result ?? 0),
+      speaking: Number(certificate.speaking_result ?? 0),
+      writing: Number(certificate.writing_result ?? 0),
+      reading: Number(certificate.reading_result ?? 0),
+    });
+  }, [certificateCategory, certificate]);
+
   return (
     <Box
       className="min-h-28 relative rounded-lg bg-background-primary-light p-3 shadow-md transition-all hover:shadow-lg dark:bg-background-primary-dark dark:shadow-slate-800"
@@ -90,13 +109,21 @@ export const AddCertificateItem = ({
       <Flex gap={12} align="center" justify="space-between" className="pb-4">
         <Flex gap={12} align="center" className="min-w-0">
           <Box
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-100 text-base font-semibold text-slate-600 dark:bg-slate-800/60 dark:text-slate-100"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-100 text-base font-semibold text-slate-600 dark:bg-slate-800/60 dark:text-slate-100 overflow-hidden"
             style={{
               background: `linear-gradient(135deg, ${badgeColor}1A 0%, ${badgeColor} 100%)`,
               color: "#fff",
             }}
           >
-            {authorInitial}
+            {certificate.authorImage ? (
+              <img
+                src={certificate.authorImage}
+                alt={authorName}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              authorInitial
+            )}
           </Box>
           <Flex direction="column" gap={4} className="min-w-0">
             <Text className="truncate text-base font-semibold text-slate-900 dark:text-slate-100">
@@ -118,23 +145,60 @@ export const AddCertificateItem = ({
           }
         />
 
-        <InfoRowItem
-          icon={FiGlobe}
-          label={t("domain_label")}
-          value={certificate?.domain ?? t("not_updated")}
-        />
+        {certificateCategory ===
+          CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE && (
+          <>
+            <InfoRowItem
+              icon={FiGlobe}
+              label={t("domain_label")}
+              value={certificate?.domain ?? t("not_updated")}
+            />
+            <InfoRowItem
+              icon={PiShieldCheck}
+              label={t("certificate_grant_level")}
+              value={certificate?.grantLevel ?? t("not_updated")}
+            />
 
-        <InfoRowItem
-          icon={PiShieldCheck}
-          label={t("certificate_grant_level")}
-          value={certificate?.grantLevel}
-        />
+            <InfoRowItem
+              icon={HiOutlineQrCode}
+              label={t("certificate_reg_no_label")}
+              value={certificate?.reg_no}
+            />
+          </>
+        )}
 
-        <InfoRowItem
-          icon={HiOutlineQrCode}
-          label={t("certificate_reg_no_label")}
-          value={certificate?.reg_no}
-        />
+        {certificateCategory === CERTIFICATE_CATEGORIES.IELTS && (
+          <>
+            <InfoRowItem
+              icon={FiGlobe}
+              label={t("candidate_number")}
+              value={certificate?.candidate_number ?? t("not_updated")}
+            />
+
+            <InfoRowItem
+              icon={PiShieldCheck}
+              label={t("test_report")}
+              value={certificate?.test_report ?? t("not_updated")}
+            />
+
+            <Flex gap={8}>
+              <Box className="flex-1">
+                <InfoRowItem
+                  icon={HiOutlineQrCode}
+                  label={t("overall")}
+                  value={ieltsOverallScore?.overall ?? t("not_updated")}
+                />
+              </Box>
+              <Box className="flex-1">
+                <InfoRowItem
+                  icon={HiOutlineQrCode}
+                  label={t("band")}
+                  value={ieltsOverallScore?.cefr ?? t("not_updated")}
+                />
+              </Box>
+            </Flex>
+          </>
+        )}
       </Flex>
 
       <Drawer

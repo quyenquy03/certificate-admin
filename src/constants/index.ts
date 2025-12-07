@@ -12,3 +12,5 @@ export * from "./organizationStatus";
 export * from "./countries";
 export * from "./certificateTypes";
 export * from "./certificateLevels";
+export * from "./genders";
+export * from "./languages";

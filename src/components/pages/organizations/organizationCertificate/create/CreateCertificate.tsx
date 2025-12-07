@@ -16,7 +16,11 @@ import {
   PaginationCustom,
 } from "@/components";
 import { PAGE_URLS } from "@/constants";
-import { CERTIFICATE_ADDITIONAL_FIELD, FORM_MODES } from "@/enums";
+import {
+  CERTIFICATE_ADDITIONAL_FIELD,
+  CERTIFICATE_CATEGORIES,
+  FORM_MODES,
+} from "@/enums";
 import { useImportCertificates } from "@/mutations";
 import { useQueryGetAllCertificateTypes } from "@/queries";
 import {
@@ -53,6 +57,7 @@ type CreateCertificateFormValues = {
 
   [CERTIFICATE_ADDITIONAL_FIELD.ADDRESS]?: string;
   [CERTIFICATE_ADDITIONAL_FIELD.SIGNER]?: string;
+  [CERTIFICATE_ADDITIONAL_FIELD.CENTRE_NUMBER]?: string;
 };
 
 const DEFAULT_VALUES: CreateCertificateFormValues = {
@@ -88,6 +93,8 @@ export const CreateCertificate = () => {
     watch,
     reset,
     setValue,
+    trigger,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<CreateCertificateFormValues>({
     defaultValues: DEFAULT_VALUES,
@@ -95,6 +102,7 @@ export const CreateCertificate = () => {
 
   const watchValidFrom = watch("validFrom");
   const watchValidTo = watch("validTo");
+  const certificateTypeId = watch("certificateTypeId");
   const formRef = useRef<HTMLFormElement | null>(null);
   const { currentOrganization } = stores.organization();
 
@@ -123,12 +131,34 @@ export const CreateCertificate = () => {
     });
   }, [certificateTypesResponse?.data, t]);
 
+  const certificateCategory = useMemo(() => {
+    if (!certificateTypeId || !certificateTypeOptions.length) return null;
+
+    const currentCertificateType = certificateTypeOptions.find(
+      (item) => item.value === certificateTypeId
+    );
+
+    if (!currentCertificateType) return null;
+
+    switch (currentCertificateType.code) {
+      case "IELTS":
+        return CERTIFICATE_CATEGORIES.IELTS;
+      case "TOEIC":
+        return CERTIFICATE_CATEGORIES.TOEIC;
+      case "CN001":
+      case "KS01":
+        return CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE;
+      default:
+        return null;
+    }
+  }, [certificateTypeId, certificateTypeOptions]);
+
   const { mutate: importCertificates, isPending: isImporting } =
     useImportCertificates({
       onSuccess: () => {
         notifications.show({
-          title: "Certificate created",
-          message: "You created the certificate successfully.",
+          title: t("create_certificate_success_title"),
+          message: t("create_certificate_success_message"),
           color: "green",
         });
         reset(DEFAULT_VALUES);
@@ -138,7 +168,7 @@ export const CreateCertificate = () => {
         if (isAxiosError<BaseErrorType>(error)) {
           const code = error.response?.data?.code ?? "common_error_message";
           notifications.show({
-            title: "Create certificate failed",
+            title: t("create_certificate_failed_title"),
             message: t(code as any),
             color: "red",
           });
@@ -146,7 +176,7 @@ export const CreateCertificate = () => {
         }
 
         notifications.show({
-          title: "Create certificate failed",
+          title: t("create_certificate_failed_title"),
           message: t("common_error_message"),
           color: "red",
         });
@@ -164,8 +194,8 @@ export const CreateCertificate = () => {
     try {
       if (!currentOrganization || !currentOrganization.id) {
         notifications.show({
-          title: "Lưu chứng chỉ thất bại",
-          message: "Không tìm thấy tổ chức của bạn",
+          title: t("create_certificate_failed_title"),
+          message: t("organization_not_found"),
           color: "red",
         });
         return;
@@ -175,8 +205,8 @@ export const CreateCertificate = () => {
       );
       if (!selectedCertificateType) {
         notifications.show({
-          title: "Lưu chứng chỉ thất bại",
-          message: "Không tìm thấy loại chứng chỉ phù hợp",
+          title: t("create_certificate_failed_title"),
+          message: t("certificate_type_not_found"),
           color: "red",
         });
         return;
@@ -186,10 +216,31 @@ export const CreateCertificate = () => {
           const additionalInfo: AdditionalInfoType = {
             signer: values.signer,
             address: values.address,
-            serial_number: item.serial_number,
-            reg_no: item.reg_no,
             certificate_type: selectedCertificateType.code,
           };
+
+          if (
+            certificateCategory ===
+            CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE
+          ) {
+            additionalInfo.reg_no = item.reg_no;
+            additionalInfo.serial_number = item.serial_number;
+          }
+
+          if (certificateCategory === CERTIFICATE_CATEGORIES.IELTS) {
+            additionalInfo.candidate_sex = item.candidate_sex;
+            additionalInfo.candidate_number = item.candidate_number;
+            additionalInfo.first_language = item.first_language;
+            additionalInfo.test_report = item.test_report;
+            additionalInfo.listening_result = item.listening_result;
+            additionalInfo.reading_result = item.reading_result;
+            additionalInfo.writing_result = item.writing_result;
+            additionalInfo.speaking_result = item.speaking_result;
+            additionalInfo.administrator_comments = item.administrator_comments;
+            additionalInfo.centre_number =
+              values[CERTIFICATE_ADDITIONAL_FIELD.CENTRE_NUMBER];
+          }
+
           return {
             validFrom: values.validFrom?.toISOString() ?? "",
             validTo: values.validTo?.toISOString() ?? "",
@@ -202,6 +253,7 @@ export const CreateCertificate = () => {
                   : item.authorDob instanceof Date
                   ? item.authorDob.toISOString()
                   : "",
+              authorImage: item.authorImage,
               authorEmail: item.authorEmail,
               authorDocuments: [],
               authorCountryCode: item.authorCountryCode,
@@ -209,7 +261,7 @@ export const CreateCertificate = () => {
                 typeof item.grantLevel === "number"
                   ? item.grantLevel
                   : Number(item.grantLevel),
-              domain: item.domain,
+              domain: item.domain?.trim() ? item.domain?.trim() : "private",
               additionalInfo: JSON.stringify(additionalInfo),
             },
           };
@@ -235,7 +287,16 @@ export const CreateCertificate = () => {
     certificateItemModal.onClose();
   };
 
-  const handleCreateCertificate = () => {
+  const handleCreateCertificate = async () => {
+    const checkCertificateCategory = await trigger(["certificateTypeId"]);
+    if (!checkCertificateCategory || !certificateCategory) {
+      notifications.show({
+        title: t("cannot_add_certificate_item"),
+        message: t("select_certificate_type_first"),
+        color: "red",
+      });
+      return;
+    }
     setCurrentCertificate(null);
     certificateItemModal.onOpen();
   };
@@ -278,7 +339,7 @@ export const CreateCertificate = () => {
 
     if (isExistAuthor) {
       notifications.show({
-        title: "Add certificate item fail",
+        title: t("add_certificate_item_failed"),
         message: t("common_error_message"),
         color: "red",
       });
@@ -289,8 +350,8 @@ export const CreateCertificate = () => {
       setListCertificates((prev) => [...prev, certificateItem]);
 
       notifications.show({
-        title: "Add certificate item success",
-        message: "Da them thanh cong mot chung chi moi",
+        title: t("add_certificate_item_success"),
+        message: t("add_certificate_item_success_message"),
         color: "green",
       });
       return;
@@ -306,8 +367,8 @@ export const CreateCertificate = () => {
     setCurrentCertificate(null);
 
     notifications.show({
-      title: "Update certificate item success",
-      message: "Da chinh sua thanh cong mot chung chi",
+      title: t("update_certificate_item_success"),
+      message: t("update_certificate_item_success_message"),
       color: "green",
     });
   };
@@ -372,10 +433,16 @@ export const CreateCertificate = () => {
     }
   }, [currentOrganization?.id, setValue]);
 
+  useEffect(() => {
+    if (certificateTypeId) {
+      clearErrors("certificateTypeId");
+    }
+  }, [certificateTypeId, clearErrors]);
+
   return (
     <Box className="w-full relative flex h-full flex-col">
       <PageHeader
-        title="Create certificate"
+        title={t("create_certificate")}
         classNames={{
           wrapper:
             "sticky top-0 z-20 gap-4 bg-white/90 backdrop-blur dark:bg-slate-950/90",
@@ -391,7 +458,7 @@ export const CreateCertificate = () => {
             disabled={isProcessing}
           >
             <FiArrowLeft className="text-base" />
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             type="button"
@@ -400,7 +467,7 @@ export const CreateCertificate = () => {
             onClick={handleSubmitFromHeader}
             disabled={isProcessing}
           >
-            {isProcessing ? "Processing..." : "Save"}
+            {isProcessing ? t("processing") : t("save")}
           </Button>
         </Group>
       </PageHeader>
@@ -422,10 +489,10 @@ export const CreateCertificate = () => {
                 <Stack gap="lg">
                   <Stack gap="xs">
                     <Text className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      Certificate details
+                      {t("certificate_details")}
                     </Text>
                     <Text className="text-sm text-slate-500 dark:text-slate-400">
-                      Fill in the basic information for the new certificate.
+                      {t("certificate_details_description")}
                     </Text>
                   </Stack>
 
@@ -433,11 +500,11 @@ export const CreateCertificate = () => {
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <FormDatePicker
                         name="validFrom"
-                        name_label="Valid from"
-                        name_placeholder="Select start date"
+                        name_label="valid_from"
+                        name_placeholder="valid_from_placeholder"
                         errors={errors}
                         control={control as any}
-                        isTranslate={false}
+                        isTranslate
                         maxDate={watchValidTo ?? undefined}
                         rules={{
                           required: t("required_field"),
@@ -447,11 +514,11 @@ export const CreateCertificate = () => {
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <FormDatePicker
                         name="validTo"
-                        name_label="Valid to"
-                        name_placeholder="Select end date"
+                        name_label="valid_to"
+                        name_placeholder="valid_to_placeholder"
                         errors={errors}
                         control={control as any}
-                        isTranslate={false}
+                        isTranslate
                         minDate={watchValidFrom ?? undefined}
                         rules={{
                           required: t("required_field"),
@@ -461,12 +528,12 @@ export const CreateCertificate = () => {
                     <Grid.Col span={12}>
                       <FormSelect
                         name="certificateTypeId"
-                        name_label="Certificate type"
-                        name_placeholder="Select certificate type"
+                        name_label="certificate_type"
+                        name_placeholder="certificate_type_placeholder"
                         control={control as any}
                         errors={errors}
                         data={certificateTypeOptions}
-                        isTranslate={false}
+                        isTranslate
                         allowDeselect={false}
                         searchable
                         rightSection={
@@ -480,11 +547,11 @@ export const CreateCertificate = () => {
                     <Grid.Col span={{ base: 12 }}>
                       <FormInput
                         name={CERTIFICATE_ADDITIONAL_FIELD.SIGNER}
-                        name_label={t("signer_label")}
-                        name_placeholder={t("signer_placeholder")}
+                        name_label="signer_label"
+                        name_placeholder="signer_placeholder"
                         register={register as any}
                         errors={errors}
-                        isTranslate={false}
+                        isTranslate
                         rules={{
                           required: t("required_field"),
                         }}
@@ -493,16 +560,31 @@ export const CreateCertificate = () => {
                     <Grid.Col span={{ base: 12 }}>
                       <FormInput
                         name={CERTIFICATE_ADDITIONAL_FIELD.ADDRESS}
-                        name_label={t("address_label")}
-                        name_placeholder={t("address_placeholder")}
+                        name_label="address_label"
+                        name_placeholder="address_placeholder"
                         register={register as any}
                         errors={errors}
-                        isTranslate={false}
+                        isTranslate
                         rules={{
                           required: t("required_field"),
                         }}
                       />
                     </Grid.Col>
+                    {certificateCategory === CERTIFICATE_CATEGORIES.IELTS && (
+                      <Grid.Col span={{ base: 12 }}>
+                        <FormInput
+                          name={CERTIFICATE_ADDITIONAL_FIELD.CENTRE_NUMBER}
+                          name_label="centre_number_label"
+                          name_placeholder="centre_number_placeholder"
+                          register={register as any}
+                          errors={errors}
+                          isTranslate
+                          rules={{
+                            required: t("required_field"),
+                          }}
+                        />
+                      </Grid.Col>
+                    )}
                   </Grid>
                 </Stack>
               </Paper>
@@ -523,7 +605,7 @@ export const CreateCertificate = () => {
                   className="border-b-2"
                 >
                   <Text className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                    List certificates ({filteredCertificates.length})
+                    {t("list_certificates")} ({filteredCertificates.length})
                   </Text>
                   <Group wrap="nowrap" gap={"xs"}>
                     <Input
@@ -557,6 +639,7 @@ export const CreateCertificate = () => {
                             certificate={certificate}
                             onUpdate={handleEditCertificate}
                             onDelete={handleDeleteCertificate}
+                            certificateCategory={certificateCategory}
                           />
                         </Grid.Col>
                       ))}
@@ -586,6 +669,7 @@ export const CreateCertificate = () => {
         certificateItem={currentCertificate}
         onCheckExistedAuthorId={handleCheckExistAuthorCardId}
         onSaveCertificateItem={handleSaveCertificateItem}
+        certificateCategory={certificateCategory}
       />
 
       <ImportCertificateModal

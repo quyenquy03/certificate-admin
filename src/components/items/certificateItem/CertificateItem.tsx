@@ -8,7 +8,6 @@ import {
   DropdownMenuItemProps,
   InfoRowItem,
 } from "@/components";
-import { HiOutlineQrCode } from "react-icons/hi2";
 import {
   PiEnvelopeSimple,
   PiCalendarCheck,
@@ -49,30 +48,6 @@ export const CertificateItem = ({
     authorName.charAt(0)?.toUpperCase() ||
     certificate.code?.charAt(0)?.toUpperCase() ||
     "C";
-
-  const txItems = [
-    {
-      key: "signed",
-      label: t("signed_tx_hash"),
-      value: certificate.signedTxHash ?? t("not_updated"),
-      icon: HiOutlineQrCode,
-      disabledCopyButton: !Boolean(certificate.signedTxHash),
-    },
-    {
-      key: "approved",
-      label: t("approved_tx_hash"),
-      value: certificate.approvedTxHash ?? t("not_updated"),
-      icon: HiOutlineQrCode,
-      disabledCopyButton: !Boolean(certificate.approvedTxHash),
-    },
-    {
-      key: "revoked",
-      label: t("revoked_tx_hash"),
-      value: certificate.revokedTxHash ?? t("not_updated"),
-      icon: HiOutlineQrCode,
-      disabledCopyButton: !Boolean(certificate.revokedTxHash),
-    },
-  ];
 
   const actionMenuItems: DropdownMenuItemProps[] = [];
   if (onShowDetail) {
@@ -155,15 +130,15 @@ export const CertificateItem = ({
       <Flex gap={8} direction="column">
         <InfoRowItem
           icon={PiEnvelopeSimple}
+          label={t("certificate_code")}
+          value={certificate?.code ?? t("not_updated")}
+          showCopyButton
+        />
+
+        <InfoRowItem
+          icon={PiEnvelopeSimple}
           label={t("email")}
           value={author?.authorEmail ?? t("not_updated")}
-        />
-        <InfoRowItem
-          icon={PiCalendarCheck}
-          label={t("valid_period")}
-          value={`${formatDate(certificate.validFrom) || t("not_updated")} - ${
-            formatDate(certificate.validTo) || t("not_updated")
-          }`}
         />
 
         <Flex gap={12} wrap="wrap">
@@ -204,19 +179,20 @@ export const CertificateItem = ({
             </Flex>
           </Flex>
         </Flex>
-      </Flex>
 
-      <Flex direction="column" gap={8} className="mt-2">
-        {txItems.map((tx) => (
-          <InfoRowItem
-            key={tx.key}
-            label={tx.label}
-            value={tx.value}
-            icon={tx.icon}
-            showCopyButton
-            disabledCopyButton={tx.disabledCopyButton}
-          />
-        ))}
+        <InfoRowItem
+          icon={PiEnvelopeSimple}
+          label={t("certificate_type")}
+          value={certificate?.certificateType?.name ?? t("not_updated")}
+        />
+
+        <InfoRowItem
+          icon={PiCalendarCheck}
+          label={t("valid_period")}
+          value={`${formatDate(certificate.validFrom) || t("not_updated")} - ${
+            formatDate(certificate.validTo) || t("not_updated")
+          }`}
+        />
       </Flex>
     </Box>
   );

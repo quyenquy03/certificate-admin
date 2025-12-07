@@ -10,7 +10,7 @@ import * as htmlToImage from "html-to-image";
 import { Button } from "@mantine/core";
 import jsPDF from "jspdf";
 import { formatDate, formatFullDate, getLastWordCapitalized } from "@/helpers";
-import { getDegreeClassfication } from "@/helpers/getDegreeClassfication";
+import { getDegreeClassfication } from "@/helpers";
 
 type CertificateImageModalProps = {
   certificate: CertificateDetailType | null;

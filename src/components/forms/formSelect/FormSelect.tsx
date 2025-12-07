@@ -14,6 +14,7 @@ import {
 import "../style.css";
 
 import { cn } from "@/helpers";
+import { useMemo } from "react";
 
 type FormSelectProps = {
   name: string;
@@ -58,6 +59,15 @@ export function FormSelect({
       : name_placeholder
     : undefined;
 
+  const selectData = useMemo(() => {
+    if (!data) return [];
+    return data.map((item) => ({
+      ...item,
+      value: String(item.value),
+      label: String(isTranslate ? t(item.label as string) : item.label),
+    }));
+  }, [data, isTranslate, t]);
+
   return (
     <div className={cn("relative flex flex-col", classNames?.wrapper)}>
       <Controller
@@ -72,7 +82,7 @@ export function FormSelect({
           <Select
             {...args}
             {...field}
-            data={data}
+            data={selectData}
             disabled={disabled}
             label={isTranslate && name_label ? t(name_label) : name_label}
             placeholder={placeholderLabel}
