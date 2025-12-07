@@ -152,35 +152,6 @@ export const CreateEditCertificateModal = ({
       });
       return;
     }
-
-    // let data: CertificateItemFormType = {
-    //   authorName: values.authorName,
-    //   authorEmail: values.authorEmail,
-    //   authorIdCard: values.authorIdCard,
-    //   authorDob: values.authorDob,
-    //   authorCountryCode: values.authorCountryCode,
-    //   grantLevel: values.grantLevel,
-    //   domain: values.domain ?? "",
-    //   authorImage: authorImage?.preview,
-    // };
-
-    // if (certificateCategory === CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE) {
-    //   data.reg_no = values.reg_no;
-    //   data.serial_number = values.serial_number;
-    // }
-
-    // if (certificateCategory === CERTIFICATE_CATEGORIES.IELTS) {
-    //   data.candidate_sex = values.candidate_sex;
-    //   data.candidate_number = values.candidate_number;
-    //   data.first_language = values.first_language;
-    //   data.test_report = values.test_report;
-    //   data.listening_result = values.listening_result;
-    //   data.reading_result = values.reading_result;
-    //   data.writing_result = values.writing_result;
-    //   data.speaking_result = values.speaking_result;
-    //   data.administrator_comments = values.administrator_comments;
-    // }
-
     onSaveCertificateItem(
       {
         ...values,

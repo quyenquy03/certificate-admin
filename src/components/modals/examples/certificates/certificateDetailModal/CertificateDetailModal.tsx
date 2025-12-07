@@ -6,11 +6,19 @@ import {
   ARBITRUM_SEPOLIA_RPC_URL,
   ARBITRUM_SEPOLIA_URL,
   envs,
+  GENDER_LABELS,
+  LANGUAGE_LABELS,
 } from "@/constants";
-import { CERTIFICATE_REQUEST_TYPES, CERTIFICATE_STATUSES } from "@/enums";
+import {
+  CERTIFICATE_CATEGORIES,
+  CERTIFICATE_REQUEST_TYPES,
+  CERTIFICATE_STATUSES,
+  GENDERS,
+  LANGUAGES,
+} from "@/enums";
 import { formatDate } from "@/helpers";
 import { useSubmitCertificateForVerify } from "@/mutations";
-import { CertificateResponseType } from "@/types";
+import { AdditionalInfoType, CertificateResponseType } from "@/types";
 import { Box, Flex, Text, ActionIcon, Grid, GridCol } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { BrowserProvider, Contract } from "ethers";
@@ -29,6 +37,8 @@ type Eip1193Provider = {
   isMetaMask?: boolean;
   providers?: Eip1193Provider[];
 };
+
+type TranslateFn = ReturnType<typeof useTranslations>;
 
 const ARBITRUM_TESTNET_PARAMS = {
   chainId: "0x66eee",
@@ -74,14 +84,14 @@ const isInsufficientFundsError = (error: unknown) => {
   return message?.includes("insufficient funds") ?? false;
 };
 
-const getSigningErrorMessage = (error: unknown) => {
+const getSigningErrorMessage = (error: unknown, t: TranslateFn) => {
   if (isInsufficientFundsError(error)) {
-    return "Bạn không đủ ETH trong tài khoản để thanh toán phí gas trên Arbitrum testnet.";
+    return t("sign_certificate_insufficient_funds");
   }
   if (error instanceof Error) {
     return error.message;
   }
-  return "Unable to sign certificate. Please try again.";
+  return t("sign_certificate_error_generic");
 };
 
 const ensureArbitrumTestnet = async (provider: Eip1193Provider) => {
@@ -188,14 +198,49 @@ export const CertificateDetailModal = ({
     ];
   }, [certificate]);
 
+  const certificateCategory = useMemo(() => {
+    if (!certificate) return null;
+
+    const currentCertificateType = certificate.certificateType?.code;
+
+    if (!currentCertificateType) return null;
+
+    switch (currentCertificateType) {
+      case "IELTS":
+        return CERTIFICATE_CATEGORIES.IELTS;
+      case "TOEIC":
+        return CERTIFICATE_CATEGORIES.TOEIC;
+      case "CN001":
+      case "KS01":
+        return CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE;
+      default:
+        return null;
+    }
+  }, [certificate]);
+
+  const additionalInfo = useMemo(() => {
+    try {
+      if (!certificate || !certificate.authorProfile?.additionalInfo)
+        return null;
+
+      const additionalInfo: AdditionalInfoType = JSON.parse(
+        certificate.authorProfile.additionalInfo
+      );
+
+      return additionalInfo;
+    } catch (error) {
+      return null;
+    }
+  }, [certificate]);
+
   const handleSignCertificate = async () => {
     if (!certificate || isSigning) return;
 
     const contractAddress = envs.CONTRACT_ADDRESS?.trim();
     if (!contractAddress || contractAddress === "no value") {
       notifications.show({
-        title: "Certificate signing",
-        message: "Contract address is not configured.",
+        title: t("certificate_signing"),
+        message: t("contract_address_not_configured"),
         color: "red",
       });
       return;
@@ -204,8 +249,8 @@ export const CertificateDetailModal = ({
     const provider = getMetaMaskProvider();
     if (!provider) {
       notifications.show({
-        title: "Certificate signing",
-        message: "MetaMask wallet is not detected in this browser.",
+        title: t("certificate_signing"),
+        message: t("metamask_not_detected"),
         color: "red",
       });
       return;
@@ -214,8 +259,8 @@ export const CertificateDetailModal = ({
     const authorProfile = certificate.authorProfile;
     if (!authorProfile) {
       notifications.show({
-        title: "Certificate signing",
-        message: "Author profile is missing on this certificate.",
+        title: t("certificate_signing"),
+        message: t("author_profile_missing"),
         color: "red",
       });
       return;
@@ -236,19 +281,22 @@ export const CertificateDetailModal = ({
     const ipfsHash = certificate.certificateHash?.trim();
 
     const missingFields: string[] = [];
-    if (!certificateId) missingFields.push("certificate id");
-    if (!organizationId) missingFields.push("organization id");
-    if (!certificateTypeId) missingFields.push("certificate type");
-    if (!holderIdCard) missingFields.push("holder id card");
-    if (!holderCountryCode) missingFields.push("holder country");
-    if (Number.isNaN(normalizedGrantLevel)) missingFields.push("grant level");
-    if (!expireTime) missingFields.push("expire time");
-    if (!ipfsHash) missingFields.push("certificate hash");
+    if (!certificateId) missingFields.push(t("certificate_id"));
+    if (!organizationId) missingFields.push(t("organization_id"));
+    if (!certificateTypeId) missingFields.push(t("certificate_type"));
+    if (!holderIdCard) missingFields.push(t("author_id_card"));
+    if (!holderCountryCode) missingFields.push(t("holder_country"));
+    if (Number.isNaN(normalizedGrantLevel))
+      missingFields.push(t("certificate_grant_level"));
+    if (!expireTime) missingFields.push(t("valid_to"));
+    if (!ipfsHash) missingFields.push(t("certificate_hash"));
 
     if (missingFields.length) {
       notifications.show({
-        title: "Certificate signing",
-        message: `Missing data: ${missingFields.join(", ")}.`,
+        title: t("certificate_signing"),
+        message: t("missing_certificate_data", {
+          fields: missingFields.join(", "),
+        }),
         color: "red",
       });
       return;
@@ -278,15 +326,15 @@ export const CertificateDetailModal = ({
       onSignSuccess?.();
 
       notifications.show({
-        title: "Certificate signing",
-        message: `Submitted certificate on-chain. Tx: ${tx.hash}`,
+        title: t("certificate_signing"),
+        message: t("certificate_submitted_success", { hash: tx.hash }),
         color: "green",
       });
     } catch (error) {
       console.error("sign_certificate_error", error);
       notifications.show({
-        title: "Certificate signing",
-        message: getSigningErrorMessage(error),
+        title: t("certificate_signing"),
+        message: getSigningErrorMessage(error, t),
         color: "red",
       });
     } finally {
@@ -375,6 +423,121 @@ export const CertificateDetailModal = ({
                 }
               />
             </Box>
+
+            <Box className="space-y-3 rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/60">
+              <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                {t("other_information")}
+              </Text>
+              {certificateCategory ===
+                CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE && (
+                <>
+                  <InfoRowItem
+                    label={t("reg_no")}
+                    value={
+                      (additionalInfo?.reg_no as string) ?? t("not_updated")
+                    }
+                  />
+                  <InfoRowItem
+                    label={t("serial_number")}
+                    value={
+                      (additionalInfo?.serial_number as string) ??
+                      t("not_updated")
+                    }
+                    showCopyButton
+                  />
+                </>
+              )}
+
+              {certificateCategory === CERTIFICATE_CATEGORIES.IELTS && (
+                <>
+                  <Grid gutter="md">
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <InfoRowItem
+                        label={t("test_report")}
+                        value={
+                          (additionalInfo?.test_report as string) ??
+                          t("not_updated")
+                        }
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <InfoRowItem
+                        label={t("candidate_number")}
+                        value={
+                          (additionalInfo?.candidate_number as string) ??
+                          t("not_updated")
+                        }
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <InfoRowItem
+                        label={t("candidate_sex")}
+                        value={
+                          additionalInfo?.candidate_sex
+                            ? t(
+                                GENDER_LABELS[
+                                  additionalInfo.candidate_sex as GENDERS
+                                ]
+                              )
+                            : t("not_updated")
+                        }
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <InfoRowItem
+                        label={t("first_language")}
+                        value={
+                          additionalInfo?.first_language
+                            ? t(
+                                LANGUAGE_LABELS[
+                                  additionalInfo?.first_language as LANGUAGES
+                                ]
+                              )
+                            : t("not_updated")
+                        }
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 6, sm: 3 }}>
+                      <InfoRowItem
+                        label={t("listening")}
+                        value={
+                          (additionalInfo?.listening_result as string) ??
+                          t("not_updated")
+                        }
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 6, sm: 3 }}>
+                      <InfoRowItem
+                        label={t("speaking")}
+                        value={
+                          (additionalInfo?.speaking_result as string) ??
+                          t("not_updated")
+                        }
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 6, sm: 3 }}>
+                      <InfoRowItem
+                        label={t("writing")}
+                        value={
+                          (additionalInfo?.writing_result as string) ??
+                          t("not_updated")
+                        }
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 6, sm: 3 }}>
+                      <InfoRowItem
+                        label={t("reading")}
+                        value={
+                          (additionalInfo?.reading_result as string) ??
+                          t("not_updated")
+                        }
+                      />
+                    </Grid.Col>
+                  </Grid>
+                </>
+              )}
+            </Box>
+
             <Flex gap={10}>
               <Box className="flex-1 w-full space-y-3 rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/60">
                 <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">

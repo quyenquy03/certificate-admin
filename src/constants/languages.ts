@@ -1,11 +1,24 @@
+import { LANGUAGES as LANGUAGES_ENUM } from "@/enums";
+export const LANGUAGE_LABELS = {
+  [LANGUAGES_ENUM.EN]: "vietnamese",
+  [LANGUAGES_ENUM.VI]: "english",
+  [LANGUAGES_ENUM.JA]: "japanese",
+  [LANGUAGES_ENUM.KO]: "korean",
+  [LANGUAGES_ENUM.ZH_CN]: "zh_CN",
+  [LANGUAGES_ENUM.ZH_TW]: "zh_TW",
+  [LANGUAGES_ENUM.ES]: "spanish",
+  [LANGUAGES_ENUM.FR]: "french",
+  [LANGUAGES_ENUM.DE]: "german",
+};
+
 export const LANGUAGES = [
-  { label: "vietnamese", value: "vi" },
-  { label: "english", value: "en" },
-  { label: "japanese", value: "ja" },
-  { label: "korean", value: "ko" },
-  { label: "zh_CN", value: "zh_CN" },
-  { label: "zh_TW", value: "zh_TW" },
-  { label: "spanish", value: "es" },
-  { label: "french", value: "fr" },
-  { label: "german", value: "de" },
+  { label: LANGUAGE_LABELS[LANGUAGES_ENUM.EN], value: LANGUAGES_ENUM.EN },
+  { label: LANGUAGE_LABELS[LANGUAGES_ENUM.VI], value: LANGUAGES_ENUM.VI },
+  { label: LANGUAGE_LABELS[LANGUAGES_ENUM.JA], value: LANGUAGES_ENUM.JA },
+  { label: LANGUAGE_LABELS[LANGUAGES_ENUM.KO], value: LANGUAGES_ENUM.KO },
+  { label: LANGUAGE_LABELS[LANGUAGES_ENUM.ZH_CN], value: LANGUAGES_ENUM.ZH_CN },
+  { label: LANGUAGE_LABELS[LANGUAGES_ENUM.ZH_TW], value: LANGUAGES_ENUM.ZH_TW },
+  { label: LANGUAGE_LABELS[LANGUAGES_ENUM.ES], value: LANGUAGES_ENUM.ES },
+  { label: LANGUAGE_LABELS[LANGUAGES_ENUM.FR], value: LANGUAGES_ENUM.FR },
+  { label: LANGUAGE_LABELS[LANGUAGES_ENUM.DE], value: LANGUAGES_ENUM.DE },
 ];
