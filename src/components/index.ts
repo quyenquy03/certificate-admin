@@ -16,3 +16,4 @@ export * from "./separators";
 export * from "./wrappers";
 export * from "./infoRowItem";
 export * from "./noData";
+export * from "./certificateTemplates";

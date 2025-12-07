@@ -1,5 +1,9 @@
 export const IMAGES = {
   logo: "/logos/logo.svg",
+  ielts: {
+    logos: "/logos/ielts.png",
+    stamp: "/logos/ielts-stamp.png",
+  },
   default: {
     avatar: "/defaults/avt-default.jpg",
     noData: "/defaults/no-data.png",

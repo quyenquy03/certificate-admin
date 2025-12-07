@@ -36,3 +36,13 @@ export const calculateIELTSOverall = (data: IeltsScoreType) => {
 
   return { overall: rounded, cefr };
 };
+
+export const formatScore = (value: string | number) => {
+  if (value === null || value === undefined) return "";
+
+  const str = String(value).trim();
+
+  if (str.includes(".")) return str;
+
+  return `${str}.0`;
+};

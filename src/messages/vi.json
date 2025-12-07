@@ -360,6 +360,7 @@
   "certificate_grant_level_placeholder": "Nh?p c?p ?? (0 - 4)",
   "certificate_grant_level_min": "C?p ?? ph?i l?n h?n ho?c b?ng 0.",
   "certificate_holder_section": "Thong tin nguoi so huu",
+  "certificate_holder_name": "Ten nguoi so huu",
   "certificate_holder_id_card": "So CCCD/CMND",
   "certificate_holder_country_code": "Ma quoc gia",
   "certificate_holder_birthday": "Ngay sinh",

@@ -360,6 +360,7 @@
   "certificate_grant_level_placeholder": "Enter grant level (0 - 4)",
   "certificate_grant_level_min": "Grant level must be at least 0.",
   "certificate_holder_section": "Holder information",
+  "certificate_holder_name": "Holder name",
   "certificate_holder_id_card": "ID card",
   "certificate_holder_country_code": "Country code",
   "certificate_holder_birthday": "Birthday",

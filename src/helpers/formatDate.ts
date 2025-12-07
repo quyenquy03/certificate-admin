@@ -1,6 +1,6 @@
 import moment from "moment";
 
-type FormatDate = "YYYY/MM/DD" | "DD/MM/YYYY";
+type FormatDate = "YYYY/MM/DD" | "DD/MM/YYYY" | "DD/MMM/YYYY";
 
 export const formatDate = (date: string, format: FormatDate = "DD/MM/YYYY") => {
   if (!date || date?.trim() === "") return "Invalid date";
@@ -24,7 +24,6 @@ export const formatFullDate = (date: string, locale: "en" | "vi" = "vi") => {
 };
 
 export const excelDateToJSDate = (serial: number) => {
-  // 25569 là số ngày từ 1/1/1900 đến 1/1/1970
   const utc_days = Math.floor(serial - 25569);
   const utc_value = utc_days * 86400;
   const date_info = new Date(utc_value * 1000);
