@@ -8,21 +8,30 @@ import {
   UserItemSkeleton,
   PaginationCustom,
   PageContentWrapper,
+  ConfirmationModal,
+  type ConfirmationModalType,
 } from "@/components";
 import { PAGINATION_PARAMS } from "@/constants";
 import { removeNoneCharacters, useDebounce, useDisclose } from "@/hooks";
 import { useQueryGetAllUsers } from "@/queries";
-import { BasePaginationParams, UserResponseType } from "@/types";
+import { BasePaginationParams, BaseErrorType, UserResponseType } from "@/types";
+import { useDeleteUser, useResetPassword } from "@/mutations";
 import { Box, Grid, Input } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
+import { notifications } from "@mantine/notifications";
+import { isAxiosError } from "axios";
 
 export const UsersManagement = () => {
   const t = useTranslations();
   const userFormModal = useDisclose();
+  const confirmationModal = useDisclose();
   const [selectedUser, setSelectedUser] = useState<UserResponseType | null>(
     null
   );
+  const [confirmationType, setConfirmationType] =
+    useState<ConfirmationModalType | null>(null);
+  const [actionUser, setActionUser] = useState<UserResponseType | null>(null);
 
   const [searchParams, setSearchParams] = useState<BasePaginationParams>({
     page: PAGINATION_PARAMS.GET_USERS.page,
@@ -43,6 +52,96 @@ export const UsersManagement = () => {
     ...searchParams,
     search: removeNoneCharacters(searchDebouncedValue),
   });
+
+  const actionUserName = useMemo(() => {
+    if (!actionUser) {
+      return "";
+    }
+
+    const fullName =
+      [actionUser.firstName?.trim(), actionUser.lastName?.trim()]
+        .filter(Boolean)
+        .join(" ")
+        .trim() || "";
+
+    const email = actionUser.email?.trim() ?? "";
+
+    return fullName || email || t("not_updated");
+  }, [actionUser, t]);
+
+  const handleOpenConfirmationModal = (
+    type: ConfirmationModalType,
+    user: UserResponseType
+  ) => {
+    setConfirmationType(type);
+    setActionUser(user);
+    confirmationModal.onOpen();
+  };
+
+  const handleCloseConfirmationModal = () => {
+    confirmationModal.onClose();
+    setConfirmationType(null);
+    setActionUser(null);
+  };
+
+  const handleMutationError = (error: unknown, failKey: string) => {
+    let message = t("common_error_message");
+
+    if (isAxiosError<BaseErrorType>(error)) {
+      const code = error.response?.data?.code;
+      message = t(code || "common_error_message");
+    }
+
+    notifications.show({
+      title: t(failKey),
+      message,
+      color: "red",
+    });
+  };
+
+  const { mutate: deleteUser, isPending: isDeletingUser } = useDeleteUser({
+    onSuccess: () => {
+      notifications.show({
+        title: t("delete_user_success_title"),
+        message: t("delete_user_success_desc"),
+        color: "green",
+      });
+      handleCloseConfirmationModal();
+      refetchListUsers();
+    },
+    onError: (error) => handleMutationError(error, "delete_user_fail"),
+  });
+
+  const { mutate: resetPassword, isPending: isResettingPassword } =
+    useResetPassword({
+      onSuccess: () => {
+        notifications.show({
+          title: t("reset_password_success_title"),
+          message: t("reset_password_success_desc"),
+          color: "green",
+        });
+        handleCloseConfirmationModal();
+        refetchListUsers();
+      },
+      onError: (error) => handleMutationError(error, "reset_password_fail"),
+    });
+
+  const handleConfirmAction = () => {
+    if (!confirmationType || !actionUser?.id) {
+      return;
+    }
+
+    if (confirmationType === "delete") {
+      deleteUser(actionUser.id);
+      return;
+    }
+
+    if (confirmationType === "reset_password") {
+      resetPassword(actionUser.id);
+    }
+  };
+
+  const isConfirmProcessing = isDeletingUser || isResettingPassword;
 
   const handleCreateUser = () => {
     setSelectedUser(null);
@@ -119,7 +218,16 @@ export const UsersManagement = () => {
                   xl: 4,
                 }}
               >
-                <UserItem user={item} onUpdate={handleUpdateUser} />
+                <UserItem
+                  user={item}
+                  onUpdate={handleUpdateUser}
+                  onDelete={(user) =>
+                    handleOpenConfirmationModal("delete", user)
+                  }
+                  onResetPassword={(user) =>
+                    handleOpenConfirmationModal("reset_password", user)
+                  }
+                />
               </Grid.Col>
             ))}
           </Grid>
@@ -144,6 +252,35 @@ export const UsersManagement = () => {
         onClose={handleCloseModal}
         onSuccess={handleSuccessSubmit}
         selectedUser={selectedUser}
+      />
+      <ConfirmationModal
+        type={confirmationType ?? "delete"}
+        title={
+          confirmationType
+            ? t(
+                confirmationType === "delete"
+                  ? "delete_user_confirmation_title"
+                  : "reset_password_confirmation_title"
+              )
+            : ""
+        }
+        description={
+          confirmationType
+            ? t(
+                confirmationType === "delete"
+                  ? "delete_user_confirmation_desc"
+                  : "reset_password_confirmation_desc",
+                {
+                  name: actionUserName || t("not_updated"),
+                }
+              )
+            : ""
+        }
+        itemName={actionUserName}
+        opened={confirmationModal.isOpen}
+        onClose={handleCloseConfirmationModal}
+        onConfirm={handleConfirmAction}
+        isLoading={isConfirmProcessing}
       />
     </Box>
   );

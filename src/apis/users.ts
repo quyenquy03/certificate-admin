@@ -87,7 +87,7 @@ const deleteUser = async (
 ): Promise<BaseResponseType<UserResponseType>> => {
   const response = await axiosClient<BaseResponseType<UserResponseType>>({
     method: AXIOS_METHOD.DELETE,
-    url: API_ROUTES.RESET_PASSWORD + "/" + userId,
+    url: API_ROUTES.DELETE_USER + "/" + userId,
   });
   return response.data;
 };

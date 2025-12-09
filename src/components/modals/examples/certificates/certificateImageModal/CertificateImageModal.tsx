@@ -15,7 +15,6 @@ import { Button } from "@mantine/core";
 import jsPDF from "jspdf";
 import { cn } from "@/helpers";
 import { CERTIFICATE_CATEGORIES } from "@/enums";
-import {} from "@/components";
 
 type CertificateImageModalProps = {
   certificate: CertificateDetailType | null;

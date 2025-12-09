@@ -13,7 +13,7 @@ import { formatDate } from "@/helpers";
 import { UserResponseType } from "@/types";
 import { Box, Flex, Text } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { BiEdit, BiShow, BiTrash } from "react-icons/bi";
+import { BiEdit, BiReset, BiShow, BiTrash } from "react-icons/bi";
 import {
   PiCalendarCheck,
   PiEnvelopeSimple,
@@ -28,6 +28,7 @@ type UserItemProps = {
   onViewDetail?: (user: UserResponseType) => void;
   onUpdate?: (user: UserResponseType) => void;
   onDelete?: (user: UserResponseType) => void;
+  onResetPassword?: (user: UserResponseType) => void;
 };
 
 const ROLE_COLORS: Partial<Record<USER_ROLES, string>> = {
@@ -43,6 +44,7 @@ export const UserItem = ({
   onViewDetail,
   onUpdate,
   onDelete,
+  onResetPassword,
 }: UserItemProps) => {
   const t = useTranslations();
 
@@ -77,6 +79,15 @@ export const UserItem = ({
       label: t("update_user"),
       leftIcon: <BiEdit />,
       onClick: () => onUpdate?.(user),
+    });
+  }
+
+  if (onResetPassword) {
+    actionMenuItems.push({
+      id: "reset_password",
+      label: t("reset_password"),
+      leftIcon: <BiReset />,
+      onClick: () => onResetPassword?.(user),
     });
   }
 

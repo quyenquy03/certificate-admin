@@ -7,11 +7,16 @@ import { useTranslations } from "next-intl";
 import { Fragment, ReactNode, useMemo } from "react";
 import {
   PiCheckCircleBold,
+  PiKeyBold,
   PiProhibitBold,
   PiWarningCircleBold,
 } from "react-icons/pi";
 
-export type ConfirmationModalType = "delete" | "activate" | "deactivate";
+export type ConfirmationModalType =
+  | "delete"
+  | "activate"
+  | "deactivate"
+  | "reset_password";
 
 type ConfirmationModalProps = {
   type: ConfirmationModalType;
@@ -125,6 +130,29 @@ const TYPE_STYLES: Record<
     accentTextClass: "text-amber-600 dark:text-amber-200",
     highlightTextClass: "text-amber-600 dark:text-amber-200 font-semibold",
     icon: <PiProhibitBold className="text-3xl" />,
+  },
+  reset_password: {
+    titleKey: "reset_password_confirmation_title",
+    messageKey: "reset_password_confirmation_desc",
+    confirmTextKey: "reset_password",
+    themeIconColor: "blue",
+    headerGradientClass:
+      "from-blue-200 via-indigo-200 to-cyan-200 dark:from-blue-900/40 dark:via-indigo-900/40 dark:to-cyan-900/30",
+    headerTitleClass: "text-blue-900 dark:text-blue-100",
+    wrapperBorderClass:
+      "border-blue-100/60 dark:border-blue-900/30 bg-white dark:bg-dark-7",
+    closeButtonClass:
+      "top-3 right-3 bg-white/60 hover:bg-white/70 text-blue-600 dark:bg-white/10 dark:text-blue-100 shadow-sm",
+    closeIconClass: "text-xl",
+    footerBoxClass: "border-none bg-blue-50/80 px-5 py-3 dark:bg-dark-6",
+    cancelButtonClass:
+      "border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-900/40 dark:text-blue-200 dark:hover:bg-blue-900/20",
+    confirmButtonClass: "bg-blue-600 hover:bg-blue-500",
+    accentBoxClass:
+      "rounded-lg border border-blue-100/70 bg-blue-50/80 px-4 py-3 text-center dark:border-blue-900/40 dark:bg-blue-950/40",
+    accentTextClass: "text-blue-600 dark:text-blue-200",
+    highlightTextClass: "text-blue-600 dark:text-blue-200 font-semibold",
+    icon: <PiKeyBold className="text-3xl" />,
   },
 };
 
