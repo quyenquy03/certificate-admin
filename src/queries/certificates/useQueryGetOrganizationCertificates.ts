@@ -18,7 +18,7 @@ export const useQueryGetOrganizationCertificates = (
     QueryKey
   >
 ) => {
-  const queryKey = [QUERY_KEYS.GET_ORGANIZATION_CERTIFICATES];
+  const queryKey = [QUERY_KEYS.GET_ORGANIZATION_CERTIFICATES, params];
 
   const queryFn = async () => {
     return await certificateApis.getOrganizationCertificates(params.id, params);

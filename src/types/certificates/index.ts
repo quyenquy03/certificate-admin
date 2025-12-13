@@ -11,3 +11,4 @@ export * from "./certificateRequestType";
 export * from "./getCertificateRequestSpecificParams";
 export * from "./certificateItemFormType";
 export * from "./importCertificateRequestType";
+export * from "./revokeCertificateRequestType";

@@ -1,14 +1,7 @@
 "use client";
 
-import CertificateABI from "@/abis/CertificateABI.json";
 import { Modal, type BaseModalProps, InfoRowItem } from "@/components";
-import {
-  ARBITRUM_SEPOLIA_RPC_URL,
-  ARBITRUM_SEPOLIA_URL,
-  envs,
-  GENDER_LABELS,
-  LANGUAGE_LABELS,
-} from "@/constants";
+import { GENDER_LABELS, LANGUAGE_LABELS } from "@/constants";
 import {
   CERTIFICATE_TEMPLATES,
   CERTIFICATE_REQUEST_TYPES,
@@ -17,13 +10,10 @@ import {
   LANGUAGES,
 } from "@/enums";
 import { formatDate } from "@/helpers";
-import { useSubmitCertificateForVerify } from "@/mutations";
 import { AdditionalInfoType, CertificateResponseType } from "@/types";
 import { Box, Flex, Text, ActionIcon, Grid, GridCol } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { BrowserProvider, Contract } from "ethers";
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { FiCopy } from "react-icons/fi";
 import { HiOutlineQrCode } from "react-icons/hi2";
 
@@ -31,101 +21,13 @@ type CertificateDetailModalProps = {
   certificate: CertificateResponseType | null;
   onSignSuccess?: () => void;
   isOrganizationOwner?: boolean;
+  canSign?: boolean;
+  canApprove?: boolean;
+  canRevoke?: boolean;
+  onApproveCertificate?: (certificate: CertificateResponseType) => void;
+  onRevokeCertificate?: (certificate: CertificateResponseType) => void;
+  onSignCertificate?: (certificate: CertificateResponseType) => void;
 } & Omit<BaseModalProps, "children">;
-
-type Eip1193Provider = {
-  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-  isMetaMask?: boolean;
-  providers?: Eip1193Provider[];
-};
-
-type TranslateFn = ReturnType<typeof useTranslations>;
-
-const ARBITRUM_TESTNET_PARAMS = {
-  chainId: "0x66eee",
-  chainName: "Arbitrum Sepolia",
-  nativeCurrency: {
-    name: "Ether",
-    symbol: "ETH",
-    decimals: 18,
-  },
-  rpcUrls: [ARBITRUM_SEPOLIA_RPC_URL],
-  blockExplorerUrls: [ARBITRUM_SEPOLIA_URL],
-};
-
-const getMetaMaskProvider = (): Eip1193Provider | undefined => {
-  if (typeof window === "undefined") return undefined;
-  const anyWindow = window as typeof window & {
-    ethereum?: Eip1193Provider & { providers?: Eip1193Provider[] };
-  };
-  const { ethereum } = anyWindow ?? {};
-
-  if (!ethereum) return undefined;
-
-  if (Array.isArray(ethereum.providers)) {
-    return ethereum.providers.find((provider) => provider?.isMetaMask);
-  }
-
-  if (ethereum.isMetaMask) return ethereum;
-
-  return undefined;
-};
-
-const isInsufficientFundsError = (error: unknown) => {
-  const code = (error as { code?: string | number })?.code;
-  if (
-    code === "INSUFFICIENT_FUNDS" ||
-    code === "INSUFFICIENT_FUNDS_ERROR" ||
-    code === -32000
-  ) {
-    return true;
-  }
-
-  const message = (error as { message?: string })?.message?.toLowerCase();
-  return message?.includes("insufficient funds") ?? false;
-};
-
-const getSigningErrorMessage = (error: unknown, t: TranslateFn) => {
-  if (isInsufficientFundsError(error)) {
-    return t("sign_certificate_insufficient_funds");
-  }
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return t("sign_certificate_error_generic");
-};
-
-const ensureArbitrumTestnet = async (provider: Eip1193Provider) => {
-  const targetChainId = ARBITRUM_TESTNET_PARAMS.chainId;
-  const currentChainId = (await provider.request({
-    method: "eth_chainId",
-  })) as string | undefined;
-
-  if (currentChainId?.toLowerCase() === targetChainId.toLowerCase()) {
-    return;
-  }
-
-  try {
-    await provider.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: targetChainId }],
-    });
-  } catch (error) {
-    const requestError = error as { code?: number };
-    if (requestError?.code === 4902) {
-      await provider.request({
-        method: "wallet_addEthereumChain",
-        params: [ARBITRUM_TESTNET_PARAMS],
-      });
-      await provider.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: targetChainId }],
-      });
-      return;
-    }
-    throw error;
-  }
-};
 
 export const CertificateDetailModal = ({
   certificate,
@@ -133,15 +35,17 @@ export const CertificateDetailModal = ({
   onClose,
   onSignSuccess,
   isOrganizationOwner = false,
+  canSign,
+  canApprove,
+  canRevoke,
+  onApproveCertificate,
+  onRevokeCertificate,
+  onSignCertificate,
   ...props
 }: CertificateDetailModalProps) => {
   const t = useTranslations();
-  const [isSigning, setIsSigning] = useState(false);
 
   const author = certificate?.authorProfile;
-
-  const { mutateAsync: submitCertificateForVerify, isPending: isSubmitting } =
-    useSubmitCertificateForVerify();
 
   const summaryItems = useMemo(() => {
     if (!certificate) return [];
@@ -235,134 +139,53 @@ export const CertificateDetailModal = ({
     }
   }, [certificate]);
 
-  const handleSignCertificate = async () => {
-    if (!certificate || isSigning) return;
+  const normalizedCanSign = canSign ?? isOrganizationOwner;
+  const normalizedCanApprove = canApprove ?? isOrganizationOwner;
+  const normalizedCanRevoke = canRevoke ?? isOrganizationOwner;
 
-    const contractAddress = envs.CONTRACT_ADDRESS?.trim();
-    if (!contractAddress || contractAddress === "no value") {
-      notifications.show({
-        title: t("certificate_signing"),
-        message: t("contract_address_not_configured"),
-        color: "red",
-      });
-      return;
+  const modalAction = useMemo(() => {
+    switch (certificate?.status) {
+      case CERTIFICATE_STATUSES.CREATED:
+        return {
+          text: "sign_certificate",
+          allowed: normalizedCanSign,
+        };
+      case CERTIFICATE_STATUSES.SIGNED:
+        return {
+          text: "approve",
+          allowed: normalizedCanApprove,
+        };
+      case CERTIFICATE_STATUSES.VERIFIED:
+        return {
+          text: "revoke",
+          allowed: normalizedCanRevoke,
+        };
+      default:
+        return { text: "", allowed: false };
     }
-
-    const provider = getMetaMaskProvider();
-    if (!provider) {
-      notifications.show({
-        title: t("certificate_signing"),
-        message: t("metamask_not_detected"),
-        color: "red",
-      });
-      return;
-    }
-
-    const authorProfile = certificate.authorProfile;
-    if (!authorProfile) {
-      notifications.show({
-        title: t("certificate_signing"),
-        message: t("author_profile_missing"),
-        color: "red",
-      });
-      return;
-    }
-
-    const certificateId = certificate.id?.trim();
-    const organizationId = certificate.organizationId?.trim();
-    const certificateTypeId = certificate.certificateTypeId?.trim();
-    const holderIdCard = authorProfile.authorIdCard?.trim();
-    const holderCountryCode = authorProfile.authorCountryCode;
-    const rawGrantLevel = Number(authorProfile.grantLevel ?? 0);
-    const normalizedGrantLevel = Number.isFinite(rawGrantLevel)
-      ? Math.trunc(rawGrantLevel)
-      : Number.NaN;
-    const expireTime = certificate.validTo
-      ? Math.floor(new Date(certificate.validTo).getTime() / 1000)
-      : undefined;
-    const ipfsHash = certificate.certificateHash?.trim();
-
-    const missingFields: string[] = [];
-    if (!certificateId) missingFields.push(t("certificate_id"));
-    if (!organizationId) missingFields.push(t("organization_id"));
-    if (!certificateTypeId) missingFields.push(t("certificate_type"));
-    if (!holderIdCard) missingFields.push(t("author_id_card"));
-    if (!holderCountryCode) missingFields.push(t("holder_country"));
-    if (Number.isNaN(normalizedGrantLevel))
-      missingFields.push(t("certificate_grant_level"));
-    if (!expireTime) missingFields.push(t("valid_to"));
-    if (!ipfsHash) missingFields.push(t("certificate_hash"));
-
-    if (missingFields.length) {
-      notifications.show({
-        title: t("certificate_signing"),
-        message: t("missing_certificate_data", {
-          fields: missingFields.join(", "),
-        }),
-        color: "red",
-      });
-      return;
-    }
-
-    try {
-      setIsSigning(true);
-      await provider.request({ method: "eth_requestAccounts" });
-      await ensureArbitrumTestnet(provider);
-      const browserProvider = new BrowserProvider(provider as any);
-      const signer = await browserProvider.getSigner();
-      const contract = new Contract(contractAddress, CertificateABI, signer);
-
-      const tx = await contract.submitCertificate(
-        certificate.code,
-        organizationId,
-        certificateTypeId,
-        holderIdCard,
-        holderCountryCode,
-        BigInt(normalizedGrantLevel),
-        BigInt(expireTime!),
-        ipfsHash
-      );
-
-      await tx.wait();
-
-      onSignSuccess?.();
-
-      notifications.show({
-        title: t("certificate_signing"),
-        message: t("certificate_submitted_success", { hash: tx.hash }),
-        color: "green",
-      });
-    } catch (error) {
-      console.error("sign_certificate_error", error);
-      notifications.show({
-        title: t("certificate_signing"),
-        message: getSigningErrorMessage(error, t),
-        color: "red",
-      });
-    } finally {
-      setIsSigning(false);
-    }
-  };
+  }, [
+    certificate?.status,
+    normalizedCanApprove,
+    normalizedCanRevoke,
+    normalizedCanSign,
+  ]);
 
   const handleClickConfirmButton = useCallback(() => {
     if (!certificate || !certificate?.status) return;
     switch (certificate.status) {
       case CERTIFICATE_STATUSES.CREATED:
-        handleSignCertificate();
+        onSignCertificate?.(certificate);
+        return;
+      case CERTIFICATE_STATUSES.SIGNED:
+        onApproveCertificate?.(certificate);
+        return;
+      case CERTIFICATE_STATUSES.VERIFIED:
+        onRevokeCertificate?.(certificate);
         return;
       default:
         return;
     }
-  }, [certificate]);
-
-  const modalConfirmText = useMemo(() => {
-    switch (certificate?.status) {
-      case CERTIFICATE_STATUSES.CREATED:
-        return "sign_certificate";
-      default:
-        return "";
-    }
-  }, [certificate?.status]);
+  }, [certificate, onApproveCertificate, onRevokeCertificate]);
 
   return (
     <Modal
@@ -372,11 +195,11 @@ export const CertificateDetailModal = ({
       size="lg"
       footerProps={{
         showFooter: true,
-        confirmText: modalConfirmText !== "" ? t(modalConfirmText) : "",
-        hideConfirmButton: modalConfirmText === "" || !isOrganizationOwner,
+        confirmText: modalAction.text !== "" ? t(modalAction.text as any) : "",
+        hideConfirmButton: modalAction.text === "" || !modalAction.allowed,
       }}
       onConfirm={handleClickConfirmButton}
-      isLoading={isSigning || props.isLoading}
+      isLoading={props.isLoading}
       {...props}
     >
       <Flex direction="column" gap={12}>

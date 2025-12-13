@@ -34,3 +34,7 @@ body {
 .scrollbar::-webkit-scrollbar-track {
   background-color: #f5f5f5;
 }
+
+.mantine-Notifications-root {
+  z-index: 5000 !important;
+}

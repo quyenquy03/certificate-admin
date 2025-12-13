@@ -55,6 +55,9 @@ export const API_ROUTES = {
   REJECT_CERTIFICATE_REQUEST: (id: string) =>
     `/certificates/certificate-requests/${id}/reject`,
 
+  REVOKE_CERTIFICATE: (id: string) => `/certificates/revoke/${id}`,
+  APPROVE_CERTIFICATE: (id: string) => `/certificates/approve/${id}`,
+
   // uploads
   UPLOAD_AUTHOR_IMAGE: "/uploads/author-image",
   UPLOAD_PROFILE_IMAGE: "/uploads/profile-image",

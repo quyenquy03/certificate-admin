@@ -11,25 +11,27 @@ import {
   PaginationCustom,
   NoData,
   PageContentWrapper,
+  ConfirmationModal,
+  RevokeCertificateModal,
+  SignCertificateModal,
 } from "@/components";
-import { Box, Grid, Group, Input, Select, Stack, Text } from "@mantine/core";
+import { Box, Grid, Group, Input, Select } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import { useDebounce, useDisclose } from "@/hooks";
 import { useQueryGetOrganizationCertificates } from "@/queries";
 import {
   BasePaginationParams,
   CertificateResponseType,
-  SubmitCertificateRequestType,
+  BaseErrorType,
   UserResponseType,
 } from "@/types";
-import {
-  CERTIFICATE_REQUEST_TYPES,
-  CERTIFICATE_STATUSES,
-  SORTS,
-} from "@/enums";
+import { CERTIFICATE_STATUSES, SORTS } from "@/enums";
 import { PAGINATION_PARAMS, PAGE_URLS } from "@/constants";
 import { stores } from "@/stores";
 import { useRouter } from "next/navigation";
+import { useApproveCertificate, useRevokeCertificate } from "@/mutations";
+import { notifications } from "@mantine/notifications";
+import { isAxiosError } from "axios";
 
 export const CertificatesManagement = () => {
   const t = useTranslations();
@@ -39,11 +41,16 @@ export const CertificatesManagement = () => {
   const headerRef = useRef<HTMLDivElement | null>(null);
   const detailModal = useDisclose();
   const issuerDetailModal = useDisclose();
+  const confirmationModal = useDisclose();
+  const revokeModal = useDisclose();
+  const signModal = useDisclose();
   const [selectedCertificate, setSelectedCertificate] =
     useState<CertificateResponseType | null>(null);
   const [selectedIssuer, setSelectedIssuer] = useState<UserResponseType | null>(
     null
   );
+  const [actionCertificate, setActionCertificate] =
+    useState<CertificateResponseType | null>(null);
 
   const [searchParams, setSearchParams] = useState<BasePaginationParams>({
     page: PAGINATION_PARAMS.GET_CERTIFICATES.page,
@@ -72,6 +79,8 @@ export const CertificatesManagement = () => {
     [t]
   );
 
+  const issuerFilterInitialized = useRef(false);
+
   const {
     data: certificatesResponse,
     isFetching,
@@ -87,29 +96,18 @@ export const CertificatesManagement = () => {
       filters: searchParams.filters,
     },
     {
-      enabled: Boolean(currentOrganization?.id),
+      enabled: Boolean(
+        currentOrganization?.id &&
+          currentUser?.id &&
+          issuerFilterInitialized.current
+      ),
     } as any
   );
 
   useEffect(() => {
-    if (!currentOrganization?.id) return;
-    refetch();
-  }, [
-    currentOrganization?.id,
-    debouncedSearch,
-    searchParams.page,
-    searchParams.limit,
-    searchParams.filters,
-    refetch,
-  ]);
-
-  const issuerFilterInitialized = useRef(false);
-
-  useEffect(() => {
-    if (issuerFilterInitialized.current) return;
-    if (!currentUser?.id) return;
+    if (!currentUser?.id || issuerFilterInitialized.current) return;
     setSearchParams((prev) => {
-      if (prev.filters?.issuerId?.eq) return prev;
+      if (prev.filters?.issuerId?.eq === currentUser.id) return { ...prev };
       return {
         ...prev,
         filters: {
@@ -120,6 +118,73 @@ export const CertificatesManagement = () => {
     });
     issuerFilterInitialized.current = true;
   }, [currentUser?.id]);
+
+  const handleMutationError = (error: unknown, failKey: string) => {
+    let message = t("common_error_message");
+
+    if (isAxiosError<BaseErrorType>(error)) {
+      const code = error.response?.data?.code;
+      message = t(code || "common_error_message");
+    }
+
+    notifications.show({
+      title: t(failKey),
+      message,
+      color: "red",
+    });
+  };
+
+  const handleCloseActionModals = () => {
+    confirmationModal.onClose();
+    signModal.onClose();
+    revokeModal.onClose();
+    setActionCertificate(null);
+  };
+
+  const { mutate: approveCertificateMutate, isPending: isApproving } =
+    useApproveCertificate({
+      onSuccess: () => {
+        notifications.show({
+          title: t("approve_certificate_success_title"),
+          message: t("approve_certificate_success_desc", {
+            code: actionCertificateCode || t("not_updated"),
+          }),
+          color: "green",
+        });
+        handleCloseActionModals();
+        handleCloseCertificateDetail();
+        refetch();
+      },
+      onError: (error) =>
+        handleMutationError(error, "approve_certificate_fail"),
+    });
+
+  const { mutate: revokeCertificateMutate, isPending: isRevoking } =
+    useRevokeCertificate({
+      onSuccess: () => {
+        notifications.show({
+          title: t("revoke_certificate_success_title"),
+          message: t("revoke_certificate_success_desc", {
+            code: actionCertificateCode || t("not_updated"),
+          }),
+          color: "green",
+        });
+        handleCloseActionModals();
+        handleCloseCertificateDetail();
+        refetch();
+      },
+      onError: (error) => handleMutationError(error, "revoke_certificate_fail"),
+    });
+
+  const handleOpenApproveModal = (certificate: CertificateResponseType) => {
+    setActionCertificate(certificate);
+    confirmationModal.onOpen();
+  };
+
+  const handleOpenRevokeModal = (certificate: CertificateResponseType) => {
+    setActionCertificate(certificate);
+    revokeModal.onOpen();
+  };
 
   const handleSearchChange = (value: string) => {
     setSearchParams((prev) => ({
@@ -172,7 +237,42 @@ export const CertificatesManagement = () => {
   const certificates = certificatesResponse?.data ?? [];
   const totalPages = certificatesResponse?.pagination?.totalPage ?? 0;
 
-  const isEmptyState = !isFetching && certificates.length === 0;
+  const isIssuerFilterReady = issuerFilterInitialized.current;
+  const isEmptyState =
+    isIssuerFilterReady && !isFetching && certificates.length === 0;
+  const isLoadingCertificates = isLoading || !isIssuerFilterReady;
+
+  useEffect(() => {
+    if (!currentOrganization?.id || !currentUser?.id || !isIssuerFilterReady) {
+      return;
+    }
+    refetch();
+  }, [
+    currentOrganization?.id,
+    currentUser?.id,
+    isIssuerFilterReady,
+    searchParams.filters,
+    searchParams.sort,
+    searchParams.page,
+    searchParams.limit,
+    debouncedSearch,
+    refetch,
+  ]);
+
+  const isOrganizationOwner = currentOrganization?.isOwner ?? false;
+  const canApproveCertificate = isOrganizationOwner;
+  const canRevokeCertificate = isOrganizationOwner;
+
+  const canSignSelectedCertificate = useMemo(() => {
+    if (!selectedCertificate) return false;
+    const isIssuer = currentUser?.id === selectedCertificate.issuerId;
+    return isOrganizationOwner || isIssuer;
+  }, [currentUser?.id, isOrganizationOwner, selectedCertificate]);
+
+  const actionCertificateCode = useMemo(() => {
+    if (!actionCertificate) return "";
+    return actionCertificate.code?.trim() || "";
+  }, [actionCertificate]);
 
   const handleShowCertificateDetail = (
     certificate: CertificateResponseType
@@ -186,6 +286,28 @@ export const CertificatesManagement = () => {
     setSelectedCertificate(null);
   };
 
+  const handleSignFromItem = (certificate: CertificateResponseType) => {
+    setSelectedCertificate(certificate);
+    setActionCertificate(certificate);
+    signModal.onOpen();
+  };
+
+  const handleSignFromDetail = () => {
+    if (!selectedCertificate) return;
+    setActionCertificate(selectedCertificate);
+    signModal.onOpen();
+  };
+
+  const handleApproveFromDetail = () => {
+    if (!selectedCertificate) return;
+    handleOpenApproveModal(selectedCertificate);
+  };
+
+  const handleRevokeFromDetail = () => {
+    if (!selectedCertificate) return;
+    handleOpenRevokeModal(selectedCertificate);
+  };
+
   const handleShowIssuerDetail = (issuer: UserResponseType) => {
     setSelectedIssuer(issuer);
     issuerDetailModal.onOpen();
@@ -194,6 +316,19 @@ export const CertificatesManagement = () => {
   const handleCloseIssuerDetail = () => {
     issuerDetailModal.onClose();
     setSelectedIssuer(null);
+  };
+
+  const handleConfirmApprove = () => {
+    if (!canApproveCertificate || !actionCertificate?.id) return;
+    approveCertificateMutate(actionCertificate.id);
+  };
+
+  const handleConfirmRevoke = (reason: string) => {
+    if (!canRevokeCertificate || !actionCertificate?.id) return;
+    revokeCertificateMutate({
+      id: actionCertificate.id,
+      data: { revokeReason: reason },
+    });
   };
 
   const handleUpdateCertificate = (certificate: CertificateResponseType) => {
@@ -206,6 +341,7 @@ export const CertificatesManagement = () => {
 
   const handleSignSuccess = () => {
     detailModal.onClose();
+    signModal.onClose();
     refetch();
   };
 
@@ -222,10 +358,16 @@ export const CertificatesManagement = () => {
             placeholder={t("issuer_filter_placeholder")}
             data={issuerFilterOptions}
             value={
-              searchParams.filters?.issuerId?.eq ? "me" : ("all" as string | null)
+              searchParams.filters?.issuerId?.eq
+                ? "me"
+                : ("all" as string | null)
             }
             onChange={handleIssuerFilterChange}
-            className="w-full max-w-[180px] hidden lg:block"
+            checkIconPosition="right"
+            classNames={{
+              wrapper: "w-full max-w-[180px] hidden lg:block text-color-light",
+              option: "text-color-light dark:text-color-dark",
+            }}
             allowDeselect={false}
           />
           <Select
@@ -233,7 +375,11 @@ export const CertificatesManagement = () => {
             data={statusOptions}
             value={(searchParams.filters?.status?.eq as string | null) ?? null}
             onChange={handleStatusChange}
-            className="w-full max-w-[180px] hidden lg:block"
+            checkIconPosition="right"
+            classNames={{
+              wrapper: "w-full max-w-[180px] hidden lg:block text-color-light",
+              option: "text-color-light dark:text-color-dark",
+            }}
             allowDeselect
           />
 
@@ -253,7 +399,7 @@ export const CertificatesManagement = () => {
       </PageHeader>
       <PageContentWrapper>
         <div ref={headerRef}></div>
-        {isLoading ? (
+        {isLoadingCertificates ? (
           <Grid gutter="md">
             {Array.from({ length: searchParams.limit }).map((_, index) => (
               <Grid.Col key={index} span={{ base: 12, md: 6, xl: 4 }}>
@@ -273,6 +419,26 @@ export const CertificatesManagement = () => {
                   onUpdate={handleUpdateCertificate}
                   onDelete={handleDeleteCertificate}
                   onShowIssuerDetail={handleShowIssuerDetail}
+                  onApprove={
+                    isOrganizationOwner ? handleOpenApproveModal : undefined
+                  }
+                  onRevoke={
+                    isOrganizationOwner ? handleOpenRevokeModal : undefined
+                  }
+                  onSign={handleSignFromItem}
+                  canSign={
+                    (isOrganizationOwner ||
+                      currentUser?.id === certificate.issuerId) &&
+                    certificate.status === CERTIFICATE_STATUSES.CREATED
+                  }
+                  canApprove={
+                    isOrganizationOwner &&
+                    certificate.status === CERTIFICATE_STATUSES.SIGNED
+                  }
+                  canRevoke={
+                    isOrganizationOwner &&
+                    certificate.status === CERTIFICATE_STATUSES.VERIFIED
+                  }
                 />
               </Grid.Col>
             ))}
@@ -287,11 +453,45 @@ export const CertificatesManagement = () => {
           />
         )}
 
+        <ConfirmationModal
+          type="approve_certificate"
+          opened={confirmationModal.isOpen}
+          onClose={handleCloseActionModals}
+          onConfirm={handleConfirmApprove}
+          isLoading={isApproving}
+          itemName={actionCertificateCode || t("not_updated")}
+          description={t("approve_certificate_confirmation", {
+            code: actionCertificateCode || t("not_updated"),
+          })}
+          zIndex={2100}
+        />
+        <SignCertificateModal
+          opened={signModal.isOpen}
+          onClose={handleCloseActionModals}
+          certificate={actionCertificate}
+          onSignSuccess={handleSignSuccess}
+          zIndex={2100}
+        />
+        <RevokeCertificateModal
+          opened={revokeModal.isOpen}
+          onClose={handleCloseActionModals}
+          onConfirm={handleConfirmRevoke}
+          isLoading={isRevoking}
+          certificateCode={actionCertificateCode}
+          zIndex={2100}
+        />
+
         <CertificateDetailModal
           opened={detailModal.isOpen}
           onClose={handleCloseCertificateDetail}
           certificate={selectedCertificate}
           onSignSuccess={handleSignSuccess}
+          canSign={canSignSelectedCertificate}
+          canApprove={canApproveCertificate}
+          canRevoke={canRevokeCertificate}
+          onApproveCertificate={handleApproveFromDetail}
+          onRevokeCertificate={handleRevokeFromDetail}
+          onSignCertificate={handleSignFromDetail}
         />
         <UserDetailModal
           opened={issuerDetailModal.isOpen && Boolean(selectedIssuer)}

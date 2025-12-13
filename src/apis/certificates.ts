@@ -11,6 +11,7 @@ import {
   CertificateRequestType,
   RejectCertificateRequestType,
   ImportCertificateRequestType,
+  RevokeCertificateRequestType,
 } from "@/types";
 import axios from "axios";
 
@@ -222,6 +223,32 @@ const rejectCertificateRequest = async (
   return response.data;
 };
 
+const approveCertificate = async (
+  id: string
+): Promise<BaseResponseType<CertificateResponseType>> => {
+  const response = await axiosClient<BaseResponseType<CertificateResponseType>>(
+    {
+      method: AXIOS_METHOD.PUT,
+      url: API_ROUTES.APPROVE_CERTIFICATE(id),
+    }
+  );
+  return response.data;
+};
+
+const revokeCertificate = async (
+  id: string,
+  data: RevokeCertificateRequestType
+): Promise<BaseResponseType<CertificateResponseType>> => {
+  const response = await axiosClient<BaseResponseType<CertificateResponseType>>(
+    {
+      method: AXIOS_METHOD.PUT,
+      url: API_ROUTES.REVOKE_CERTIFICATE(id),
+      data,
+    }
+  );
+  return response.data;
+};
+
 export const certificateApis = {
   getCertificateType,
   getCertificateTypes,
@@ -240,4 +267,6 @@ export const certificateApis = {
   getCertificateRequestsSpecific,
   approveCertificateRequest,
   rejectCertificateRequest,
+  approveCertificate,
+  revokeCertificate,
 };

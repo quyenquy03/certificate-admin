@@ -51,6 +51,7 @@ const RECENT_CERTIFICATES_LIMIT = 5;
 export const OrganizationDashboard = () => {
   const t = useTranslations();
   const router = useRouter();
+  const { currentUser } = stores.account();
   const { currentOrganization, organizations, isLoading } =
     stores.organization();
 
@@ -58,20 +59,18 @@ export const OrganizationDashboard = () => {
     useState<CertificateResponseType | null>(null);
   const detailModal = useDisclose();
 
-  const {
-    data: certificatesResponse,
-    isFetching: isCertificatesFetching,
-  } = useQueryGetOrganizationCertificates(
-    {
-      id: currentOrganization?.id ?? "",
-      page: 1,
-      limit: RECENT_CERTIFICATES_LIMIT,
-      sort: { createdAt: SORTS.DESC },
-    },
-    {
-      enabled: Boolean(currentOrganization?.id),
-    } as any
-  );
+  const { data: certificatesResponse, isFetching: isCertificatesFetching } =
+    useQueryGetOrganizationCertificates(
+      {
+        id: currentOrganization?.id ?? "",
+        page: 1,
+        limit: RECENT_CERTIFICATES_LIMIT,
+        sort: { createdAt: SORTS.DESC },
+      },
+      {
+        enabled: Boolean(currentOrganization?.id),
+      } as any
+    );
 
   const recentCertificates = certificatesResponse?.data ?? [];
   const isCertificatesEmpty =
@@ -107,7 +106,9 @@ export const OrganizationDashboard = () => {
     const total = recentCertificates.length || 0;
     const items = Object.entries(counts).map(([status, value]) => {
       const typedStatus = status as CERTIFICATE_STATUSES;
-      const percentage = total ? Math.round(((value as number) / total) * 100) : 0;
+      const percentage = total
+        ? Math.round(((value as number) / total) * 100)
+        : 0;
 
       return {
         status: typedStatus,
@@ -123,18 +124,25 @@ export const OrganizationDashboard = () => {
     };
   }, [recentCertificates]);
 
+  const canSignSelectedCertificate = useMemo(() => {
+    if (!selectedCertificate) return false;
+    const isOrgOwner = currentOrganization?.isOwner ?? false;
+    const isIssuer = currentUser?.id === selectedCertificate.issuerId;
+    return isOrgOwner || isIssuer;
+  }, [currentOrganization?.isOwner, currentUser?.id, selectedCertificate]);
+
   const infoItems = useMemo(
     () => [
       {
         key: "email",
         label: t("organization_dashboard_contact_email"),
-        value: currentOrganization?.email,
+        value: "currentOrganization?.email",
         icon: <HiOutlineEnvelope className="h-4 w-4" />,
       },
       {
         key: "phone",
         label: t("organization_dashboard_contact_phone"),
-        value: currentOrganization?.phoneNumber,
+        value: "currentOrganization?.phoneNumber",
         icon: <HiOutlinePhone className="h-4 w-4" />,
       },
       {
@@ -198,7 +206,9 @@ export const OrganizationDashboard = () => {
     },
   ];
 
-  const handleOpenCertificateDetail = (certificate: CertificateResponseType) => {
+  const handleOpenCertificateDetail = (
+    certificate: CertificateResponseType
+  ) => {
     setSelectedCertificate(certificate);
     detailModal.onOpen();
   };
@@ -343,9 +353,7 @@ export const OrganizationDashboard = () => {
         </Button>
         <ButtonAdd
           tooltipLabel="create_certificate"
-          onClick={() =>
-            router.push(PAGE_URLS.ORGANIZATION_CREATE_CERTIFICATE)
-          }
+          onClick={() => router.push(PAGE_URLS.ORGANIZATION_CREATE_CERTIFICATE)}
         />
       </PageHeader>
 
@@ -524,7 +532,12 @@ export const OrganizationDashboard = () => {
                 shadow="md"
                 className="h-full rounded-xl border border-slate-200/70 bg-white/95 p-5 dark:border-slate-800/70 dark:bg-slate-900/70"
               >
-                <Flex align="center" justify="space-between" gap={12} wrap="wrap">
+                <Flex
+                  align="center"
+                  justify="space-between"
+                  gap={12}
+                  wrap="wrap"
+                >
                   <Box>
                     <Text className="text-base font-semibold text-slate-900 dark:text-white">
                       {t("organization_dashboard_recent_certificates")}
@@ -537,7 +550,9 @@ export const OrganizationDashboard = () => {
                     variant="light"
                     color="blue"
                     size="xs"
-                    onClick={() => router.push(PAGE_URLS.ORGANIZATIONS_CERTIFICATES)}
+                    onClick={() =>
+                      router.push(PAGE_URLS.ORGANIZATIONS_CERTIFICATES)
+                    }
                   >
                     {t("organization_dashboard_view_all_certificates")}
                   </Button>
@@ -562,15 +577,18 @@ export const OrganizationDashboard = () => {
                   ) : (
                     recentCertificates.map((certificate) => {
                       const badgeColor =
-                        CERTIFICATE_STATUS_COLORS[certificate.status] ?? "#0EA5E9";
+                        CERTIFICATE_STATUS_COLORS[certificate.status] ??
+                        "#0EA5E9";
                       const createdAt = certificate.createdAt
                         ? dayjs(certificate.createdAt).format("DD MMM YYYY")
                         : t("not_updated");
 
                       const authorName =
-                        certificate.authorProfile?.authorName || t("not_updated");
+                        certificate.authorProfile?.authorName ||
+                        t("not_updated");
                       const authorEmail =
-                        certificate.authorProfile?.authorEmail || t("not_updated");
+                        certificate.authorProfile?.authorEmail ||
+                        t("not_updated");
 
                       return (
                         <Paper
@@ -638,6 +656,9 @@ export const OrganizationDashboard = () => {
         opened={detailModal.isOpen}
         onClose={handleCloseCertificateDetail}
         certificate={selectedCertificate}
+        canSign={canSignSelectedCertificate}
+        canApprove={false}
+        canRevoke={false}
       />
     </Box>
   );

@@ -1,12 +1,15 @@
 "use client";
 
 import { PageHeader, ButtonAdd } from "@/components";
+import { useQueryGetAllOrganizations } from "@/queries";
 import { Box, Input } from "@mantine/core";
 import { useTranslations } from "next-intl";
 
 export const OrganizationsManagement = () => {
   const t = useTranslations();
 
+  const { data } = useQueryGetAllOrganizations();
+  console.log("Organizations data:", data);
   return (
     <Box className="w-full relative">
       <PageHeader

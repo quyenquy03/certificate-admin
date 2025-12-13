@@ -16,7 +16,9 @@ export type ConfirmationModalType =
   | "delete"
   | "activate"
   | "deactivate"
-  | "reset_password";
+  | "reset_password"
+  | "approve_certificate"
+  | "revoke_certificate";
 
 type ConfirmationModalProps = {
   type: ConfirmationModalType;
@@ -25,6 +27,7 @@ type ConfirmationModalProps = {
   description?: string;
   icon?: ReactNode;
   className?: string;
+  content?: ReactNode;
 } & Omit<
   BaseModalProps,
   | "children"
@@ -154,6 +157,52 @@ const TYPE_STYLES: Record<
     highlightTextClass: "text-blue-600 dark:text-blue-200 font-semibold",
     icon: <PiKeyBold className="text-3xl" />,
   },
+  approve_certificate: {
+    titleKey: "approve_certificate_title",
+    messageKey: "approve_certificate_confirmation",
+    confirmTextKey: "approve",
+    themeIconColor: "green",
+    headerGradientClass:
+      "from-emerald-200 via-teal-200 to-sky-200 dark:from-emerald-900/40 dark:via-teal-900/40 dark:to-sky-900/30",
+    headerTitleClass: "text-emerald-900 dark:text-emerald-100",
+    wrapperBorderClass:
+      "border-emerald-100/60 dark:border-emerald-900/30 bg-white dark:bg-dark-7",
+    closeButtonClass:
+      "top-3 right-3 bg-white/60 hover:bg-white/70 text-emerald-600 dark:bg-white/10 dark:text-emerald-100 shadow-sm",
+    closeIconClass: "text-xl",
+    footerBoxClass: "border-none bg-emerald-50/80 px-5 py-3 dark:bg-dark-6",
+    cancelButtonClass:
+      "border-emerald-200 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-900/40 dark:text-emerald-200 dark:hover:bg-emerald-900/20",
+    confirmButtonClass: "bg-emerald-600 hover:bg-emerald-500",
+    accentBoxClass:
+      "rounded-lg border border-emerald-100/70 bg-emerald-50/80 px-4 py-3 text-center dark:border-emerald-900/40 dark:bg-emerald-950/40",
+    accentTextClass: "text-emerald-600 dark:text-emerald-200",
+    highlightTextClass: "text-emerald-600 dark:text-emerald-200 font-semibold",
+    icon: <PiCheckCircleBold className="text-3xl" />,
+  },
+  revoke_certificate: {
+    titleKey: "revoke_certificate_title",
+    messageKey: "revoke_certificate_confirmation",
+    confirmTextKey: "revoke",
+    themeIconColor: "red",
+    headerGradientClass:
+      "from-rose-200 via-rose-300 to-amber-200 dark:from-rose-900/40 dark:via-rose-800/40 dark:to-amber-900/30",
+    headerTitleClass: "text-rose-900 dark:text-rose-100",
+    wrapperBorderClass:
+      "border-red-100/60 dark:border-red-900/30 bg-white dark:bg-dark-7",
+    closeButtonClass:
+      "top-3 right-3 bg-white/60 hover:bg-white/70 text-rose-600 dark:bg-white/10 dark:text-rose-100 shadow-sm",
+    closeIconClass: "text-xl",
+    footerBoxClass: "border-none bg-red-50/80 px-5 py-3 dark:bg-dark-6",
+    cancelButtonClass:
+      "border-red-200 text-red-600 hover:bg-rose-50 dark:border-red-900/40 dark:text-red-300 dark:hover:bg-red-900/20",
+    confirmButtonClass: "bg-rose-600 hover:bg-rose-500",
+    accentBoxClass:
+      "rounded-lg border border-red-100/70 bg-red-50/80 px-4 py-3 text-center dark:border-red-900/40 dark:bg-red-950/40",
+    accentTextClass: "text-red-600 dark:text-red-300",
+    highlightTextClass: "text-red-600 dark:text-red-300 font-semibold",
+    icon: <PiProhibitBold className="text-3xl" />,
+  },
 };
 
 export const ConfirmationModal = ({
@@ -167,6 +216,7 @@ export const ConfirmationModal = ({
   isLoading,
   icon,
   className,
+  content,
   ...args
 }: ConfirmationModalProps) => {
   const t = useTranslations();
@@ -270,6 +320,7 @@ export const ConfirmationModal = ({
             {fallbackName}
           </Text>
         </Box>
+        {content}
       </Stack>
     </Modal>
   );

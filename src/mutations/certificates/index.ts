@@ -6,3 +6,5 @@ export * from "./useDeleteCertificateType";
 export * from "./useUpdateCertificateType";
 export * from "./useSubmitCertificateForVerify";
 export * from "./useImportCertificates";
+export * from "./useApproveCertificate";
+export * from "./useRevokeCertificate";

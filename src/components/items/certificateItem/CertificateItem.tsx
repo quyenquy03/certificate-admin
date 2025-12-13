@@ -16,7 +16,7 @@ import {
   PiTrafficConeThin,
   PiShieldCheck,
 } from "react-icons/pi";
-import { BiShow, BiEdit, BiTrash } from "react-icons/bi";
+import { BiShow, BiEdit, BiTrash, BiCheckCircle, BiBlock } from "react-icons/bi";
 import { formatDate } from "@/helpers";
 
 type CertificateItemProps = {
@@ -26,10 +26,19 @@ type CertificateItemProps = {
   onUpdate?: (certificate: CertificateResponseType) => void;
   onDelete?: (certificate: CertificateResponseType) => void;
   onShowIssuerDetail?: (issuer: CertificateResponseType["issuer"]) => void;
+  onApprove?: (certificate: CertificateResponseType) => void;
+  onRevoke?: (certificate: CertificateResponseType) => void;
+  onSign?: (certificate: CertificateResponseType) => void;
+  canSign?: boolean;
+  canApprove?: boolean;
+  canRevoke?: boolean;
 };
 
 const STATUS_COLOR: Partial<Record<CERTIFICATE_STATUSES, string>> = {
   [CERTIFICATE_STATUSES.CREATED]: "#2563EB",
+  [CERTIFICATE_STATUSES.SIGNED]: "#2563EB",
+  [CERTIFICATE_STATUSES.VERIFIED]: "#16A34A",
+  [CERTIFICATE_STATUSES.REVOKED]: "#DC2626",
 };
 
 export const CertificateItem = ({
@@ -39,6 +48,12 @@ export const CertificateItem = ({
   onUpdate,
   onDelete,
   onShowIssuerDetail,
+  onApprove,
+  onRevoke,
+  onSign,
+  canSign,
+  canApprove,
+  canRevoke,
 }: CertificateItemProps) => {
   const t = useTranslations();
   const author = certificate.authorProfile;
@@ -70,6 +85,14 @@ export const CertificateItem = ({
       onClick: () => onShowDetail(certificate),
     });
   }
+  if (canSign && onSign) {
+    actionMenuItems.push({
+      id: "sign",
+      label: t("sign_certificate"),
+      leftIcon: <BiCheckCircle />,
+      onClick: () => onSign(certificate),
+    });
+  }
   if (onUpdate) {
     actionMenuItems.push({
       id: "update",
@@ -84,6 +107,22 @@ export const CertificateItem = ({
       label: t("delete"),
       leftIcon: <BiTrash />,
       onClick: () => onDelete(certificate),
+    });
+  }
+  if (canApprove && onApprove) {
+    actionMenuItems.push({
+      id: "approve",
+      label: t("approve"),
+      leftIcon: <BiCheckCircle />,
+      onClick: () => onApprove(certificate),
+    });
+  }
+  if (canRevoke && onRevoke) {
+    actionMenuItems.push({
+      id: "revoke",
+      label: t("revoke"),
+      leftIcon: <BiBlock />,
+      onClick: () => onRevoke(certificate),
     });
   }
 
