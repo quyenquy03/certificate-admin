@@ -29,3 +29,24 @@ export const excelDateToJSDate = (serial: number) => {
   const date_info = new Date(utc_value * 1000);
   return date_info;
 };
+
+export const calculateEndDate = (
+  startDate: Date | string | null | undefined,
+  durationYears: number | string | null | undefined
+): string => {
+  if (!startDate || durationYears === undefined || durationYears === null) {
+    return "";
+  }
+
+  const parsedDuration = Number(durationYears);
+  if (Number.isNaN(parsedDuration)) return "";
+
+  const start = new Date(startDate);
+  if (Number.isNaN(start.getTime())) return "";
+
+  const months = Math.round(parsedDuration * 12);
+  const end = new Date(start);
+  end.setMonth(end.getMonth() + months);
+
+  return end.toISOString();
+};

@@ -19,14 +19,14 @@ import {
   getLastWordCapitalized,
 } from "@/helpers";
 import { useMemo, useState } from "react";
-import { CERTIFICATE_CATEGORIES } from "@/enums";
+import { CERTIFICATE_TEMPLATES } from "@/enums";
 
 type AddCertificateItemProps = {
   certificate: CertificateItemFormType;
   onClick?: (certificate: CertificateItemFormType) => void;
   onUpdate?: (certificate: CertificateItemFormType) => void;
   onDelete?: (certificate: CertificateItemFormType) => void;
-  certificateCategory: CERTIFICATE_CATEGORIES | null;
+  certificateCategory: CERTIFICATE_TEMPLATES | null;
 };
 
 const BADGE_COLOR = "#2563EB";
@@ -73,7 +73,7 @@ export const AddCertificateItem = ({
   }, [certificate, onUpdate, setIsDelete, onDelete]);
 
   const ieltsOverallScore = useMemo(() => {
-    if (!certificate || certificateCategory !== CERTIFICATE_CATEGORIES.IELTS)
+    if (!certificate || certificateCategory !== CERTIFICATE_TEMPLATES.IELTS)
       return null;
 
     return calculateIELTSOverall({
@@ -146,7 +146,7 @@ export const AddCertificateItem = ({
         />
 
         {certificateCategory ===
-          CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE && (
+          CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE && (
           <>
             <InfoRowItem
               icon={FiGlobe}
@@ -167,7 +167,7 @@ export const AddCertificateItem = ({
           </>
         )}
 
-        {certificateCategory === CERTIFICATE_CATEGORIES.IELTS && (
+        {certificateCategory === CERTIFICATE_TEMPLATES.IELTS && (
           <>
             <InfoRowItem
               icon={FiGlobe}

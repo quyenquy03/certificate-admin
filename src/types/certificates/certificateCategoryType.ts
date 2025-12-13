@@ -5,6 +5,7 @@ export type CertificateCategoryType = {
   code: string;
   name: string;
   description: string;
+  additionalInfo?: string;
   isActive: boolean;
   initTxHash: string;
 };

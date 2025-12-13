@@ -22,6 +22,10 @@ export const API_ROUTES = {
   GET_MY_ORGANIZATION: "/organizations/my-organizations",
   REGISTER_ORGANIZATION: "/organizations/register",
   GET_ORGANIZATION_REGISTRATIONS: "/organizations/registrations",
+  ADD_ORGANIZATION_MEMBER: "/organizations/add-member",
+  GET_ORGANIZATION_MEMBERS: (id: string) => `/organizations/members/${id}`,
+  REMOVE_ORGANIZATION_MEMBER: (id: string, userId: string) =>
+    `/organizations/${id}/members/${userId}/remove`,
   APPROVE_REGISTRATION: (id: string) =>
     `/organizations/registrations/${id}/approve`,
   REJECT_REGISTRATION: (id: string) =>

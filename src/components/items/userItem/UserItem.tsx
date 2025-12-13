@@ -6,6 +6,8 @@ import {
   InfoRowItem,
   UserBlockCard,
   UserRoleCard,
+  OrganizationMemberStatusCard,
+  type OrganizationMemberStatus,
 } from "@/components";
 import { IMAGES } from "@/constants";
 import { USER_ROLES } from "@/enums";
@@ -29,6 +31,7 @@ type UserItemProps = {
   onUpdate?: (user: UserResponseType) => void;
   onDelete?: (user: UserResponseType) => void;
   onResetPassword?: (user: UserResponseType) => void;
+  membershipStatus?: OrganizationMemberStatus;
 };
 
 const ROLE_COLORS: Partial<Record<USER_ROLES, string>> = {
@@ -45,6 +48,7 @@ export const UserItem = ({
   onUpdate,
   onDelete,
   onResetPassword,
+  membershipStatus,
 }: UserItemProps) => {
   const t = useTranslations();
 
@@ -147,7 +151,11 @@ export const UserItem = ({
             {email}
           </Text>
           <Flex gap={6} wrap="wrap">
-            <UserRoleCard role={user.role} />
+            {membershipStatus ? (
+              <OrganizationMemberStatusCard status={membershipStatus} />
+            ) : (
+              <UserRoleCard role={user.role} />
+            )}
             <UserBlockCard isBlock={user.isLocked} />
           </Flex>
         </Flex>

@@ -6,7 +6,6 @@ import {
   GraduationCertificateTemplate,
   IeltsCertificateTemplate,
 } from "@/components";
-import { certificateTypes } from "@/constants";
 
 import { AdditionalInfoType, CertificateDetailType } from "@/types";
 import { useTranslations } from "next-intl";
@@ -14,11 +13,11 @@ import { useMemo, useState } from "react";
 import { Button } from "@mantine/core";
 import jsPDF from "jspdf";
 import { cn } from "@/helpers";
-import { CERTIFICATE_CATEGORIES } from "@/enums";
+import { CERTIFICATE_TEMPLATES } from "@/enums";
 
 type CertificateImageModalProps = {
   certificate: CertificateDetailType | null;
-  certificateCategory?: CERTIFICATE_CATEGORIES | null;
+  certificateCategory?: CERTIFICATE_TEMPLATES | null;
 } & Omit<BaseModalProps, "children">;
 
 export const CertificateImageModal = ({
@@ -47,13 +46,6 @@ export const CertificateImageModal = ({
     }
   }, [certificate]);
 
-  const certificateType = useMemo(() => {
-    if (!certificate) return;
-    const certificateType = certificateTypes.find(
-      (item) => item.code === certificate.certificateType
-    );
-  }, [certificate]);
-
   const certificateCategory = useMemo(() => {
     if (
       !certificate ||
@@ -68,12 +60,12 @@ export const CertificateImageModal = ({
 
     switch (currentCertificateType) {
       case "IELTS":
-        return CERTIFICATE_CATEGORIES.IELTS;
+        return CERTIFICATE_TEMPLATES.IELTS;
       case "TOEIC":
-        return CERTIFICATE_CATEGORIES.TOEIC;
+        return CERTIFICATE_TEMPLATES.TOEIC;
       case "CN001":
       case "KS01":
-        return CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE;
+        return CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE;
       default:
         return null;
     }
@@ -137,7 +129,7 @@ export const CertificateImageModal = ({
                   alt="left-certificate-exported"
                   className={cn(
                     "max-w-[500px] h-auto border rounded-md",
-                    certificateCategory === CERTIFICATE_CATEGORIES.IELTS &&
+                    certificateCategory === CERTIFICATE_TEMPLATES.IELTS &&
                       "max-w-[800px]"
                   )}
                 />
@@ -153,8 +145,7 @@ export const CertificateImageModal = ({
           )}
       </div>
 
-      {certificateCategory ===
-        CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE && (
+      {certificateCategory === CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE && (
         <GraduationCertificateTemplate
           certificate={certificate}
           certificateAdditionalInfo={certificateAdditionalInfo}
@@ -165,7 +156,7 @@ export const CertificateImageModal = ({
         />
       )}
 
-      {certificateCategory === CERTIFICATE_CATEGORIES.IELTS && (
+      {certificateCategory === CERTIFICATE_TEMPLATES.IELTS && (
         <IeltsCertificateTemplate
           certificate={certificate}
           certificateAdditionalInfo={certificateAdditionalInfo}

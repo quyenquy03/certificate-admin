@@ -73,12 +73,16 @@ export const Sidebar = ({ onOpenSettings }: SidebarProps) => {
       icon: TbNotes,
       link: PAGE_URLS.MY_ORGANIZATIONS,
     },
-    {
-      id: "3",
-      label: t("members"),
-      icon: TbCalendarStats,
-      link: PAGE_URLS.ORGANIZATIONS_MEMBERS,
-    },
+    ...(currentUser?.role === USER_ROLES.ORGANIZATION
+      ? [
+          {
+            id: "3",
+            label: t("members"),
+            icon: TbCalendarStats,
+            link: PAGE_URLS.ORGANIZATIONS_MEMBERS,
+          },
+        ]
+      : []),
     {
       id: "4",
       label: t("certificates"),

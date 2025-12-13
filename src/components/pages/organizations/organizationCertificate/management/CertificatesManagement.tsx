@@ -6,6 +6,7 @@ import {
   CertificateItem,
   CertificateItemSkeleton,
   CertificateDetailModal,
+  UserDetailModal,
   PageHeader,
   PaginationCustom,
   NoData,
@@ -19,6 +20,7 @@ import {
   BasePaginationParams,
   CertificateResponseType,
   SubmitCertificateRequestType,
+  UserResponseType,
 } from "@/types";
 import {
   CERTIFICATE_REQUEST_TYPES,
@@ -33,10 +35,15 @@ export const CertificatesManagement = () => {
   const t = useTranslations();
   const router = useRouter();
   const { currentOrganization } = stores.organization();
+  const { currentUser } = stores.account();
   const headerRef = useRef<HTMLDivElement | null>(null);
   const detailModal = useDisclose();
+  const issuerDetailModal = useDisclose();
   const [selectedCertificate, setSelectedCertificate] =
     useState<CertificateResponseType | null>(null);
+  const [selectedIssuer, setSelectedIssuer] = useState<UserResponseType | null>(
+    null
+  );
 
   const [searchParams, setSearchParams] = useState<BasePaginationParams>({
     page: PAGINATION_PARAMS.GET_CERTIFICATES.page,
@@ -54,6 +61,14 @@ export const CertificatesManagement = () => {
         value: status,
         label: t(status),
       })),
+    [t]
+  );
+
+  const issuerFilterOptions = useMemo(
+    () => [
+      { value: "me", label: t("issuer_filter_me") },
+      { value: "all", label: t("issuer_filter_all") },
+    ],
     [t]
   );
 
@@ -88,6 +103,24 @@ export const CertificatesManagement = () => {
     refetch,
   ]);
 
+  const issuerFilterInitialized = useRef(false);
+
+  useEffect(() => {
+    if (issuerFilterInitialized.current) return;
+    if (!currentUser?.id) return;
+    setSearchParams((prev) => {
+      if (prev.filters?.issuerId?.eq) return prev;
+      return {
+        ...prev,
+        filters: {
+          ...(prev.filters ?? {}),
+          issuerId: { eq: currentUser.id },
+        },
+      };
+    });
+    issuerFilterInitialized.current = true;
+  }, [currentUser?.id]);
+
   const handleSearchChange = (value: string) => {
     setSearchParams((prev) => ({
       ...prev,
@@ -103,6 +136,24 @@ export const CertificatesManagement = () => {
         filters.status = { eq: value };
       } else {
         delete filters.status;
+      }
+
+      return {
+        ...prev,
+        filters: Object.keys(filters).length ? filters : undefined,
+        page: PAGINATION_PARAMS.DEFAULT.page,
+      };
+    });
+  };
+
+  const handleIssuerFilterChange = (value: string | null) => {
+    setSearchParams((prev) => {
+      const filters = { ...(prev.filters ?? {}) };
+      if (value === "me") {
+        if (!currentUser?.id) return prev;
+        filters.issuerId = { eq: currentUser.id };
+      } else {
+        delete filters.issuerId;
       }
 
       return {
@@ -135,6 +186,16 @@ export const CertificatesManagement = () => {
     setSelectedCertificate(null);
   };
 
+  const handleShowIssuerDetail = (issuer: UserResponseType) => {
+    setSelectedIssuer(issuer);
+    issuerDetailModal.onOpen();
+  };
+
+  const handleCloseIssuerDetail = () => {
+    issuerDetailModal.onClose();
+    setSelectedIssuer(null);
+  };
+
   const handleUpdateCertificate = (certificate: CertificateResponseType) => {
     console.log("Update certificate", certificate.id);
   };
@@ -157,6 +218,16 @@ export const CertificatesManagement = () => {
         }}
       >
         <Group wrap="nowrap">
+          <Select
+            placeholder={t("issuer_filter_placeholder")}
+            data={issuerFilterOptions}
+            value={
+              searchParams.filters?.issuerId?.eq ? "me" : ("all" as string | null)
+            }
+            onChange={handleIssuerFilterChange}
+            className="w-full max-w-[180px] hidden lg:block"
+            allowDeselect={false}
+          />
           <Select
             placeholder={t("status")}
             data={statusOptions}
@@ -201,6 +272,7 @@ export const CertificatesManagement = () => {
                   onShowDetail={handleShowCertificateDetail}
                   onUpdate={handleUpdateCertificate}
                   onDelete={handleDeleteCertificate}
+                  onShowIssuerDetail={handleShowIssuerDetail}
                 />
               </Grid.Col>
             ))}
@@ -220,6 +292,11 @@ export const CertificatesManagement = () => {
           onClose={handleCloseCertificateDetail}
           certificate={selectedCertificate}
           onSignSuccess={handleSignSuccess}
+        />
+        <UserDetailModal
+          opened={issuerDetailModal.isOpen && Boolean(selectedIssuer)}
+          onClose={handleCloseIssuerDetail}
+          user={selectedIssuer}
         />
       </PageContentWrapper>
     </Box>

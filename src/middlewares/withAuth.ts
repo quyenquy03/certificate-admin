@@ -43,7 +43,9 @@ export function withAuth(request: NextRequest) {
 
     if (
       (decoded?.role !== USER_ROLES.ADMIN && isAdminPage) ||
-      (decoded?.role !== USER_ROLES.ORGANIZATION && isOrganizationPage)
+      (decoded?.role !== USER_ROLES.ORGANIZATION &&
+        decoded?.role !== USER_ROLES.MANAGER &&
+        isOrganizationPage)
     ) {
       return NextResponse.rewrite(new URL(PAGE_URLS.FORBIDDEN, request.url));
     }

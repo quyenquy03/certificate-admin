@@ -41,7 +41,10 @@ export const Login = () => {
         nextUrl = PAGE_URLS.ADMIN_DASHBOARD;
       }
 
-      if (decoded?.role === USER_ROLES.ORGANIZATION) {
+      if (
+        decoded?.role === USER_ROLES.ORGANIZATION ||
+        decoded?.role === USER_ROLES.MANAGER
+      ) {
         nextUrl = PAGE_URLS.ORGANIZATIONS_DASHBOARD;
       }
 

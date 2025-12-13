@@ -9,4 +9,5 @@ export type UpdateProfileRequestType = {
   dob: string;
   gender: GENDERS;
   avatar?: string;
+  email: string;
 };

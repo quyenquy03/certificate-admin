@@ -7,6 +7,9 @@ import {
   RegisterOrganizationRequestType,
   RejectOrganizationRequestType,
   OrganizationResponseType,
+  AddOrganizationMemberRequestType,
+  OrganizationMemberResponseType,
+  UserResponseType,
 } from "@/types";
 
 const getRegistration = async (
@@ -98,6 +101,33 @@ const rejectRegistration = async (
   return response.data;
 };
 
+const addOrganizationMember = async (
+  data: AddOrganizationMemberRequestType
+): Promise<BaseResponseType<OrganizationMemberResponseType>> => {
+  const response = await axiosClient<
+    BaseResponseType<OrganizationMemberResponseType>
+  >({
+    method: AXIOS_METHOD.POST,
+    url: API_ROUTES.ADD_ORGANIZATION_MEMBER,
+    data,
+  });
+  return response.data;
+};
+
+const getOrganizationMembers = async (
+  organizationId: string,
+  data?: BasePaginationParams
+): Promise<BaseResponseType<OrganizationMemberResponseType[]>> => {
+  const response = await axiosClient<
+    BaseResponseType<OrganizationMemberResponseType[]>
+  >({
+    method: AXIOS_METHOD.GET,
+    url: API_ROUTES.GET_ORGANIZATION_MEMBERS(organizationId),
+    data,
+  });
+  return response.data;
+};
+
 export const organizationApis = {
   registerOrganization,
   getRegistration,
@@ -106,4 +136,6 @@ export const organizationApis = {
   getRegistrations,
   approveRegistration,
   rejectRegistration,
+  addOrganizationMember,
+  getOrganizationMembers,
 };

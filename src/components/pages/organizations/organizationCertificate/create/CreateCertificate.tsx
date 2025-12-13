@@ -15,10 +15,11 @@ import {
   ImportCertificateModal,
   PaginationCustom,
 } from "@/components";
-import { PAGE_URLS } from "@/constants";
+import { PAGE_URLS, DEFAULT_CERTIFICATE_DURATION_YEARS } from "@/constants";
 import {
   CERTIFICATE_ADDITIONAL_FIELD,
-  CERTIFICATE_CATEGORIES,
+  CERTIFICATE_TYPE_ADDITIONAL_FIELD,
+  CERTIFICATE_TEMPLATES,
   FORM_MODES,
 } from "@/enums";
 import { useImportCertificates } from "@/mutations";
@@ -28,7 +29,9 @@ import {
   BaseErrorType,
   CertificateItemFormType,
   ImportCertificateItem,
+  CertificateCategoryAdditionalInfoType,
 } from "@/types";
+import { calculateEndDate } from "@/helpers/formatDate";
 import {
   Box,
   Flex,
@@ -51,7 +54,6 @@ import { useDebounce, useDisclose } from "@/hooks";
 
 type CreateCertificateFormValues = {
   validFrom: Date | null;
-  validTo: Date | null;
   certificateTypeId: string;
   organizationId: string;
 
@@ -62,9 +64,32 @@ type CreateCertificateFormValues = {
 
 const DEFAULT_VALUES: CreateCertificateFormValues = {
   validFrom: null,
-  validTo: null,
   certificateTypeId: "",
   organizationId: "",
+};
+
+type CertificateTypeOption = {
+  value: string;
+  label: string;
+  code: string;
+  additionalInfo?: CertificateCategoryAdditionalInfoType;
+};
+
+const parseCertificateTypeAdditionalInfo = (
+  additionalInfo?: string | null
+): CertificateCategoryAdditionalInfoType => {
+  if (!additionalInfo) return {};
+
+  try {
+    const parsedInfo = JSON.parse(additionalInfo);
+    if (parsedInfo && typeof parsedInfo === "object") {
+      return parsedInfo as CertificateCategoryAdditionalInfoType;
+    }
+    return {};
+  } catch (error) {
+    console.error("Failed to parse certificate type additional info", error);
+    return {};
+  }
 };
 
 export const CreateCertificate = () => {
@@ -100,8 +125,6 @@ export const CreateCertificate = () => {
     defaultValues: DEFAULT_VALUES,
   });
 
-  const watchValidFrom = watch("validFrom");
-  const watchValidTo = watch("validTo");
   const certificateTypeId = watch("certificateTypeId");
   const formRef = useRef<HTMLFormElement | null>(null);
   const { currentOrganization } = stores.organization();
@@ -113,10 +136,13 @@ export const CreateCertificate = () => {
     enabled: true,
   } as any);
 
-  const certificateTypeOptions = useMemo(() => {
+  const certificateTypeOptions = useMemo<CertificateTypeOption[]>(() => {
     return (certificateTypesResponse?.data ?? []).map((type) => {
       const trimmedName = type.name?.trim() ?? "";
       const trimmedCode = type.code?.trim() ?? "";
+      const parsedAdditionalInfo = parseCertificateTypeAdditionalInfo(
+        type.additionalInfo
+      );
 
       return {
         value: type.id,
@@ -127,31 +153,46 @@ export const CreateCertificate = () => {
             ? trimmedCode
             : t("not_updated"),
         code: trimmedCode,
+        additionalInfo: parsedAdditionalInfo,
       };
     });
   }, [certificateTypesResponse?.data, t]);
 
-  const certificateCategory = useMemo(() => {
+  const selectedCertificateType = useMemo(() => {
     if (!certificateTypeId || !certificateTypeOptions.length) return null;
-
-    const currentCertificateType = certificateTypeOptions.find(
-      (item) => item.value === certificateTypeId
+    return (
+      certificateTypeOptions.find((item) => item.value === certificateTypeId) ??
+      null
     );
-
-    if (!currentCertificateType) return null;
-
-    switch (currentCertificateType.code) {
-      case "IELTS":
-        return CERTIFICATE_CATEGORIES.IELTS;
-      case "TOEIC":
-        return CERTIFICATE_CATEGORIES.TOEIC;
-      case "CN001":
-      case "KS01":
-        return CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE;
-      default:
-        return null;
-    }
   }, [certificateTypeId, certificateTypeOptions]);
+
+  const certificateCategory = useMemo(() => {
+    if (!selectedCertificateType) return null;
+
+    const template =
+      selectedCertificateType.additionalInfo?.[
+        CERTIFICATE_TYPE_ADDITIONAL_FIELD.CERTIFICATE_TEMPLATE
+      ];
+
+    if (!template) return null;
+
+    return template as CERTIFICATE_TEMPLATES;
+  }, [selectedCertificateType]);
+
+  const durationYears = useMemo(() => {
+    const rawDuration =
+      selectedCertificateType?.additionalInfo?.[
+        CERTIFICATE_TYPE_ADDITIONAL_FIELD.EXPIRED_YEAR
+      ];
+    const parsedDuration = Number(rawDuration);
+
+    if (rawDuration === "" || rawDuration === null || rawDuration === undefined)
+      return DEFAULT_CERTIFICATE_DURATION_YEARS;
+
+    if (Number.isNaN(parsedDuration)) return DEFAULT_CERTIFICATE_DURATION_YEARS;
+
+    return parsedDuration;
+  }, [selectedCertificateType?.additionalInfo]);
 
   const { mutate: importCertificates, isPending: isImporting } =
     useImportCertificates({
@@ -220,14 +261,13 @@ export const CreateCertificate = () => {
           };
 
           if (
-            certificateCategory ===
-            CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE
+            certificateCategory === CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE
           ) {
             additionalInfo.reg_no = item.reg_no;
             additionalInfo.serial_number = item.serial_number;
           }
 
-          if (certificateCategory === CERTIFICATE_CATEGORIES.IELTS) {
+          if (certificateCategory === CERTIFICATE_TEMPLATES.IELTS) {
             additionalInfo.candidate_sex = item.candidate_sex;
             additionalInfo.candidate_number = item.candidate_number;
             additionalInfo.first_language = item.first_language;
@@ -243,7 +283,7 @@ export const CreateCertificate = () => {
 
           return {
             validFrom: values.validFrom?.toISOString() ?? "",
-            validTo: values.validTo?.toISOString() ?? "",
+            validTo: calculateEndDate(values.validFrom, durationYears),
             authorProfile: {
               authorName: item.authorName,
               authorIdCard: item.authorIdCard,
@@ -505,21 +545,6 @@ export const CreateCertificate = () => {
                         errors={errors}
                         control={control as any}
                         isTranslate
-                        maxDate={watchValidTo ?? undefined}
-                        rules={{
-                          required: t("required_field"),
-                        }}
-                      />
-                    </Grid.Col>
-                    <Grid.Col span={{ base: 12, sm: 6 }}>
-                      <FormDatePicker
-                        name="validTo"
-                        name_label="valid_to"
-                        name_placeholder="valid_to_placeholder"
-                        errors={errors}
-                        control={control as any}
-                        isTranslate
-                        minDate={watchValidFrom ?? undefined}
                         rules={{
                           required: t("required_field"),
                         }}
@@ -570,7 +595,7 @@ export const CreateCertificate = () => {
                         }}
                       />
                     </Grid.Col>
-                    {certificateCategory === CERTIFICATE_CATEGORIES.IELTS && (
+                    {certificateCategory === CERTIFICATE_TEMPLATES.IELTS && (
                       <Grid.Col span={{ base: 12 }}>
                         <FormInput
                           name={CERTIFICATE_ADDITIONAL_FIELD.CENTRE_NUMBER}

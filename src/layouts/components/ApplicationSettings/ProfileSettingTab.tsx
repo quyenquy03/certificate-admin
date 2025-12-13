@@ -40,6 +40,7 @@ export const ProfileSettingTab = ({ onBack }: ProfileSettingTabProps) => {
     formState: { errors, isSubmitting, isDirty },
   } = useForm<FieldValues>({
     defaultValues: {
+      email: "",
       firstName: "",
       lastName: "",
       phone: "",
@@ -57,7 +58,9 @@ export const ProfileSettingTab = ({ onBack }: ProfileSettingTabProps) => {
       .filter(Boolean)
       .join(" ")
       .trim();
-    return names || currentUser.email || currentUser.userName || t("profile_setting");
+    return (
+      names || currentUser.email || currentUser.userName || t("profile_setting")
+    );
   }, [currentUser, t]);
 
   const genderOptions = useMemo(
@@ -73,6 +76,7 @@ export const ProfileSettingTab = ({ onBack }: ProfileSettingTabProps) => {
     (user?: ProfileUser | null) => {
       if (!user) {
         reset({
+          email: "",
           firstName: "",
           lastName: "",
           phone: "",
@@ -83,6 +87,7 @@ export const ProfileSettingTab = ({ onBack }: ProfileSettingTabProps) => {
         return;
       }
       reset({
+        email: user.email ?? "",
         firstName: user.firstName ?? "",
         lastName: user.lastName ?? "",
         phone: user.phone ?? "",
@@ -126,6 +131,7 @@ export const ProfileSettingTab = ({ onBack }: ProfileSettingTabProps) => {
   const onSubmit: SubmitHandler<FieldValues> = (values) => {
     if (!currentUser) return;
 
+    const email = (values.email ?? "").trim();
     const firstName = (values.firstName ?? "").trim();
     const lastName = (values.lastName ?? "").trim();
     const phone = (values.phone ?? "").trim();
@@ -137,13 +143,14 @@ export const ProfileSettingTab = ({ onBack }: ProfileSettingTabProps) => {
 
     const payload: UpdateProfileRequestType = {
       id: currentUser.id,
+      email,
       firstName,
       lastName,
       phone: phone || undefined,
       address: address || undefined,
       dob: dobValue || "",
       gender: genderValue,
-      avatar: currentUser.avatar,
+      avatar: undefined,
     };
 
     updateProfile(payload);
@@ -229,10 +236,7 @@ export const ProfileSettingTab = ({ onBack }: ProfileSettingTabProps) => {
           </div>
         </div>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-5"
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
           <section className="flex flex-col gap-5 rounded-md border border-slate-200/80 bg-white/85 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
             <div>
               <p className="text-base font-semibold text-slate-900 dark:text-white">

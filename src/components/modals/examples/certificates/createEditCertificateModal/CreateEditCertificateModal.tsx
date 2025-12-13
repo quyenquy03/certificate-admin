@@ -12,7 +12,7 @@ import {
 import { COUNTRY_OPTIONS, GENDER_OPTIONS, LANGUAGES } from "@/constants";
 import {
   CERTIFICATE_ADDITIONAL_FIELD,
-  CERTIFICATE_CATEGORIES,
+  CERTIFICATE_TEMPLATES,
   COUNTRIES,
   FORM_MODES,
 } from "@/enums";
@@ -33,7 +33,7 @@ type CreateEditCertificateModalProps = {
     action: FORM_MODES
   ) => void;
   onCheckExistedAuthorId: (authorId: string, action: FORM_MODES) => boolean;
-  certificateCategory: CERTIFICATE_CATEGORIES | null;
+  certificateCategory: CERTIFICATE_TEMPLATES | null;
 } & Omit<BaseModalProps, "children">;
 
 const CERTIFICATE_ITEM_DEFAULT: CertificateItemFormType = {
@@ -334,7 +334,7 @@ export const CreateEditCertificateModal = ({
             </Grid.Col>
           </Grid>
           {certificateCategory ===
-            CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE && (
+            CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE && (
             <FormInput
               name="domain"
               name_label="domain_label"
@@ -381,7 +381,7 @@ export const CreateEditCertificateModal = ({
               />
             </Grid.Col>
             {certificateCategory ===
-              CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE && (
+              CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE && (
               <Grid.Col span={{ base: 12, sm: 4 }}>
                 <FormInput
                   name="grantLevel"
@@ -403,7 +403,7 @@ export const CreateEditCertificateModal = ({
               </Grid.Col>
             )}
 
-            {certificateCategory === CERTIFICATE_CATEGORIES.IELTS && (
+            {certificateCategory === CERTIFICATE_TEMPLATES.IELTS && (
               <Grid.Col span={{ base: 12, sm: 4 }}>
                 <FormSelect
                   name={CERTIFICATE_ADDITIONAL_FIELD.CANDIDATE_SEX}
@@ -424,7 +424,7 @@ export const CreateEditCertificateModal = ({
           </Grid>
 
           {certificateCategory ===
-            CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE && (
+            CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE && (
             <Grid gutter="md">
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <FormInput
@@ -455,7 +455,7 @@ export const CreateEditCertificateModal = ({
             </Grid>
           )}
 
-          {certificateCategory === CERTIFICATE_CATEGORIES.IELTS && (
+          {certificateCategory === CERTIFICATE_TEMPLATES.IELTS && (
             <Grid gutter="md">
               <Grid.Col span={{ base: 12, sm: 4 }}>
                 <FormInput

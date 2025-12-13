@@ -1,7 +1,6 @@
 "use client";
 
 import CertificateABI from "@/abis/CertificateABI.json";
-import { CertificateImageModal } from "@/components/modals";
 import { certificateApis } from "@/apis";
 import {
   ARBITRUM_SEPOLIA_RPC_URL,
@@ -9,11 +8,10 @@ import {
   LANGUAGE_LABELS,
   envs,
 } from "@/constants";
-import { CERTIFICATE_CATEGORIES } from "@/enums";
-import type { GENDERS, LANGUAGES } from "@/enums";
+import { CERTIFICATE_TEMPLATES, GENDERS, LANGUAGES } from "@/enums";
 import { formatDate } from "@/helpers";
 import { useDisclose } from "@/hooks";
-import { NoData } from "@/components/noData";
+import { NoData, CertificateImageModal } from "@/components";
 import type { AdditionalInfoType, CertificateDetailType } from "@/types";
 import { Contract, JsonRpcProvider } from "ethers";
 import { useEffect, useMemo, useState } from "react";
@@ -144,18 +142,18 @@ export const CertificateDetail = ({
     const certificateTypeCode =
       typeCodeFromAdditionalInfo || typeCodeFromCertificate;
 
-    let certificateCategory: CERTIFICATE_CATEGORIES | null = null;
+    let certificateCategory: CERTIFICATE_TEMPLATES | null = null;
 
     switch (certificateTypeCode.toUpperCase()) {
       case "IELTS":
-        certificateCategory = CERTIFICATE_CATEGORIES.IELTS;
+        certificateCategory = CERTIFICATE_TEMPLATES.IELTS;
         break;
       case "TOEIC":
-        certificateCategory = CERTIFICATE_CATEGORIES.TOEIC;
+        certificateCategory = CERTIFICATE_TEMPLATES.TOEIC;
         break;
       case "CN001":
       case "KS01":
-        certificateCategory = CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE;
+        certificateCategory = CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE;
         break;
       default:
         certificateCategory = null;
@@ -191,8 +189,8 @@ export const CertificateDetail = ({
     | undefined;
   const certificateCategory = formattedCertificate?.certificateCategory;
   const isGraduationCategory =
-    certificateCategory === CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE;
-  const isIeltsCategory = certificateCategory === CERTIFICATE_CATEGORIES.IELTS;
+    certificateCategory === CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE;
+  const isIeltsCategory = certificateCategory === CERTIFICATE_TEMPLATES.IELTS;
 
   const DetailItem = ({
     label,

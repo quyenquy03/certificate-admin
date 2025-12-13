@@ -1,13 +1,15 @@
 import { CERTIFICATE_STATUSES } from "@/enums";
 import { CertificateResponseType } from "@/types";
-import { Badge, Box, Flex, Text } from "@mantine/core";
+import { ActionIcon, Badge, Box, Flex, Text } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import {
   ButtonMore,
   DropdownMenu,
   DropdownMenuItemProps,
   InfoRowItem,
+  Image,
 } from "@/components";
+import { IMAGES } from "@/constants";
 import {
   PiEnvelopeSimple,
   PiCalendarCheck,
@@ -23,6 +25,7 @@ type CertificateItemProps = {
   onShowDetail?: (certificate: CertificateResponseType) => void;
   onUpdate?: (certificate: CertificateResponseType) => void;
   onDelete?: (certificate: CertificateResponseType) => void;
+  onShowIssuerDetail?: (issuer: CertificateResponseType["issuer"]) => void;
 };
 
 const STATUS_COLOR: Partial<Record<CERTIFICATE_STATUSES, string>> = {
@@ -35,9 +38,11 @@ export const CertificateItem = ({
   onShowDetail,
   onUpdate,
   onDelete,
+  onShowIssuerDetail,
 }: CertificateItemProps) => {
   const t = useTranslations();
   const author = certificate.authorProfile;
+  const issuer = certificate.issuer;
 
   const normalize = (value?: string | null) => value?.trim() || "";
   const badgeColor = STATUS_COLOR[certificate.status] ?? "#0EA5E9";
@@ -48,6 +53,13 @@ export const CertificateItem = ({
     authorName.charAt(0)?.toUpperCase() ||
     certificate.code?.charAt(0)?.toUpperCase() ||
     "C";
+  const issuerAvatar = normalize(issuer?.avatar) || IMAGES.default.avatar;
+  const issuerFullName =
+    [normalize(issuer?.firstName), normalize(issuer?.lastName)]
+      .filter(Boolean)
+      .join(" ")
+      .trim() || t("not_updated");
+  const issuerEmail = normalize(issuer?.email) || t("not_updated");
 
   const actionMenuItems: DropdownMenuItemProps[] = [];
   if (onShowDetail) {
@@ -193,6 +205,43 @@ export const CertificateItem = ({
             formatDate(certificate.validTo) || t("not_updated")
           }`}
         />
+        <Box className="rounded-lg border border-slate-200 px-3 py-3 dark:border-slate-700">
+          <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            {t("issuer")}
+          </Text>
+          <Flex align="center" gap={12} justify="space-between">
+            <Flex align="center" gap={12} className="min-w-0 flex-1">
+              <Box className="relative h-10 w-10 shrink-0 overflow-hidden rounded-sm bg-slate-100 dark:bg-slate-800/60">
+                <Image
+                  src={issuerAvatar}
+                  alt="issuer avatar"
+                  className="h-full w-full object-cover"
+                  wrapperClassName="h-full w-full"
+                  fallbackSrc={IMAGES.default.avatar}
+                />
+              </Box>
+              <Flex direction="column" gap={4} className="min-w-0">
+                <Text className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  {issuerFullName}
+                </Text>
+                <Text className="truncate text-xs text-slate-500 dark:text-slate-400">
+                  {issuerEmail}
+                </Text>
+              </Flex>
+            </Flex>
+            <ActionIcon
+              variant="light"
+              color="blue"
+              onClick={(event) => {
+                event.stopPropagation();
+                if (!issuer) return;
+                onShowIssuerDetail?.(issuer);
+              }}
+            >
+              <BiShow />
+            </ActionIcon>
+          </Flex>
+        </Box>
       </Flex>
     </Box>
   );

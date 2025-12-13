@@ -10,7 +10,7 @@ import {
   LANGUAGE_LABELS,
 } from "@/constants";
 import {
-  CERTIFICATE_CATEGORIES,
+  CERTIFICATE_TEMPLATES,
   CERTIFICATE_REQUEST_TYPES,
   CERTIFICATE_STATUSES,
   GENDERS,
@@ -30,6 +30,7 @@ import { HiOutlineQrCode } from "react-icons/hi2";
 type CertificateDetailModalProps = {
   certificate: CertificateResponseType | null;
   onSignSuccess?: () => void;
+  isOrganizationOwner?: boolean;
 } & Omit<BaseModalProps, "children">;
 
 type Eip1193Provider = {
@@ -131,6 +132,7 @@ export const CertificateDetailModal = ({
   opened,
   onClose,
   onSignSuccess,
+  isOrganizationOwner = false,
   ...props
 }: CertificateDetailModalProps) => {
   const t = useTranslations();
@@ -207,12 +209,12 @@ export const CertificateDetailModal = ({
 
     switch (currentCertificateType) {
       case "IELTS":
-        return CERTIFICATE_CATEGORIES.IELTS;
+        return CERTIFICATE_TEMPLATES.IELTS;
       case "TOEIC":
-        return CERTIFICATE_CATEGORIES.TOEIC;
+        return CERTIFICATE_TEMPLATES.TOEIC;
       case "CN001":
       case "KS01":
-        return CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE;
+        return CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE;
       default:
         return null;
     }
@@ -371,7 +373,7 @@ export const CertificateDetailModal = ({
       footerProps={{
         showFooter: true,
         confirmText: modalConfirmText !== "" ? t(modalConfirmText) : "",
-        hideConfirmButton: modalConfirmText === "",
+        hideConfirmButton: modalConfirmText === "" || !isOrganizationOwner,
       }}
       onConfirm={handleClickConfirmButton}
       isLoading={isSigning || props.isLoading}
@@ -429,7 +431,7 @@ export const CertificateDetailModal = ({
                 {t("other_information")}
               </Text>
               {certificateCategory ===
-                CERTIFICATE_CATEGORIES.GRADUATION_CERTIFICATE && (
+                CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE && (
                 <>
                   <InfoRowItem
                     label={t("reg_no")}
@@ -448,7 +450,7 @@ export const CertificateDetailModal = ({
                 </>
               )}
 
-              {certificateCategory === CERTIFICATE_CATEGORIES.IELTS && (
+              {certificateCategory === CERTIFICATE_TEMPLATES.IELTS && (
                 <>
                   <Grid gutter="md">
                     <Grid.Col span={{ base: 12, sm: 6 }}>

@@ -3,3 +3,4 @@ export * from "./userRoleCard";
 export * from "./userBlockCard";
 export * from "./organizationStatusCard";
 export * from "./certificateTypeActiveCard/CertificateTypeActiveCard";
+export * from "./organizationMemberStatusCard";

@@ -12,5 +12,6 @@ export * from "./certificateTypes";
 export * from "./certificateLevels";
 export * from "./certificateRequestStatuses";
 export * from "./certificateRequestTypes";
-export * from "./certificateCategories";
+export * from "./certificateTemplates";
 export * from "./ieltsCefrs";
+export * from "./certificateTypeAdditionalFields";
