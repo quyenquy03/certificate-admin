@@ -19,6 +19,7 @@ export const API_ROUTES = {
   // organizations
   GET_ORGANIZATION_REGISTRATION: "/organizations/registrations",
   GET_ORGANIZATIONS: "/organizations/get-organizations",
+  GET_ORGANIZATION: (id: string) => `/organizations/get-organizations/${id}`,
   GET_MY_ORGANIZATION: "/organizations/my-organizations",
   REGISTER_ORGANIZATION: "/organizations/register",
   GET_ORGANIZATION_REGISTRATIONS: "/organizations/registrations",

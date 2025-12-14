@@ -38,7 +38,7 @@ export function withAuth(request: NextRequest) {
     const decoded: any = jwt.decode(token);
     const isAdminPage = ADMIN_PAGE_URLS.some((item) => pathname.includes(item));
     const isOrganizationPage = ORG_PAGE_URLS.some((item) =>
-      pathname.includes(item)
+      pathname.startsWith(item)
     );
 
     if (

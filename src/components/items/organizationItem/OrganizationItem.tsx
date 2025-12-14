@@ -1,4 +1,6 @@
-import { ORGANIZATION_STATUS_COLORS } from "@/constants";
+"use client";
+
+import { IMAGES, ORGANIZATION_STATUS_COLORS } from "@/constants";
 import { OrganizationResponseType } from "@/types";
 import { ActionIcon, Box, Flex, Text, Tooltip } from "@mantine/core";
 import { useTranslations } from "next-intl";
@@ -10,17 +12,31 @@ import {
 } from "react-icons/hi2";
 import { ORGANIZATION_STATUSES } from "@/enums";
 import { FiCopy } from "react-icons/fi";
+import {
+  ButtonMore,
+  DropdownMenu,
+  DropdownMenuItemProps,
+  Image,
+} from "@/components";
+import { BiShow } from "react-icons/bi";
+import { PiCertificate, PiUsersThree } from "react-icons/pi";
 
 type OrganizationItemProps = {
   organization: OrganizationResponseType;
   onClick?: (organization: OrganizationResponseType) => void;
   isCurrent?: boolean;
+  onShowDetail?: (organization: OrganizationResponseType) => void;
+  onViewMembers?: (organization: OrganizationResponseType) => void;
+  onViewCertificates?: (organization: OrganizationResponseType) => void;
 };
 
 export const OrganizationItem = ({
   organization,
   onClick,
   isCurrent = false,
+  onShowDetail,
+  onViewMembers,
+  onViewCertificates,
 }: OrganizationItemProps) => {
   const t = useTranslations();
 
@@ -35,6 +51,14 @@ export const OrganizationItem = ({
     trimmedOrEmpty(organization.description) || t("not_updated");
 
   const organizationInitial = organizationName?.charAt(0)?.toUpperCase() || "O";
+  const owner = organization.owner;
+  const ownerFullName =
+    [trimmedOrEmpty(owner?.firstName), trimmedOrEmpty(owner?.lastName)]
+      .filter(Boolean)
+      .join(" ")
+      .trim() || t("not_updated");
+  const ownerEmail = trimmedOrEmpty(owner?.email) || t("not_updated");
+  const ownerAvatar = trimmedOrEmpty(owner?.avatar) || IMAGES.default.avatar;
 
   const accentStatus = organization.isActive
     ? ORGANIZATION_STATUSES.APPROVED
@@ -68,6 +92,35 @@ export const OrganizationItem = ({
     }
   };
 
+  const actionMenuItems: DropdownMenuItemProps[] = [];
+
+  if (onShowDetail) {
+    actionMenuItems.push({
+      id: "detail",
+      label: t("view_detail"),
+      leftIcon: <BiShow />,
+      onClick: () => onShowDetail?.(organization),
+    });
+  }
+
+  if (onViewMembers) {
+    actionMenuItems.push({
+      id: "members",
+      label: t("members"),
+      leftIcon: <PiUsersThree />,
+      onClick: () => onViewMembers?.(organization),
+    });
+  }
+
+  if (onViewCertificates) {
+    actionMenuItems.push({
+      id: "certificates",
+      label: t("certificates"),
+      leftIcon: <PiCertificate />,
+      onClick: () => onViewCertificates?.(organization),
+    });
+  }
+
   return (
     <Box
       className="min-h-28 relative text-color-light dark:text-color-dark bg-background-primary-light dark:bg-background-primary-dark rounded-md shadow-md dark:shadow-gray-600 p-3 transition-all"
@@ -75,6 +128,17 @@ export const OrganizationItem = ({
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
+      {actionMenuItems.length > 0 && (
+        <DropdownMenu items={actionMenuItems} position="bottom-end">
+          <Box
+            className="absolute top-3 right-3 z-10"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <ButtonMore />
+          </Box>
+        </DropdownMenu>
+      )}
+
       <Box
         className="absolute inset-x-0 top-0 h-1 w-full rounded-t-md"
         style={{
@@ -142,6 +206,30 @@ export const OrganizationItem = ({
             <Text className={valueClass}>{websiteValue}</Text>
           </Flex>
         </Flex>
+        <Box className="rounded-md border border-gray-200 px-3 py-3 dark:border-gray-600">
+          <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300">
+            {t("organization_owner")}
+          </Text>
+          <Flex align="center" gap={12}>
+            <Box className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-700/60">
+              <Image
+                src={ownerAvatar}
+                alt="owner avatar"
+                className="h-full w-full object-cover"
+                wrapperClassName="h-full w-full"
+                fallbackSrc={IMAGES.default.avatar}
+              />
+            </Box>
+            <Flex direction="column" gap={4} className="min-w-0">
+              <Text className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
+                {ownerFullName}
+              </Text>
+              <Text className="truncate text-xs text-gray-500 dark:text-gray-300">
+                {ownerEmail}
+              </Text>
+            </Flex>
+          </Flex>
+        </Box>
         <Flex gap={12} align="center" className={infoCardClass}>
           <Box className={iconWrapperClass}>
             <HiOutlineDocumentDuplicate className="h-4 w-4" />

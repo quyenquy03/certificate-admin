@@ -2,34 +2,30 @@ import { QueryKey, useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import { QUERY_KEYS, QUERY_TIMES } from "@/constants";
-import {
-  BasePaginationParams,
-  BaseResponseType,
-  OrganizationResponseType,
-} from "@/types";
+import { BaseResponseType, OrganizationResponseType } from "@/types";
 import { organizationApis } from "@/apis";
 
-export const useQueryGetAllOrganizations = (
-  params?: BasePaginationParams,
+export const useQueryGetOrganization = (
+  organizationId: string,
   options?: UseQueryOptions<
     unknown,
     AxiosError,
-    BaseResponseType<OrganizationResponseType[]>,
+    BaseResponseType<OrganizationResponseType>,
     QueryKey
   >
 ) => {
-  const queryKey = [QUERY_KEYS.GET_ALL_ORGANIZATIONS];
+  const queryKey = [QUERY_KEYS.GET_ORGANIZATION, organizationId];
 
   const queryFn = async () => {
-    return await organizationApis.getOrganizations(params);
+    return await organizationApis.getOrganization(organizationId);
   };
 
   return useQuery({
     queryKey,
     queryFn,
     retry: 1,
-    staleTime: QUERY_TIMES.STALE_TIME.GET_ALL_ORGANIZATIONS,
-    gcTime: QUERY_TIMES.GC_TIME.GET_ALL_ORGANIZATIONS,
+    staleTime: QUERY_TIMES.STALE_TIME.GET_ORGANIZATION,
+    gcTime: QUERY_TIMES.GC_TIME.GET_ORGANIZATION,
     refetchOnWindowFocus: false,
     enabled: true,
     ...options,

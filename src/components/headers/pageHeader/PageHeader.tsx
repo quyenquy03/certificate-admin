@@ -1,10 +1,13 @@
 import { cn } from "@/helpers";
-import { Group, Paper, Stack, Title } from "@mantine/core";
+import { useHandleBack } from "@/hooks";
+import { Box, Flex, Group, Paper, Stack, Title } from "@mantine/core";
 import { ReactNode } from "react";
+import { BiChevronLeft } from "react-icons/bi";
 
 type PageHeaderProps = {
   children?: ReactNode;
   title?: string;
+  showBackButton?: boolean;
   classNames?: {
     wrapper?: string;
     title?: string;
@@ -16,7 +19,9 @@ export const PageHeader = ({
   children,
   title,
   classNames,
+  showBackButton = false,
 }: PageHeaderProps) => {
+  const { handleBack } = useHandleBack();
   return (
     <Paper
       withBorder
@@ -37,7 +42,15 @@ export const PageHeader = ({
         className="relative"
       >
         {title && (
-          <Stack gap={2} className="min-w-0 flex-1">
+          <Flex gap={2} className="min-w-0 flex-1 gap-3 items-center">
+            {showBackButton && (
+              <Box
+                onClick={handleBack}
+                className="w-9 h-9 mr-3 flex items-center justify-center cursor-pointer bg-gray-300/50 dark:bg-gray-700/50 rounded-md mb-1"
+              >
+                <BiChevronLeft className="text-gray-500 w-6 h-6" />
+              </Box>
+            )}
             <Title
               order={2}
               className={cn(
@@ -47,7 +60,7 @@ export const PageHeader = ({
             >
               {title}
             </Title>
-          </Stack>
+          </Flex>
         )}
 
         {children && (

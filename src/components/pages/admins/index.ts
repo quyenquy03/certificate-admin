@@ -4,3 +4,5 @@ export * from "./users";
 export * from "./registrations";
 export * from "./certificateTypes";
 export * from "./certificateRequests";
+export * from "./organizationMembers";
+export * from "./organizationCertificates";

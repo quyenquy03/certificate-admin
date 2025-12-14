@@ -50,6 +50,18 @@ const getOrganizations = async (
   return response.data;
 };
 
+const getOrganization = async (
+  id: string
+): Promise<BaseResponseType<OrganizationResponseType>> => {
+  const response = await axiosClient<
+    BaseResponseType<OrganizationResponseType>
+  >({
+    method: AXIOS_METHOD.GET,
+    url: API_ROUTES.GET_ORGANIZATION(id),
+  });
+  return response.data;
+};
+
 const getMyOrganizations = async (
   data?: BasePaginationParams
 ): Promise<BaseResponseType<OrganizationResponseType[]>> => {
@@ -138,4 +150,5 @@ export const organizationApis = {
   rejectRegistration,
   addOrganizationMember,
   getOrganizationMembers,
+  getOrganization,
 };
