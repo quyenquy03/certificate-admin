@@ -1,8 +1,8 @@
-import { CertificatesManagement } from "@/components";
+import { OrganizationCertificateManagement } from "@/components";
 import React from "react";
 
 const OrganizationCertificatesPage = () => {
-  return <CertificatesManagement />;
+  return <OrganizationCertificateManagement />;
 };
 
 export default OrganizationCertificatesPage;

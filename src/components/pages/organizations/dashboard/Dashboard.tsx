@@ -7,7 +7,7 @@ import {
   PageHeader,
 } from "@/components";
 import { PAGE_URLS } from "@/constants";
-import { CERTIFICATE_STATUSES, ORGANIZATION_STATUSES, SORTS } from "@/enums";
+import { CERTIFICATE_STATUSES, SORTS } from "@/enums";
 import { useDisclose } from "@/hooks";
 import { useQueryGetOrganizationCertificates } from "@/queries";
 import { stores } from "@/stores";
@@ -19,7 +19,6 @@ import {
   Flex,
   Grid,
   Paper,
-  Progress,
   Skeleton,
   Stack,
   Text,
@@ -40,6 +39,7 @@ import {
   HiOutlineWallet,
   HiOutlineCalendarDays,
 } from "react-icons/hi2";
+import { CertificateStatChart } from "./CertificateStatChart";
 
 const CERTIFICATE_STATUS_COLORS: Partial<Record<CERTIFICATE_STATUSES, string>> =
   {
@@ -52,8 +52,7 @@ export const OrganizationDashboard = () => {
   const t = useTranslations();
   const router = useRouter();
   const { currentUser } = stores.account();
-  const { currentOrganization, organizations, isLoading } =
-    stores.organization();
+  const { currentOrganization, isLoading } = stores.organization();
 
   const [selectedCertificate, setSelectedCertificate] =
     useState<CertificateResponseType | null>(null);
@@ -76,54 +75,6 @@ export const OrganizationDashboard = () => {
   const isCertificatesEmpty =
     !isCertificatesFetching && recentCertificates.length === 0;
 
-  const organizationsStats = useMemo(() => {
-    const total = organizations.length;
-    const approved = organizations.filter(
-      (item) => item.status === ORGANIZATION_STATUSES.APPROVED
-    ).length;
-    const pending = organizations.filter(
-      (item) => item.status === ORGANIZATION_STATUSES.PENDING
-    ).length;
-    const rejected = organizations.filter(
-      (item) => item.status === ORGANIZATION_STATUSES.REJECTED
-    ).length;
-
-    return {
-      total,
-      approved,
-      pending,
-      rejected,
-    };
-  }, [organizations]);
-
-  const certificateStatusSummary = useMemo(() => {
-    const counts: Partial<Record<CERTIFICATE_STATUSES, number>> = {};
-
-    recentCertificates.forEach((certificate) => {
-      counts[certificate.status] = (counts[certificate.status] ?? 0) + 1;
-    });
-
-    const total = recentCertificates.length || 0;
-    const items = Object.entries(counts).map(([status, value]) => {
-      const typedStatus = status as CERTIFICATE_STATUSES;
-      const percentage = total
-        ? Math.round(((value as number) / total) * 100)
-        : 0;
-
-      return {
-        status: typedStatus,
-        value: value as number,
-        percentage,
-        color: CERTIFICATE_STATUS_COLORS[typedStatus] ?? "#0EA5E9",
-      };
-    });
-
-    return {
-      total,
-      items,
-    };
-  }, [recentCertificates]);
-
   const canSignSelectedCertificate = useMemo(() => {
     if (!selectedCertificate) return false;
     const isOrgOwner = currentOrganization?.isOwner ?? false;
@@ -131,41 +82,42 @@ export const OrganizationDashboard = () => {
     return isOrgOwner || isIssuer;
   }, [currentOrganization?.isOwner, currentUser?.id, selectedCertificate]);
 
-  const infoItems = useMemo(
-    () => [
+  const infoItems = useMemo(() => {
+    const owner = currentOrganization?.owner;
+
+    return [
       {
         key: "email",
         label: t("organization_dashboard_contact_email"),
-        value: "currentOrganization?.email",
+        value: owner?.email ?? "",
         icon: <HiOutlineEnvelope className="h-4 w-4" />,
       },
       {
         key: "phone",
         label: t("organization_dashboard_contact_phone"),
-        value: "currentOrganization?.phoneNumber",
+        value: owner?.phone ?? "",
         icon: <HiOutlinePhone className="h-4 w-4" />,
       },
       {
         key: "website",
         label: t("organization_dashboard_contact_website"),
-        value: currentOrganization?.website,
+        value: currentOrganization?.website ?? "",
         icon: <HiOutlineGlobeAlt className="h-4 w-4" />,
       },
       {
         key: "wallet",
         label: t("organization_dashboard_wallet_label"),
-        value: currentOrganization?.walletAddress,
+        value: owner?.walletAddress ?? "",
         icon: <HiOutlineWallet className="h-4 w-4" />,
       },
-    ],
-    [
-      currentOrganization?.email,
-      currentOrganization?.phoneNumber,
-      currentOrganization?.walletAddress,
-      currentOrganization?.website,
-      t,
-    ]
-  );
+    ];
+  }, [
+    currentOrganization?.website,
+    currentOrganization?.owner?.email,
+    currentOrganization?.owner?.phone,
+    currentOrganization?.owner?.walletAddress,
+    t,
+  ]);
 
   const quickActions = [
     {
@@ -218,49 +170,9 @@ export const OrganizationDashboard = () => {
     setSelectedCertificate(null);
   };
 
-  const renderStatCard = (
-    label: string,
-    value: number,
-    accent: string,
-    options?: { percentage?: number; footerLabel?: string }
-  ) => {
-    const percentageValue =
-      typeof options?.percentage === "number" ? options.percentage : 100;
-    const footerLabel =
-      options?.footerLabel ?? t("organization_dashboard_stat_hint");
-
-    return (
-      <Paper
-        key={label}
-        radius="xl"
-        shadow="md"
-        className="rounded-xl border border-slate-200/60 bg-white/90 p-4 backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/70"
-      >
-        <Flex direction="column" gap={12}>
-          <Text className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            {label}
-          </Text>
-          <Text className="text-3xl font-bold text-slate-900 dark:text-white">
-            {value}
-          </Text>
-          <Box>
-            <Progress
-              value={Math.min(Math.max(percentageValue, 0), 100)}
-              color={accent}
-              radius="xl"
-            />
-            <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {footerLabel}
-            </Text>
-          </Box>
-        </Flex>
-      </Paper>
-    );
-  };
-
   const heroContent = () => {
     if (isLoading) {
-      return <Skeleton height={180} radius="xl" />;
+      return <Skeleton height={180} radius="sm" />;
     }
 
     if (!currentOrganization) {
@@ -268,7 +180,7 @@ export const OrganizationDashboard = () => {
         <Flex
           direction="column"
           gap={12}
-          className="rounded-xl border border-dashed border-white/40 bg-white/10 p-5 text-white"
+          className="rounded-sm border border-dashed border-white/40 bg-white/10 p-5 text-white"
         >
           <Text className="text-sm font-semibold uppercase tracking-wide text-white/70">
             {t("organization_dashboard_current_org")}
@@ -297,28 +209,27 @@ export const OrganizationDashboard = () => {
           {t("organization_dashboard_overview_label")}
         </Text>
         <Flex gap={12} align="center" wrap="wrap">
-          <Text className="text-3xl font-bold leading-tight">
-            {currentOrganization.organizationName || t("not_updated")}
-          </Text>
-          <OrganizationStatusCard status={currentOrganization.status} />
-        </Flex>
+        <Text className="text-3xl font-bold leading-tight">
+          {currentOrganization.name || t("not_updated")}
+        </Text>
+        <OrganizationStatusCard status={currentOrganization.status} />
+      </Flex>
         <Text className="text-base text-white/80">
-          {currentOrganization.organizationDescription || t("not_updated")}
+          {currentOrganization.description || t("not_updated")}
         </Text>
         <Grid gutter="lg">
           {infoItems.map((item) => {
+            const rawValue = typeof item.value === "string" ? item.value : "";
             const displayValue =
-              item.value && item.value.trim().length > 0
-                ? item.value
-                : t("not_updated");
+              rawValue.trim().length > 0 ? rawValue : t("not_updated");
 
             return (
               <Grid.Col key={item.key} span={{ base: 12, sm: 6, lg: 3 }}>
                 <Flex
                   gap={10}
-                  className="rounded-lg border border-white/20 bg-white/10 px-3 py-3 backdrop-blur"
+                  className="rounded-sm border border-white/20 bg-white/10 px-3 py-3 backdrop-blur"
                 >
-                  <Box className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/15 text-white">
+                  <Box className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/15 text-white">
                     {item.icon}
                   </Box>
                   <Flex direction="column" className="min-w-0">
@@ -360,75 +271,17 @@ export const OrganizationDashboard = () => {
       <Box className="flex-1 overflow-y-auto p-4">
         <Stack gap="lg">
           <Paper
-            radius="xl"
+            radius="sm"
             shadow="xl"
-            className="relative overflow-hidden rounded-xl border border-slate-200/40 bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800 p-6 text-white dark:border-slate-800/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950"
+            className="relative overflow-hidden rounded-sm border border-slate-200/40 bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800 p-6 text-white dark:border-slate-800/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950"
           >
             <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.25),_transparent_55%)]" />
             <Box className="relative">{heroContent()}</Box>
           </Paper>
 
-          <Grid gutter="lg">
-            <Grid.Col span={{ base: 12, md: 6, xl: 3 }}>
-              {renderStatCard(
-                t("organization_dashboard_total_orgs"),
-                organizationsStats.total,
-                "#6366F1",
-                {
-                  percentage: 100,
-                  footerLabel: t("organization_dashboard_stat_total_hint"),
-                }
-              )}
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, xl: 3 }}>
-              {renderStatCard(
-                t("organization_dashboard_approved_orgs"),
-                organizationsStats.approved,
-                "#22C55E",
-                {
-                  percentage: organizationsStats.total
-                    ? Math.round(
-                        (organizationsStats.approved /
-                          Math.max(organizationsStats.total, 1)) *
-                          100
-                      )
-                    : 0,
-                }
-              )}
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, xl: 3 }}>
-              {renderStatCard(
-                t("organization_dashboard_pending_orgs"),
-                organizationsStats.pending,
-                "#F59E0B",
-                {
-                  percentage: organizationsStats.total
-                    ? Math.round(
-                        (organizationsStats.pending /
-                          Math.max(organizationsStats.total, 1)) *
-                          100
-                      )
-                    : 0,
-                }
-              )}
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, xl: 3 }}>
-              {renderStatCard(
-                t("organization_dashboard_rejected_orgs"),
-                organizationsStats.rejected,
-                "#F43F5E",
-                {
-                  percentage: organizationsStats.total
-                    ? Math.round(
-                        (organizationsStats.rejected /
-                          Math.max(organizationsStats.total, 1)) *
-                          100
-                      )
-                    : 0,
-                }
-              )}
-            </Grid.Col>
-          </Grid>
+          {currentOrganization && (
+            <CertificateStatChart organizationId={currentOrganization.id} />
+          )}
 
           <Box className="space-y-3">
             <Flex align="center" justify="space-between" wrap="wrap" gap={12}>
@@ -445,15 +298,15 @@ export const OrganizationDashboard = () => {
               {quickActions.map((action) => (
                 <Grid.Col key={action.id} span={{ base: 12, md: 6, xl: 3 }}>
                   <Paper
-                    radius="xl"
+                    radius="sm"
                     shadow="lg"
                     onClick={action.onClick}
-                    className={`group relative h-full cursor-pointer rounded-xl border bg-white/90 p-5 transition-all hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/70 ${action.accent}`}
+                    className={`group relative h-full cursor-pointer rounded-sm border bg-white/90 p-5 transition-all hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/70 ${action.accent}`}
                   >
                     <Flex direction="column" gap={12}>
                       <ThemeIcon
                         size="xl"
-                        radius="xl"
+                        radius="lg"
                         variant="light"
                         className="bg-white/60 text-slate-700 shadow-lg dark:bg-slate-800/60 dark:text-white"
                       >
@@ -473,64 +326,11 @@ export const OrganizationDashboard = () => {
           </Box>
 
           <Grid gutter="lg">
-            <Grid.Col span={{ base: 12, lg: 5 }}>
+            <Grid.Col span={{ base: 12 }}>
               <Paper
-                radius="xl"
+                radius="sm"
                 shadow="md"
-                className="h-full rounded-xl border border-slate-200/70 bg-white/95 p-5 dark:border-slate-800/70 dark:bg-slate-900/70"
-              >
-                <Flex direction="column" gap={10}>
-                  <Box>
-                    <Text className="text-base font-semibold text-slate-900 dark:text-white">
-                      {t("organization_dashboard_recent_status_title")}
-                    </Text>
-                    <Text className="text-sm text-slate-500 dark:text-slate-400">
-                      {t("organization_dashboard_recent_status_desc")}
-                    </Text>
-                  </Box>
-
-                  {certificateStatusSummary.total === 0 ? (
-                    <Box className="rounded-xl border border-dashed border-slate-200 px-4 py-6 text-center dark:border-slate-700">
-                      <Text className="text-sm text-slate-500 dark:text-slate-400">
-                        {t("organization_dashboard_certificate_status_empty")}
-                      </Text>
-                    </Box>
-                  ) : (
-                    <Stack gap="md">
-                      {certificateStatusSummary.items.map((item) => (
-                        <Flex
-                          key={item.status}
-                          align="center"
-                          gap={12}
-                          className="rounded-xl border border-slate-100 px-4 py-3 dark:border-slate-800"
-                        >
-                          <Box className="flex-1">
-                            <Text className="text-sm font-semibold text-slate-900 dark:text-white">
-                              {t(item.status as any)}
-                            </Text>
-                            <Progress
-                              value={item.percentage}
-                              color={item.color}
-                              radius="xl"
-                              className="mt-2"
-                            />
-                          </Box>
-                          <Text className="text-lg font-semibold text-slate-900 dark:text-white">
-                            {item.value}
-                          </Text>
-                        </Flex>
-                      ))}
-                    </Stack>
-                  )}
-                </Flex>
-              </Paper>
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, lg: 7 }}>
-              <Paper
-                radius="xl"
-                shadow="md"
-                className="h-full rounded-xl border border-slate-200/70 bg-white/95 p-5 dark:border-slate-800/70 dark:bg-slate-900/70"
+                className="h-full rounded-sm border border-slate-200/70 bg-white/95 p-5 dark:border-slate-800/70 dark:bg-slate-900/70"
               >
                 <Flex
                   align="center"
@@ -562,11 +362,11 @@ export const OrganizationDashboard = () => {
                   {isCertificatesFetching ? (
                     Array.from({ length: RECENT_CERTIFICATES_LIMIT }).map(
                       (_, index) => (
-                        <Skeleton key={index} height={76} radius="lg" />
+                        <Skeleton key={index} height={76} radius="sm" />
                       )
                     )
                   ) : isCertificatesEmpty ? (
-                    <Box className="rounded-xl border border-dashed border-slate-200 px-4 py-6 text-center dark:border-slate-700">
+                    <Box className="rounded-sm border border-dashed border-slate-200 px-4 py-6 text-center dark:border-slate-700">
                       <Text className="text-sm font-semibold text-slate-600 dark:text-slate-300">
                         {t("organization_dashboard_empty_certificates")}
                       </Text>
@@ -594,12 +394,12 @@ export const OrganizationDashboard = () => {
                         <Paper
                           key={certificate.id}
                           withBorder
-                          radius="xl"
+                          radius="sm"
                           shadow="xs"
                           onClick={() =>
                             handleOpenCertificateDetail(certificate)
                           }
-                          className="cursor-pointer rounded-xl border border-slate-200/70 bg-white p-4 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg dark:border-slate-800/60 dark:bg-slate-950"
+                          className="cursor-pointer rounded-sm border border-slate-200/70 bg-white p-4 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg dark:border-slate-800/60 dark:bg-slate-950"
                         >
                           <Flex
                             align="flex-start"

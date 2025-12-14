@@ -42,7 +42,7 @@ export const PageHeader = ({
         className="relative"
       >
         {title && (
-          <Flex gap={2} className="min-w-0 flex-1 gap-3 items-center">
+          <Flex gap={2} className="min-w-0 gap-3 items-center">
             {showBackButton && (
               <Box
                 onClick={handleBack}
