@@ -1,3 +1,2 @@
-export * from "./create";
-export * from "./update";
+export * from "./createUpdateCertificate";
 export * from "./management";

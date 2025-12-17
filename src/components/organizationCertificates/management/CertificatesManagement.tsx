@@ -345,7 +345,18 @@ export const CertificatesManagement = ({
   };
 
   const handleUpdateCertificate = (certificate: CertificateResponseType) => {
-    console.log("Update certificate", certificate.id);
+    if (certificate.status !== CERTIFICATE_STATUSES.CREATED) {
+      notifications.show({
+        title: t("update_certificate_failed_title"),
+        message: t("certificate_update_signed_error"),
+        color: "red",
+      });
+      return;
+    }
+
+    router.push(
+      `${PAGE_URLS.ORGANIZATIONS_CERTIFICATES}/update/${certificate.id}`
+    );
   };
 
   const handleDeleteCertificate = (certificate: CertificateResponseType) => {
@@ -433,7 +444,11 @@ export const CertificatesManagement = ({
                 <CertificateItem
                   certificate={certificate}
                   onShowDetail={handleShowCertificateDetail}
-                  onUpdate={handleUpdateCertificate}
+                  onUpdate={
+                    certificate.status === CERTIFICATE_STATUSES.CREATED
+                      ? handleUpdateCertificate
+                      : undefined
+                  }
                   onDelete={handleDeleteCertificate}
                   onShowIssuerDetail={handleShowIssuerDetail}
                   onApprove={

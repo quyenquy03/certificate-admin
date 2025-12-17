@@ -21,15 +21,21 @@ import {
   CERTIFICATE_TYPE_ADDITIONAL_FIELD,
   CERTIFICATE_TEMPLATES,
   FORM_MODES,
+  CERTIFICATE_STATUSES,
+  COUNTRIES,
 } from "@/enums";
-import { useImportCertificates } from "@/mutations";
-import { useQueryGetAllCertificateTypes } from "@/queries";
+import { useImportCertificates, useUpdateCertificate } from "@/mutations";
+import {
+  useQueryGetAllCertificateTypes,
+  useQueryGetCertificate,
+} from "@/queries";
 import {
   AdditionalInfoType,
   BaseErrorType,
   CertificateItemFormType,
   ImportCertificateItem,
   CertificateCategoryAdditionalInfoType,
+  CreateEditCertificateRequestType,
   OrganizationResponseType,
 } from "@/types";
 import { calculateEndDate } from "@/helpers/formatDate";
@@ -39,6 +45,7 @@ import {
   Grid,
   Group,
   Input,
+  Loader,
   Paper,
   Stack,
   Text,
@@ -50,7 +57,6 @@ import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { FiArrowLeft } from "react-icons/fi";
-import { stores } from "@/stores";
 import { useDebounce, useDisclose } from "@/hooks";
 
 type CreateCertificateFormValues = {
@@ -63,8 +69,9 @@ type CreateCertificateFormValues = {
   [CERTIFICATE_ADDITIONAL_FIELD.CENTRE_NUMBER]?: string;
 };
 
-type CreateCertificateProps = {
+type CreateUpdateCertificateProps = {
   currentOrganization: OrganizationResponseType | null;
+  certificateId?: string | null;
 };
 
 const DEFAULT_VALUES: CreateCertificateFormValues = {
@@ -97,13 +104,32 @@ const parseCertificateTypeAdditionalInfo = (
   }
 };
 
-export const CreateCertificate = ({
+const parseCertificateAdditionalInfo = (
+  additionalInfo?: string | null
+): AdditionalInfoType => {
+  if (!additionalInfo) return {};
+
+  try {
+    const parsedInfo = JSON.parse(additionalInfo);
+    if (parsedInfo && typeof parsedInfo === "object") {
+      return parsedInfo as AdditionalInfoType;
+    }
+    return {};
+  } catch (error) {
+    console.error("Failed to parse certificate additional info", error);
+    return {};
+  }
+};
+
+export const CreateUpdateCertificate = ({
   currentOrganization,
-}: CreateCertificateProps) => {
+  certificateId,
+}: CreateUpdateCertificateProps) => {
   const t = useTranslations();
   const router = useRouter();
   const certificateItemModal = useDisclose();
   const importCertificateModal = useDisclose();
+  const isUpdateMode = Boolean(certificateId);
 
   const [listCertificates, setListCertificates] = useState<
     CertificateItemFormType[]
@@ -136,11 +162,37 @@ export const CreateCertificate = ({
   const formRef = useRef<HTMLFormElement | null>(null);
 
   const {
+    data: certificateDetailResponse,
+    isFetching: isLoadingCertificate,
+  } = useQueryGetCertificate(certificateId ?? "", {
+    enabled: isUpdateMode,
+    retry: 1,
+    onError: () => {
+      notifications.show({
+        title: t("update_certificate_failed_title"),
+        message: t("common_error_message"),
+        color: "red",
+      });
+      router.push(PAGE_URLS.ORGANIZATIONS_CERTIFICATES);
+    },
+  } as any);
+
+  const {
     data: certificateTypesResponse,
     isFetching: isLoadingCertificateTypes,
   } = useQueryGetAllCertificateTypes(undefined, {
     enabled: true,
   } as any);
+
+  const certificateDetail = certificateDetailResponse?.data ?? null;
+
+  const certificateAdditionalInfo = useMemo(
+    () =>
+      parseCertificateAdditionalInfo(
+        certificateDetail?.authorProfile?.additionalInfo
+      ),
+    [certificateDetail?.authorProfile?.additionalInfo]
+  );
 
   const certificateTypeOptions = useMemo<CertificateTypeOption[]>(() => {
     return (certificateTypesResponse?.data ?? []).map((type) => {
@@ -230,7 +282,37 @@ export const CreateCertificate = ({
       },
     });
 
-  const isProcessing = isSubmitting || isImporting;
+  const { mutate: updateCertificate, isPending: isUpdating } =
+    useUpdateCertificate({
+      onSuccess: () => {
+        notifications.show({
+          title: t("update_certificate_item_success"),
+          message: t("update_certificate_item_success_message"),
+          color: "green",
+        });
+        router.push(PAGE_URLS.ORGANIZATIONS_CERTIFICATES);
+      },
+      onError: (error) => {
+        if (isAxiosError<BaseErrorType>(error)) {
+          const code = error.response?.data?.code ?? "common_error_message";
+          notifications.show({
+            title: t("update_certificate_failed_title"),
+            message: t(code as any),
+            color: "red",
+          });
+          return;
+        }
+
+        notifications.show({
+          title: t("update_certificate_failed_title"),
+          message: t("common_error_message"),
+          color: "red",
+        });
+      },
+    });
+
+  const isProcessing =
+    isSubmitting || isImporting || isUpdating || isLoadingCertificate;
 
   const handleSubmitFromHeader = () => {
     if (isProcessing) return;
@@ -239,9 +321,16 @@ export const CreateCertificate = ({
 
   const onSubmit: SubmitHandler<CreateCertificateFormValues> = (values) => {
     try {
-      if (!currentOrganization || !currentOrganization.id) {
+      const organizationId =
+        currentOrganization?.id ||
+        certificateDetail?.organizationId ||
+        values.organizationId;
+
+      if (!organizationId) {
         notifications.show({
-          title: t("create_certificate_failed_title"),
+          title: isUpdateMode
+            ? t("update_certificate_failed_title")
+            : t("create_certificate_failed_title"),
           message: t("organization_not_found"),
           color: "red",
         });
@@ -252,12 +341,90 @@ export const CreateCertificate = ({
       );
       if (!selectedCertificateType) {
         notifications.show({
-          title: t("create_certificate_failed_title"),
+          title: isUpdateMode
+            ? t("update_certificate_failed_title")
+            : t("create_certificate_failed_title"),
           message: t("certificate_type_not_found"),
           color: "red",
         });
         return;
       }
+
+      if (isUpdateMode) {
+        const certificateItem = listCertificates[0];
+        if (!certificateItem || !certificateId) {
+          notifications.show({
+            title: t("update_certificate_failed_title"),
+            message: t("common_error_message"),
+            color: "red",
+          });
+          return;
+        }
+
+        const additionalInfo: AdditionalInfoType = {
+          ...(certificateAdditionalInfo ?? {}),
+          signer: values.signer,
+          address: values.address,
+          certificate_type: selectedCertificateType.code,
+        };
+
+        if (
+          certificateCategory === CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE
+        ) {
+          additionalInfo.reg_no = certificateItem.reg_no;
+          additionalInfo.serial_number = certificateItem.serial_number;
+        }
+
+        if (certificateCategory === CERTIFICATE_TEMPLATES.IELTS) {
+          additionalInfo.candidate_sex = certificateItem.candidate_sex;
+          additionalInfo.candidate_number = certificateItem.candidate_number;
+          additionalInfo.first_language = certificateItem.first_language;
+          additionalInfo.test_report = certificateItem.test_report;
+          additionalInfo.listening_result = certificateItem.listening_result;
+          additionalInfo.reading_result = certificateItem.reading_result;
+          additionalInfo.writing_result = certificateItem.writing_result;
+          additionalInfo.speaking_result = certificateItem.speaking_result;
+          additionalInfo.administrator_comments =
+            certificateItem.administrator_comments;
+          additionalInfo.centre_number =
+            values[CERTIFICATE_ADDITIONAL_FIELD.CENTRE_NUMBER];
+        }
+
+        const payload: CreateEditCertificateRequestType = {
+          id: certificateId ?? "",
+          validFrom: values.validFrom?.toISOString() ?? "",
+          validTo: calculateEndDate(values.validFrom, durationYears),
+          certificateTypeId: selectedCertificateType.value,
+          organizationId,
+          authorProfile: {
+            authorName: certificateItem.authorName,
+            authorIdCard: certificateItem.authorIdCard,
+            authorDob:
+              typeof certificateItem.authorDob === "string"
+                ? certificateItem.authorDob
+                : certificateItem.authorDob instanceof Date
+                ? certificateItem.authorDob.toISOString()
+                : "",
+            authorImage: certificateItem.authorImage,
+            authorEmail: certificateItem.authorEmail,
+            authorDocuments:
+              certificateDetail?.authorProfile?.authorDocuments ?? [],
+            authorCountryCode: certificateItem.authorCountryCode,
+            grantLevel:
+              typeof certificateItem.grantLevel === "number"
+                ? certificateItem.grantLevel
+                : Number(certificateItem.grantLevel),
+            domain: certificateItem.domain?.trim()
+              ? certificateItem.domain?.trim()
+              : "private",
+            additionalInfo: JSON.stringify(additionalInfo),
+          },
+        };
+
+        updateCertificate(payload);
+        return;
+      }
+
       const certificates: ImportCertificateItem[] = listCertificates.map(
         (item) => {
           const additionalInfo: AdditionalInfoType = {
@@ -316,7 +483,7 @@ export const CreateCertificate = ({
 
       importCertificates({
         certificateTypeId: selectedCertificateType.value,
-        organizationId: currentOrganization?.id,
+        organizationId,
         certificates,
       });
     } catch (error) {
@@ -334,6 +501,8 @@ export const CreateCertificate = ({
   };
 
   const handleCreateCertificate = async () => {
+    if (isUpdateMode) return;
+
     const checkCertificateCategory = await trigger(["certificateTypeId"]);
     if (!checkCertificateCategory || !certificateCategory) {
       notifications.show({
@@ -355,6 +524,8 @@ export const CreateCertificate = ({
   const handleDeleteCertificate = (
     certificateItem: CertificateItemFormType
   ) => {
+    if (isUpdateMode) return;
+
     setListCertificates((prev) =>
       prev.filter((item) => item.authorIdCard !== certificateItem.authorIdCard)
     );
@@ -393,7 +564,11 @@ export const CreateCertificate = ({
     }
 
     if (action === FORM_MODES.CREATE) {
-      setListCertificates((prev) => [...prev, certificateItem]);
+      if (isUpdateMode) {
+        setListCertificates([certificateItem]);
+      } else {
+        setListCertificates((prev) => [...prev, certificateItem]);
+      }
 
       notifications.show({
         title: t("add_certificate_item_success"),
@@ -422,6 +597,8 @@ export const CreateCertificate = ({
   const handleImportCertificates = (
     certificates: CertificateItemFormType[]
   ) => {
+    if (isUpdateMode) return;
+
     setListCertificates((prev) => [...prev, ...certificates]);
   };
 
@@ -432,6 +609,8 @@ export const CreateCertificate = ({
   const handleChangePage = (page: number) => {
     setSearchParams((prev) => ({ ...prev, page }));
   };
+
+  const isListLoading = isUpdateMode && isLoadingCertificate;
 
   const filteredCertificates = useMemo(() => {
     const keyword = debouncedSearch.toLowerCase();
@@ -466,18 +645,93 @@ export const CreateCertificate = ({
   }, [filteredCertificates, searchParams.page, searchParams.pageSize]);
 
   useEffect(() => {
+    if (!isUpdateMode || !certificateDetail) return;
+
+    if (certificateDetail.status !== CERTIFICATE_STATUSES.CREATED) {
+      notifications.show({
+        title: t("update_certificate_failed_title"),
+        message: t("certificate_update_signed_error"),
+        color: "red",
+      });
+      router.push(PAGE_URLS.ORGANIZATIONS_CERTIFICATES);
+      return;
+    }
+
+    const validFromDate = certificateDetail.validFrom
+      ? new Date(certificateDetail.validFrom)
+      : null;
+
+    const newCertificateItem: CertificateItemFormType = {
+      authorName: certificateDetail.authorProfile?.authorName ?? "",
+      authorIdCard: certificateDetail.authorProfile?.authorIdCard ?? "",
+      authorDob: certificateDetail.authorProfile?.authorDob
+        ? new Date(certificateDetail.authorProfile.authorDob)
+        : null,
+      authorEmail: certificateDetail.authorProfile?.authorEmail ?? "",
+      authorCountryCode:
+        certificateDetail.authorProfile?.authorCountryCode ?? COUNTRIES.VIETNAM,
+      authorImage: certificateDetail.authorProfile?.authorImage ?? "",
+      grantLevel: certificateDetail.authorProfile?.grantLevel ?? "",
+      domain: certificateDetail.authorProfile?.domain ?? "",
+      serial_number: certificateAdditionalInfo.serial_number as string,
+      reg_no: certificateAdditionalInfo.reg_no as string,
+      centre_number: certificateAdditionalInfo.centre_number as string,
+      candidate_number: certificateAdditionalInfo.candidate_number as string,
+      candidate_sex: certificateAdditionalInfo.candidate_sex as string,
+      first_language: certificateAdditionalInfo.first_language as string,
+      test_report: certificateAdditionalInfo.test_report as string,
+      listening_result: certificateAdditionalInfo.listening_result as string,
+      reading_result: certificateAdditionalInfo.reading_result as string,
+      writing_result: certificateAdditionalInfo.writing_result as string,
+      speaking_result: certificateAdditionalInfo.speaking_result as string,
+      administrator_comments:
+        certificateAdditionalInfo.administrator_comments as string,
+    };
+
+    setListCertificates([newCertificateItem]);
+    reset({
+      validFrom: validFromDate,
+      certificateTypeId: certificateDetail.certificateTypeId ?? "",
+      organizationId:
+        certificateDetail.organizationId ?? currentOrganization?.id ?? "",
+      signer:
+        (certificateAdditionalInfo[
+          CERTIFICATE_ADDITIONAL_FIELD.SIGNER
+        ] as string) ?? "",
+      address:
+        (certificateAdditionalInfo[
+          CERTIFICATE_ADDITIONAL_FIELD.ADDRESS
+        ] as string) ?? "",
+      [CERTIFICATE_ADDITIONAL_FIELD.CENTRE_NUMBER]:
+        (certificateAdditionalInfo[
+          CERTIFICATE_ADDITIONAL_FIELD.CENTRE_NUMBER
+        ] as string) ?? "",
+    });
+  }, [
+    certificateAdditionalInfo,
+    certificateDetail,
+    currentOrganization?.id,
+    isUpdateMode,
+    reset,
+    router,
+    t,
+  ]);
+
+  useEffect(() => {
     if (searchParams.page > totalPages) {
       setSearchParams((prev) => ({ ...prev, page: totalPages }));
     }
   }, [searchParams.page, totalPages]);
 
   useEffect(() => {
+    if (isUpdateMode) return;
+
     if (currentOrganization?.id) {
       setValue("organizationId", currentOrganization.id, {
         shouldDirty: true,
       });
     }
-  }, [currentOrganization?.id, setValue]);
+  }, [currentOrganization?.id, isUpdateMode, setValue]);
 
   useEffect(() => {
     if (certificateTypeId) {
@@ -488,7 +742,7 @@ export const CreateCertificate = ({
   return (
     <Box className="w-full relative flex h-full flex-col">
       <PageHeader
-        title={t("create_certificate")}
+        title={t(isUpdateMode ? "update_certificate" : "create_certificate")}
         classNames={{
           wrapper:
             "sticky top-0 z-20 gap-4 bg-white/90 backdrop-blur dark:bg-slate-950/90",
@@ -647,8 +901,12 @@ export const CreateCertificate = ({
                         handleSearchCertificate(event.currentTarget.value)
                       }
                     />
-                    <ButtonImport onClick={importCertificateModal.onOpen} />
-                    <ButtonAdd onClick={handleCreateCertificate} />
+                    {!isUpdateMode && (
+                      <>
+                        <ButtonImport onClick={importCertificateModal.onOpen} />
+                        <ButtonAdd onClick={handleCreateCertificate} />
+                      </>
+                    )}
                   </Group>
                 </Flex>
 
@@ -657,27 +915,33 @@ export const CreateCertificate = ({
                   px={16}
                   py={10}
                 >
-                  {filteredCertificates.length === 0 ? (
+                  {isListLoading ? (
+                    <Flex justify="center" align="center" className="py-10">
+                      <Loader />
+                    </Flex>
+                  ) : filteredCertificates.length === 0 ? (
                     <NoData />
                   ) : (
                     <Grid gutter="md">
                       {paginatedCertificates.map((certificate) => (
                         <Grid.Col
-                          span={{ base: 12, md: 6 }}
-                          key={certificate.authorIdCard}
-                        >
-                          <AddCertificateItem
-                            certificate={certificate}
-                            onUpdate={handleEditCertificate}
-                            onDelete={handleDeleteCertificate}
-                            certificateCategory={certificateCategory}
-                          />
-                        </Grid.Col>
+                            span={{ base: 12, md: 6 }}
+                            key={certificate.authorIdCard}
+                          >
+                            <AddCertificateItem
+                              certificate={certificate}
+                              onUpdate={handleEditCertificate}
+                              onDelete={
+                                isUpdateMode ? undefined : handleDeleteCertificate
+                              }
+                              certificateCategory={certificateCategory}
+                            />
+                          </Grid.Col>
                       ))}
                     </Grid>
                   )}
 
-                  {totalPages > 1 && (
+                  {!isListLoading && totalPages > 1 && (
                     <PaginationCustom
                       value={searchParams.page}
                       total={totalPages}

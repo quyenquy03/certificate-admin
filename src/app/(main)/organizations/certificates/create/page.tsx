@@ -1,8 +1,8 @@
-import { CreateCertificate } from "@/components";
+import { OrganizationCreateCertificate } from "@/components";
 import React from "react";
 
 const CreateCertificatePage = () => {
-  return <CreateCertificate />;
+  return <OrganizationCreateCertificate />;
 };
 
 export default CreateCertificatePage;

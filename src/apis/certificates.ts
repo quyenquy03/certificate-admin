@@ -5,7 +5,7 @@ import {
   BaseResponseType,
   CertificateCategoryType,
   CertificateCategoryRequestType,
-  CreateCertificateRequestType,
+  CreateEditCertificateRequestType,
   CertificateResponseType,
   SubmitCertificateRequestType,
   CertificateRequestType,
@@ -103,12 +103,25 @@ const deactivateCertificateType = async (
 };
 
 const createCertificate = async (
-  data: CreateCertificateRequestType
+  data: CreateEditCertificateRequestType
 ): Promise<BaseResponseType<CertificateResponseType>> => {
   const response = await axiosClient<BaseResponseType<CertificateResponseType>>(
     {
       method: AXIOS_METHOD.POST,
       url: API_ROUTES.CREATE_CERTIFICATE,
+      data,
+    }
+  );
+  return response.data;
+};
+
+const updateCertificate = async (
+  data: CreateEditCertificateRequestType
+): Promise<BaseResponseType<CertificateResponseType>> => {
+  const response = await axiosClient<BaseResponseType<CertificateResponseType>>(
+    {
+      method: AXIOS_METHOD.PUT,
+      url: API_ROUTES.UPDATE_CERTIFICATE(data?.id as string),
       data,
     }
   );
@@ -138,6 +151,18 @@ const getCertificates = async (
     url: API_ROUTES.GET_CERTIFICATES,
     data,
   });
+  return response.data;
+};
+
+const getCertificate = async (
+  id: string
+): Promise<BaseResponseType<CertificateResponseType>> => {
+  const response = await axiosClient<BaseResponseType<CertificateResponseType>>(
+    {
+      method: AXIOS_METHOD.GET,
+      url: API_ROUTES.GET_CERTIFICATE(id),
+    }
+  );
   return response.data;
 };
 
@@ -249,6 +274,18 @@ const revokeCertificate = async (
   return response.data;
 };
 
+const deleteCertificate = async (
+  id: string
+): Promise<BaseResponseType<CertificateResponseType>> => {
+  const response = await axiosClient<BaseResponseType<CertificateResponseType>>(
+    {
+      method: AXIOS_METHOD.DELETE,
+      url: API_ROUTES.DELETE_CERTIFICATE(id),
+    }
+  );
+  return response.data;
+};
+
 export const certificateApis = {
   getCertificateType,
   getCertificateTypes,
@@ -269,4 +306,7 @@ export const certificateApis = {
   rejectCertificateRequest,
   approveCertificate,
   revokeCertificate,
+  updateCertificate,
+  getCertificate,
+  deleteCertificate,
 };

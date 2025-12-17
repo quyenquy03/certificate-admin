@@ -4,6 +4,7 @@ import {
   ButtonAdd,
   CertificateDetailModal,
   OrganizationStatusCard,
+  PageContentWrapper,
   PageHeader,
 } from "@/components";
 import { PAGE_URLS } from "@/constants";
@@ -209,11 +210,11 @@ export const OrganizationDashboard = () => {
           {t("organization_dashboard_overview_label")}
         </Text>
         <Flex gap={12} align="center" wrap="wrap">
-        <Text className="text-3xl font-bold leading-tight">
-          {currentOrganization.name || t("not_updated")}
-        </Text>
-        <OrganizationStatusCard status={currentOrganization.status} />
-      </Flex>
+          <Text className="text-3xl font-bold leading-tight">
+            {currentOrganization.name || t("not_updated")}
+          </Text>
+          <OrganizationStatusCard status={currentOrganization.status} />
+        </Flex>
         <Text className="text-base text-white/80">
           {currentOrganization.description || t("not_updated")}
         </Text>
@@ -268,7 +269,7 @@ export const OrganizationDashboard = () => {
         />
       </PageHeader>
 
-      <Box className="flex-1 overflow-y-auto p-4">
+      <PageContentWrapper>
         <Stack gap="lg">
           <Paper
             radius="sm"
@@ -450,7 +451,7 @@ export const OrganizationDashboard = () => {
             </Grid.Col>
           </Grid>
         </Stack>
-      </Box>
+      </PageContentWrapper>
 
       <CertificateDetailModal
         opened={detailModal.isOpen}

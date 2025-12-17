@@ -4,6 +4,7 @@ export * from "./useActivateCertificateType";
 export * from "./useDeactivateCertificateType";
 export * from "./useDeleteCertificateType";
 export * from "./useUpdateCertificateType";
+export * from "./useUpdateCertificate";
 export * from "./useSubmitCertificateForVerify";
 export * from "./useImportCertificates";
 export * from "./useApproveCertificate";

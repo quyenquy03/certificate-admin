@@ -42,9 +42,11 @@ export const API_ROUTES = {
     `/certificates/types/${id}/activate`,
   DEACTIVATE_CERTIFICATE_TYPE: (id: string) =>
     `/certificates/types/${id}/deactivate`,
+  UPDATE_CERTIFICATE: (id: string) => `/certificates/update/${id}`,
   CREATE_CERTIFICATE: "/certificates/create-certificate",
   IMPORT_CERTIFICATES: "/certificates/import-certificates",
   GET_CERTIFICATES: "/certificates/get-certificates",
+  GET_CERTIFICATE: (id: string) => `/certificates/by-id/${id}`,
   GET_ORGANIZATIONS_CERTIFICATES: (id: string) =>
     `/certificates/organization-certificates/${id}`,
   GET_CERTIFICATE_REQUESTS: "/certificates/certificate-requests",
@@ -58,6 +60,7 @@ export const API_ROUTES = {
 
   REVOKE_CERTIFICATE: (id: string) => `/certificates/revoke/${id}`,
   APPROVE_CERTIFICATE: (id: string) => `/certificates/approve/${id}`,
+  DELETE_CERTIFICATE: (id: string) => `/certificates/delete/${id}`,
 
   // uploads
   UPLOAD_AUTHOR_IMAGE: "/uploads/author-image",

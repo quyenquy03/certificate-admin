@@ -81,8 +81,6 @@ export const CertificateDetail = ({
         );
         const rawCertificate = await contract.getCertificate(certificateCode);
 
-        console.log(rawCertificate);
-
         if (!rawCertificate) return;
 
         const ipfsHash = rawCertificate.ipfsHash ?? rawCertificate[9];

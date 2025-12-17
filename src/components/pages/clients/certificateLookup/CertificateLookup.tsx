@@ -22,11 +22,14 @@ import {
 import { useTranslations } from "next-intl";
 import { useZxing } from "react-zxing";
 import { FiCornerUpLeft, FiSearch, FiUploadCloud } from "react-icons/fi";
+import { useRouter } from "next/navigation";
+import { PAGE_URLS } from "@/constants";
 
 type LookupMode = "qr" | "code";
 
 export const CertificateLookup = () => {
   const t = useTranslations();
+  const router = useRouter();
   const [mode, setMode] = useState<LookupMode>("qr");
   const [codeValue, setCodeValue] = useState("");
   const [fileName, setFileName] = useState<string | null>(null);
@@ -55,12 +58,14 @@ export const CertificateLookup = () => {
       const asError = error as { message?: string; name?: string };
       if (asError.name === "NotAllowedError") {
         return t("certificate_lookup_camera_permission_error", {
-          default: "Camera permission blocked. Please allow access and try again.",
+          default:
+            "Camera permission blocked. Please allow access and try again.",
         });
       }
       if (asError.name === "NotFoundError") {
         return t("certificate_lookup_camera_not_supported", {
-          default: "Camera access is not available on this device. Please upload a QR photo instead.",
+          default:
+            "Camera access is not available on this device. Please upload a QR photo instead.",
         });
       }
       if (asError.message) return String(asError.message);
@@ -103,6 +108,9 @@ export const CertificateLookup = () => {
   const handleSubmitCode = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // TODO: connect API lookup
+    router.push(
+      `${PAGE_URLS.CERTIFICATE_LOOKUP}/${encodeURIComponent(codeValue)}`
+    );
   };
 
   const handleResumeCamera = () => {
@@ -119,8 +127,9 @@ export const CertificateLookup = () => {
     if (!supported) {
       setCameraError(
         t("certificate_lookup_camera_not_supported", {
-          default: "Camera access is not available on this device. Please upload a QR photo instead.",
-        }),
+          default:
+            "Camera access is not available on this device. Please upload a QR photo instead.",
+        })
       );
       setScannerPaused(true);
     }
@@ -134,7 +143,10 @@ export const CertificateLookup = () => {
           <Badge color="indigo" variant="light" radius="xl">
             {t("certificate_lookup_badge")}
           </Badge>
-          <Title order={1} className="text-4xl font-semibold text-slate-900 dark:text-slate-100 sm:text-5xl">
+          <Title
+            order={1}
+            className="text-4xl font-semibold text-slate-900 dark:text-slate-100 sm:text-5xl"
+          >
             {t("certificate_lookup_title")}
           </Title>
           <Text size="lg" c="dimmed" maw={720}>
@@ -150,19 +162,30 @@ export const CertificateLookup = () => {
           <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent" />
           <Stack gap="lg" className="p-6 sm:p-8">
             <Stack gap="xs" align="center">
-              <Title order={3} className="text-2xl text-slate-900 dark:text-slate-100">
-                {isQrMode ? t("certificate_lookup_qr_mode_title") : t("certificate_lookup_code_mode_title")}
+              <Title
+                order={3}
+                className="text-2xl text-slate-900 dark:text-slate-100"
+              >
+                {isQrMode
+                  ? t("certificate_lookup_qr_mode_title")
+                  : t("certificate_lookup_code_mode_title")}
               </Title>
               <Text c="dimmed" className="max-w-2xl">
-                {isQrMode ? t("certificate_lookup_qr_mode_desc") : t("certificate_lookup_code_mode_desc")}
+                {isQrMode
+                  ? t("certificate_lookup_qr_mode_desc")
+                  : t("certificate_lookup_code_mode_desc")}
               </Text>
               <Badge
                 color="indigo"
                 variant="outline"
                 radius="lg"
-                leftSection={<span className="block h-2 w-2 rounded-full bg-emerald-400" />}
+                leftSection={
+                  <span className="block h-2 w-2 rounded-full bg-emerald-400" />
+                }
               >
-                {isQrMode ? t("certificate_lookup_status_qr") : t("certificate_lookup_status_code")}
+                {isQrMode
+                  ? t("certificate_lookup_status_qr")
+                  : t("certificate_lookup_status_code")}
               </Badge>
             </Stack>
 
@@ -185,10 +208,16 @@ export const CertificateLookup = () => {
                           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-white/85 via-white to-white/90 text-center dark:from-slate-900/80 dark:via-slate-950/90 dark:to-slate-950/80">
                             <div className="h-12 w-12 animate-pulse rounded-full border border-indigo-500/30 bg-indigo-500/10" />
                             <Text size="sm" c="dimmed" className="px-6">
-                              {cameraError ?? t("certificate_lookup_cta_start_camera")}
+                              {cameraError ??
+                                t("certificate_lookup_cta_start_camera")}
                             </Text>
                             {(cameraError || scannerPaused) && (
-                              <Button size="xs" color="indigo" variant="light" onClick={handleResumeCamera}>
+                              <Button
+                                size="xs"
+                                color="indigo"
+                                variant="light"
+                                onClick={handleResumeCamera}
+                              >
                                 {t("certificate_lookup_cta_enable_camera")}
                               </Button>
                             )}
@@ -198,7 +227,10 @@ export const CertificateLookup = () => {
                       </div>
                     </div>
                     <Stack gap={4} align="center">
-                      <Text fw={600} className="text-slate-900 dark:text-slate-100">
+                      <Text
+                        fw={600}
+                        className="text-slate-900 dark:text-slate-100"
+                      >
                         {t("certificate_lookup_qr_hint_title")}
                       </Text>
                       <Text size="sm" c="dimmed" maw={520}>
@@ -206,12 +238,15 @@ export const CertificateLookup = () => {
                       </Text>
                       {fileName && (
                         <Text size="xs" c="indigo.2">
-                          {t("certificate_lookup_file_selected", { name: fileName })}
+                          {t("certificate_lookup_file_selected", {
+                            name: fileName,
+                          })}
                         </Text>
                       )}
                       {cameraError && (
                         <Text size="xs" c="yellow.3">
-                          {t("certificate_lookup_camera_error_prefix")} {cameraError}
+                          {t("certificate_lookup_camera_error_prefix")}{" "}
+                          {cameraError}
                         </Text>
                       )}
                     </Stack>
@@ -249,7 +284,10 @@ export const CertificateLookup = () => {
               <form onSubmit={handleSubmitCode}>
                 <Stack gap="md" align="center">
                   <Stack gap={4} align="center">
-                    <Text fw={600} className="text-slate-900 dark:text-slate-100">
+                    <Text
+                      fw={600}
+                      className="text-slate-900 dark:text-slate-100"
+                    >
                       {t("certificate_lookup_code_label")}
                     </Text>
                     <Text size="xs" c="dimmed">

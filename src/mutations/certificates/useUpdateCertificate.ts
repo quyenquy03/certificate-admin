@@ -1,5 +1,3 @@
-"use client";
-
 import { certificateApis } from "@/apis";
 import {
   BaseResponseType,
@@ -9,7 +7,7 @@ import {
 import { useMutation, type UseMutationOptions } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 
-export const useCreateCertificate = (
+export const useUpdateCertificate = (
   option?: UseMutationOptions<
     BaseResponseType<CertificateResponseType>,
     AxiosError,
@@ -18,7 +16,7 @@ export const useCreateCertificate = (
   >
 ) => {
   const mutationFn = async (data: CreateEditCertificateRequestType) => {
-    const response = await certificateApis.createCertificate(data);
+    const response = await certificateApis.updateCertificate(data);
     return response;
   };
 

@@ -1,8 +1,8 @@
-import { OrganizationMembers } from "@/components";
+import { OrganizationMembersManagement } from "@/components";
 import React from "react";
 
 const OrganizationMembersPage = () => {
-  return <OrganizationMembers />;
+  return <OrganizationMembersManagement />;
 };
 
 export default OrganizationMembersPage;

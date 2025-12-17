@@ -1,3 +1,5 @@
+"use client";
+
 import { OrganizationMembers } from "@/components";
 import { stores } from "@/stores";
 import React from "react";
