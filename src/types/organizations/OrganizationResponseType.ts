@@ -15,4 +15,5 @@ export type OrganizationResponseType = {
   updatedAt: string;
   status: ORGANIZATION_STATUSES;
   owner: UserResponseType;
+  additionalInfo?: string;
 };

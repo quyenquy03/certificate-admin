@@ -15,6 +15,7 @@ import { BiEdit, BiTrash } from "react-icons/bi";
 import { FiGlobe } from "react-icons/fi";
 import {
   calculateIELTSOverall,
+  cn,
   formatDate,
   getLastWordCapitalized,
 } from "@/helpers";
@@ -41,7 +42,9 @@ export const AddCertificateItem = ({
   const t = useTranslations();
   const [isDelete, setIsDelete] = useState(false);
 
+  const isError = certificate.isError;
   const badgeColor = BADGE_COLOR;
+  const accentColor = isError ? "#EF4444" : badgeColor;
 
   const authorName = certificate.authorName.trim() || t("not_updated");
   const authorInitial =
@@ -86,7 +89,11 @@ export const AddCertificateItem = ({
 
   return (
     <Box
-      className="min-h-28 relative rounded-lg bg-background-primary-light p-3 shadow-md transition-all hover:shadow-lg dark:bg-background-primary-dark dark:shadow-slate-800"
+      className={cn(
+        "min-h-28 relative rounded-lg border border-transparent bg-background-primary-light p-3 shadow-md transition-all hover:shadow-lg dark:bg-background-primary-dark dark:shadow-slate-800",
+        isError &&
+          "border-red-200 bg-red-50/80 ring-1 ring-red-200/70 dark:border-red-900/60 dark:bg-red-950/20 dark:ring-red-900/60"
+      )}
       onClick={() => onClick?.(certificate)}
     >
       {actionMenuItems.length > 0 && (
@@ -102,7 +109,7 @@ export const AddCertificateItem = ({
       <Box
         className="absolute inset-x-0 top-0 h-1 w-full rounded-t-lg"
         style={{
-          background: `linear-gradient(90deg, ${badgeColor} 0%, ${badgeColor}bb 100%)`,
+          background: `linear-gradient(90deg, ${accentColor} 0%, ${accentColor}bb 100%)`,
         }}
       />
 

@@ -18,11 +18,11 @@ type LocaleContextType = {
 const LocaleContext = createContext<LocaleContextType | null>(null);
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<LANGUAGES>(LANGUAGES.EN);
+  const [locale, setLocale] = useState<LANGUAGES>(LANGUAGES.VI);
   const [messages, setMessages] = useState<any>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("locale") || LANGUAGES.EN;
+    const saved = localStorage.getItem("locale") || LANGUAGES.VI;
     changeLocale(saved as LANGUAGES);
   }, []);
 

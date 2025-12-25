@@ -1,6 +1,7 @@
 "use client";
 
 import { certificateLevels, IMAGES } from "@/constants";
+import { CERTIFICATE_TYPES } from "@/constants/certificateTypes";
 import {
   formatDate,
   formatFullDate,
@@ -30,6 +31,7 @@ export const GraduationCertificateTemplate = ({
 }: GraduationCertificateTemplateProps) => {
   const leftRef = useRef<HTMLDivElement | null>(null);
   const rightRef = useRef<HTMLDivElement | null>(null);
+  const authorImage = certificate?.authorProfile?.authorImage?.trim();
 
   const certificateLevel = useMemo(() => {
     if (!certificate) return;
@@ -41,6 +43,26 @@ export const GraduationCertificateTemplate = ({
     );
     return level;
   }, [certificate]);
+
+  const certificateTypeCode = useMemo(() => {
+    const additionalCode =
+      typeof certificateAdditionalInfo?.certificate_type === "string"
+        ? certificateAdditionalInfo.certificate_type.trim()
+        : "";
+    const certificateCode =
+      typeof certificate?.certificateType === "string"
+        ? certificate.certificateType.trim()
+        : "";
+    return (additionalCode || certificateCode).toUpperCase();
+  }, [certificateAdditionalInfo, certificate]);
+
+  const certificateTypeLabel = useMemo(() => {
+    if (!certificateTypeCode) return;
+    return CERTIFICATE_TYPES.find(
+      (item) => item.code.toUpperCase() === certificateTypeCode
+    );
+  }, [certificateTypeCode]);
+
 
   const generateImages = async () => {
     if (!leftRef.current || !rightRef.current) return;
@@ -111,7 +133,9 @@ export const GraduationCertificateTemplate = ({
 
             <div className="w-full px-10 mt-10 text-center font-times font-bold">
               <h5 className="text-black mb-1">confers</h5>
-              <h5 className="text-red-500 text-xl">THE DEGREE OF ENGINEER</h5>
+              <h5 className="text-red-500 text-xl">
+                {certificateTypeLabel?.enLabel?.toUpperCase() ?? "THE DEGREE OF ENGINEER"}
+              </h5>
             </div>
 
             <div className="w-full px-20 text-gray-700 mt-12 space-y-4 font-times">
@@ -142,11 +166,15 @@ export const GraduationCertificateTemplate = ({
             </div>
 
             <div className="px-20 mt-10 flex justify-center">
-              <img
-                src={certificate?.authorProfile.authorImage}
-                alt="avatar"
-                className="w-[120px] h-[160px] rounded-sm"
-              />
+              <div className="w-[120px] h-[160px] rounded-sm overflow-hidden">
+                {authorImage ? (
+                  <img
+                    src={authorImage}
+                    alt="avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : null}
+              </div>
             </div>
 
             <div className="px-16 absolute bottom-20 font-times text-gray-700">
@@ -192,7 +220,9 @@ export const GraduationCertificateTemplate = ({
 
             <div className="w-full px-10 mt-10 text-center font-times font-bold">
               <h5 className="text-black mb-1">cấp</h5>
-              <h5 className="text-red-500 text-xl uppercase">Bằng kỹ sư</h5>
+              <h5 className="text-red-500 text-xl uppercase">
+                {certificateTypeLabel?.viLabel ?? "Bằng kỹ sư"}
+              </h5>
             </div>
 
             <div className="w-full px-20 text-gray-700 mt-12 space-y-4 font-times">

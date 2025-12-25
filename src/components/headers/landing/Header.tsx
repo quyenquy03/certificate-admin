@@ -6,7 +6,8 @@ import { FiMenu, FiMoon, FiSun, FiX } from "react-icons/fi";
 import { cn } from "@/helpers";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "@/providers/ThemeProvider/ThemeProvider";
-import { THEMES } from "@/enums";
+import { useLocale } from "@/providers";
+import { LANGUAGES, THEMES } from "@/enums";
 import { useTranslations } from "next-intl";
 
 const navIds = ["gioi-thieu", "cach-hoat-dong-loi-ich", "doi-tac", "lien-he"] as const;
@@ -20,7 +21,9 @@ export const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { theme, setTheme } = useTheme();
+  const { locale, changeLocale } = useLocale();
   const isDark = theme === THEMES.DARK;
+  const nextLocale = locale === LANGUAGES.VI ? LANGUAGES.EN : LANGUAGES.VI;
 
   const navItems = useMemo(
     () =>
@@ -103,6 +106,10 @@ export const Header = () => {
     setTheme(isDark ? THEMES.LIGHT : THEMES.DARK);
   };
 
+  const handleToggleLanguage = () => {
+    changeLocale(nextLocale);
+  };
+
   return (
     <header
       className={cn(
@@ -144,6 +151,14 @@ export const Header = () => {
               {item.label}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={handleToggleLanguage}
+            className="inline-flex h-10 items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50 dark:border-slate-700 dark:bg-slate-900 dark:text-indigo-200 dark:hover:bg-slate-800"
+            aria-label={t("language_toggle_label")}
+          >
+            {locale === LANGUAGES.VI ? "VI" : "EN"}
+          </button>
           <button
             type="button"
             onClick={handleToggleTheme}
@@ -191,6 +206,17 @@ export const Header = () => {
                 {item.label}
               </button>
             ))}
+            <div className="flex items-center justify-between rounded-lg bg-slate-100 px-4 py-3 text-sm font-medium text-slate-800 dark:bg-slate-900 dark:text-slate-200">
+              <span>{t("language_label")}</span>
+              <button
+                type="button"
+                onClick={handleToggleLanguage}
+                className="inline-flex h-10 items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50 dark:border-slate-700 dark:bg-slate-900 dark:text-indigo-200 dark:hover:bg-slate-800"
+                aria-label={t("language_toggle_label")}
+              >
+                {locale === LANGUAGES.VI ? "VI" : "EN"}
+              </button>
+            </div>
             <div className="flex items-center justify-between rounded-lg bg-slate-100 px-4 py-3 text-sm font-medium text-slate-800 dark:bg-slate-900 dark:text-slate-200">
               <span>{t("theme_label")}</span>
               <button

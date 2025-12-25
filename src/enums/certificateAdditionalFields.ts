@@ -3,6 +3,7 @@ export enum CERTIFICATE_ADDITIONAL_FIELD {
   ADDRESS = "address",
   CERTIFICATE_TYPE = "certificate_type",
   CERTIFICATE_DATE = "certificate_date",
+  CERTIFICATE_TEMPLATE = "certificate_template",
 
   SERIAL_NUMBER = "serial_number",
   REG_NO = "reg_no",

@@ -32,6 +32,9 @@ importers:
       '@types/js-cookie':
         specifier: ^3.0.6
         version: 3.0.6
+      '@zxing/library':
+        specifier: ^0.20.0
+        version: 0.20.0
       axios:
         specifier: ^1.12.2
         version: 1.12.2

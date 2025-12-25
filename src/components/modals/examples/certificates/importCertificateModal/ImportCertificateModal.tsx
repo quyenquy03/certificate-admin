@@ -1,7 +1,7 @@
 "use client";
 
 import { ButtonIcon, Modal, type BaseModalProps } from "@/components";
-import { COUNTRIES } from "@/enums";
+import { CERTIFICATE_TEMPLATES, COUNTRIES } from "@/enums";
 import { excelDateToJSDate } from "@/helpers";
 import { CertificateItemFormType } from "@/types";
 import {
@@ -15,8 +15,15 @@ import {
   ThemeIcon,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import moment from "moment";
 import { useTranslations } from "next-intl";
-import { type ChangeEvent, type DragEvent, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  type DragEvent,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FiFileText, FiTrash2, FiUploadCloud } from "react-icons/fi";
 import * as XLSX from "xlsx";
 
@@ -27,20 +34,31 @@ type CertificateRow = {
   birthday?: string | number | Date | null;
   email?: string | number;
   domain?: string | number;
-  gpa: string | number;
+  gpa?: string | number;
   serial_number?: string | number;
   reg_no?: string | number;
-  country_code?: COUNTRIES;
+  candidate_sex?: string | number;
+  candidate_number?: string | number;
+  first_language?: string | number;
+  test_report?: string | number;
+  listening_result?: string | number;
+  reading_result?: string | number;
+  writing_result?: string | number;
+  speaking_result?: string | number;
+  administrator_comments?: string | number;
+  country_code?: string | number;
 };
 
 type ImportCertificateModalProps = {
   onImportCertificate: (certificates: CertificateItemFormType[]) => void;
+  certificateCategory: CERTIFICATE_TEMPLATES | null;
 } & Omit<BaseModalProps, "children">;
 
 export const ImportCertificateModal = ({
   opened,
   onClose,
   onImportCertificate,
+  certificateCategory,
   ...props
 }: ImportCertificateModalProps) => {
   const t = useTranslations();
@@ -50,8 +68,84 @@ export const ImportCertificateModal = ({
   const [isDragging, setIsDragging] = useState(false);
   const hasFile = Boolean(selectedFile);
 
+  const headerByCategory = useMemo(() => {
+    if (certificateCategory === CERTIFICATE_TEMPLATES.IELTS) {
+      return [
+        "stt",
+        "personal_identification",
+        "fullname",
+        "birthday",
+        "email",
+        "candidate_sex",
+        "candidate_number",
+        "first_language",
+        "test_report",
+        "listening_result",
+        "reading_result",
+        "writing_result",
+        "speaking_result",
+        "administrator_comments",
+        "country_code",
+      ] as const;
+    }
+
+    return [
+      "stt",
+      "personal_identification",
+      "fullname",
+      "birthday",
+      "email",
+      "domain",
+      "gpa",
+      "serial_number",
+      "reg_no",
+      "country_code",
+    ] as const;
+  }, [certificateCategory]);
+
+  const isEmptyValue = (value: unknown) => {
+    if (value === null || value === undefined) return true;
+    if (value instanceof Date) return false;
+    if (typeof value === "number") return Number.isNaN(value);
+    if (typeof value === "string") return value.trim().length === 0;
+    return false;
+  };
+
+  const isPositiveNumber = (value: unknown) => Number(value) > 0;
+
+  const parseBirthdayValue = (value: CertificateRow["birthday"]) => {
+    if (!value) return null;
+    if (value instanceof Date) return value;
+    if (typeof value === "number") return excelDateToJSDate(value);
+    const normalized = String(value).trim();
+    if (!normalized) return null;
+    const parsed = moment(
+      normalized,
+      [
+        "DD/MM/YYYY",
+        "D/M/YYYY",
+        "DD-MM-YYYY",
+        "D-M-YYYY",
+        "YYYY-MM-DD",
+        "YYYY/MM/DD",
+      ],
+      true
+    );
+    if (parsed.isValid()) return parsed.toDate();
+    const fallback = new Date(normalized);
+    return Number.isNaN(fallback.getTime()) ? null : fallback;
+  };
+
   const handleConfirm = async () => {
     if (!selectedFile) return;
+    if (!certificateCategory) {
+      notifications.show({
+        title: t("cannot_add_certificate_item"),
+        message: t("select_certificate_type_first"),
+        color: "red",
+      });
+      return;
+    }
 
     try {
       const { read, utils } = XLSX;
@@ -66,40 +160,49 @@ export const ImportCertificateModal = ({
 
       const worksheet = workbook.Sheets[sheetName];
       const rows = utils.sheet_to_json<CertificateRow>(worksheet, {
-        header: [
-          "stt",
-          "personal_identification",
-          "fullname",
-          "birthday",
-          "email",
-          "domain",
-          "gpa",
-          "serial_number",
-          "reg_no",
-          "country_code",
-        ],
+        header: [...headerByCategory],
         range: 1,
         defval: "",
       });
 
       const certificates: CertificateItemFormType[] = rows
-        .map((row, index) => {
-          let birthday = row.birthday;
-          if (!birthday) birthday = null;
-          else if (typeof birthday === "number")
-            birthday = excelDateToJSDate(birthday);
+        .map((row) => {
+          const birthday = parseBirthdayValue(row.birthday);
 
-          return {
+          const baseCertificate: CertificateItemFormType = {
             authorIdCard: String(row.personal_identification ?? "").trim(),
             authorName: String(row.fullname ?? "").trim(),
             authorDob: birthday,
             authorEmail: String(row.email ?? "").trim(),
+            authorCountryCode: String(
+              row.country_code ?? ""
+            ).trim() as COUNTRIES,
             domain: String(row.domain ?? "").trim(),
-            grantLevel: row.gpa,
+            grantLevel: row.gpa ?? 0,
             serial_number: String(row.serial_number ?? "").trim(),
             reg_no: String(row.reg_no ?? "").trim(),
-            authorCountryCode: row.country_code?.trim() as COUNTRIES,
           };
+
+          if (certificateCategory === CERTIFICATE_TEMPLATES.IELTS) {
+            return {
+              ...baseCertificate,
+              domain: "",
+              grantLevel: 0,
+              candidate_sex: String(row.candidate_sex ?? "").trim(),
+              candidate_number: String(row.candidate_number ?? "").trim(),
+              first_language: String(row.first_language ?? "").trim(),
+              test_report: String(row.test_report ?? "").trim(),
+              listening_result: String(row.listening_result ?? "").trim(),
+              reading_result: String(row.reading_result ?? "").trim(),
+              writing_result: String(row.writing_result ?? "").trim(),
+              speaking_result: String(row.speaking_result ?? "").trim(),
+              administrator_comments: String(
+                row.administrator_comments ?? ""
+              ).trim(),
+            };
+          }
+
+          return baseCertificate;
         })
         .filter((row) =>
           Object.values(row).some((value) => {
@@ -110,6 +213,60 @@ export const ImportCertificateModal = ({
             return value.trim().length > 0;
           })
         );
+
+      const requiredFieldsByCategory: Record<CERTIFICATE_TEMPLATES, string[]> =
+        {
+          [CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE]: [
+            "authorName",
+            "authorIdCard",
+            "authorEmail",
+            "authorDob",
+            "authorCountryCode",
+            "domain",
+            "grantLevel",
+            "serial_number",
+            "reg_no",
+          ],
+          [CERTIFICATE_TEMPLATES.IELTS]: [
+            "authorName",
+            "authorIdCard",
+            "authorEmail",
+            "authorDob",
+            "authorCountryCode",
+            "candidate_sex",
+            "candidate_number",
+            "first_language",
+            "test_report",
+            "listening_result",
+            "reading_result",
+            "writing_result",
+            "speaking_result",
+          ],
+          [CERTIFICATE_TEMPLATES.TOEIC]: [],
+        };
+
+      const certificatesWithValidation = certificates.map((item) => {
+        const requiredFields =
+          requiredFieldsByCategory[certificateCategory] ?? [];
+        const hasMissingRequired = requiredFields.some((field) => {
+          const value = (item as Record<string, unknown>)[field];
+          return isEmptyValue(value);
+        });
+
+        const hasInvalidIELTSScores =
+          certificateCategory === CERTIFICATE_TEMPLATES.IELTS &&
+          [
+            item.listening_result,
+            item.reading_result,
+            item.writing_result,
+            item.speaking_result,
+          ].some((value) => !isPositiveNumber(value));
+
+        return {
+          ...item,
+          isError: hasMissingRequired || hasInvalidIELTSScores,
+        };
+      });
 
       for (const i in certificates) {
         const checkIdCard = certificates.some(
@@ -126,7 +283,7 @@ export const ImportCertificateModal = ({
         }
       }
 
-      onImportCertificate(certificates);
+      onImportCertificate(certificatesWithValidation);
       onClose();
       setSelectedFile(null);
       notifications.show({

@@ -32,7 +32,11 @@ type CreateEditCertificateModalProps = {
     certificate: CertificateItemFormType,
     action: FORM_MODES
   ) => void;
-  onCheckExistedAuthorId: (authorId: string, action: FORM_MODES) => boolean;
+  onCheckExistedCertificate: (
+    code: string,
+    type: CERTIFICATE_TEMPLATES,
+    action: FORM_MODES
+  ) => boolean;
   certificateCategory: CERTIFICATE_TEMPLATES | null;
 } & Omit<BaseModalProps, "children">;
 
@@ -50,7 +54,7 @@ export const CreateEditCertificateModal = ({
   opened,
   onClose,
   certificateItem,
-  onCheckExistedAuthorId,
+  onCheckExistedCertificate,
   onSaveCertificateItem,
   certificateCategory,
   ...props
@@ -145,13 +149,38 @@ export const CreateEditCertificateModal = ({
     const actionMode = certificateItem ? FORM_MODES.UPDATE : FORM_MODES.CREATE;
 
     const trimmedAuthorIdCard = values.authorIdCard.trim();
-    if (onCheckExistedAuthorId(trimmedAuthorIdCard, actionMode)) {
-      setError("authorIdCard", {
-        type: "manual",
-        message: "certificate_author_id_exists",
-      });
+
+    if (!certificateCategory) return;
+    let code = "";
+    switch (certificateCategory) {
+      case CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE:
+        code = values.reg_no ?? "";
+        break;
+      case CERTIFICATE_TEMPLATES.IELTS:
+        code = values.test_report ?? "";
+        break;
+      default:
+        break;
+    }
+
+    if (onCheckExistedCertificate(code, certificateCategory, actionMode)) {
+      if (
+        certificateCategory === CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE
+      ) {
+        setError(CERTIFICATE_ADDITIONAL_FIELD.REG_NO, {
+          type: "manual",
+          message: "certificate_author_id_exists",
+        });
+      }
+      if (certificateCategory === CERTIFICATE_TEMPLATES.IELTS) {
+        setError(CERTIFICATE_ADDITIONAL_FIELD.TEST_REPORT, {
+          type: "manual",
+          message: "certificate_author_id_exists",
+        });
+      }
       return;
     }
+
     onSaveCertificateItem(
       {
         ...values,

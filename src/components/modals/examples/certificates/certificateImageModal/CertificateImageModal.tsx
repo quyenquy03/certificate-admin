@@ -55,6 +55,9 @@ export const CertificateImageModal = ({
       return null;
 
     const currentCertificateType = certificateAdditionalInfo.certificate_type;
+    const currentTemplate = certificateAdditionalInfo.certificate_template;
+
+    if (currentTemplate) return currentTemplate;
 
     if (!currentCertificateType) return null;
 
@@ -63,8 +66,11 @@ export const CertificateImageModal = ({
         return CERTIFICATE_TEMPLATES.IELTS;
       case "TOEIC":
         return CERTIFICATE_TEMPLATES.TOEIC;
-      case "CN001":
+      case "CN01":
       case "KS01":
+      case "THS01":
+      case "TS01":
+      case "KTS01":
         return CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE;
       default:
         return null;

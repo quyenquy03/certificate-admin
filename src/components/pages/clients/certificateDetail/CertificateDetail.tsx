@@ -93,6 +93,7 @@ export const CertificateDetail = ({
           await certificateApis.getCertificateDetailOnBlockchain(
             normalizedIpfsHash
           );
+        console.log("certifi", certificateDetailData);
         if (certificateDetailData) setCertificate(certificateDetailData);
       } catch (err) {
         console.log(err);
@@ -115,6 +116,7 @@ export const CertificateDetail = ({
     const author = certificate.authorProfile;
     let parsedAdditionalInfo: AdditionalInfoType | null = null;
 
+    console.log("certificate", certificate);
     try {
       const rawAdditionalInfo = author?.additionalInfo;
       if (rawAdditionalInfo) {
@@ -127,10 +129,17 @@ export const CertificateDetail = ({
       parsedAdditionalInfo = null;
     }
 
+    console.log("parsedAdditionalInfo", parsedAdditionalInfo);
+
     const typeCodeFromAdditionalInfo =
       typeof parsedAdditionalInfo?.certificate_type === "string"
         ? parsedAdditionalInfo.certificate_type.trim()
         : "";
+
+    const templateFromAdditionalInfo =
+      typeof parsedAdditionalInfo?.certificate_template === "string"
+        ? parsedAdditionalInfo?.certificate_template.trim()
+        : null;
 
     const typeCodeFromCertificate =
       typeof certificate.certificateType === "string"
@@ -139,6 +148,8 @@ export const CertificateDetail = ({
 
     const certificateTypeCode =
       typeCodeFromAdditionalInfo || typeCodeFromCertificate;
+
+    console.log("certificateTypeCode", certificateTypeCode);
 
     let certificateCategory: CERTIFICATE_TEMPLATES | null = null;
 
@@ -149,12 +160,19 @@ export const CertificateDetail = ({
       case "TOEIC":
         certificateCategory = CERTIFICATE_TEMPLATES.TOEIC;
         break;
-      case "CN001":
+      case "CN01":
       case "KS01":
+      case "THS01":
+      case "TS01":
+      case "KTS01":
         certificateCategory = CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE;
         break;
       default:
         certificateCategory = null;
+    }
+
+    if (templateFromAdditionalInfo) {
+      certificateCategory = templateFromAdditionalInfo as CERTIFICATE_TEMPLATES;
     }
 
     return {

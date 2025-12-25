@@ -161,21 +161,19 @@ export const CreateUpdateCertificate = ({
   const certificateTypeId = watch("certificateTypeId");
   const formRef = useRef<HTMLFormElement | null>(null);
 
-  const {
-    data: certificateDetailResponse,
-    isFetching: isLoadingCertificate,
-  } = useQueryGetCertificate(certificateId ?? "", {
-    enabled: isUpdateMode,
-    retry: 1,
-    onError: () => {
-      notifications.show({
-        title: t("update_certificate_failed_title"),
-        message: t("common_error_message"),
-        color: "red",
-      });
-      router.push(PAGE_URLS.ORGANIZATIONS_CERTIFICATES);
-    },
-  } as any);
+  const { data: certificateDetailResponse, isFetching: isLoadingCertificate } =
+    useQueryGetCertificate(certificateId ?? "", {
+      enabled: isUpdateMode,
+      retry: 1,
+      onError: () => {
+        notifications.show({
+          title: t("update_certificate_failed_title"),
+          message: t("common_error_message"),
+          color: "red",
+        });
+        router.push(PAGE_URLS.ORGANIZATIONS_CERTIFICATES);
+      },
+    } as any);
 
   const {
     data: certificateTypesResponse,
@@ -350,6 +348,21 @@ export const CreateUpdateCertificate = ({
         return;
       }
 
+      const checkErrorCertificate = listCertificates.some(
+        (item) => item.isError
+      );
+
+      if (checkErrorCertificate) {
+        notifications.show({
+          title: isUpdateMode
+            ? t("update_certificate_failed_title")
+            : t("create_certificate_failed_title"),
+          message: t("common_error_message"),
+          color: "red",
+        });
+        return;
+      }
+
       if (isUpdateMode) {
         const certificateItem = listCertificates[0];
         if (!certificateItem || !certificateId) {
@@ -367,6 +380,11 @@ export const CreateUpdateCertificate = ({
           address: values.address,
           certificate_type: selectedCertificateType.code,
         };
+
+        if (certificateCategory) {
+          additionalInfo[CERTIFICATE_ADDITIONAL_FIELD.CERTIFICATE_TEMPLATE] =
+            certificateCategory;
+        }
 
         if (
           certificateCategory === CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE
@@ -432,6 +450,11 @@ export const CreateUpdateCertificate = ({
             address: values.address,
             certificate_type: selectedCertificateType.code,
           };
+
+          if (certificateCategory) {
+            additionalInfo[CERTIFICATE_ADDITIONAL_FIELD.CERTIFICATE_TEMPLATE] =
+              certificateCategory;
+          }
 
           if (
             certificateCategory === CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE
@@ -516,6 +539,22 @@ export const CreateUpdateCertificate = ({
     certificateItemModal.onOpen();
   };
 
+  const handleOpenImportCertificate = async () => {
+    if (isUpdateMode) return;
+
+    const checkCertificateCategory = await trigger(["certificateTypeId"]);
+    if (!checkCertificateCategory || !certificateCategory) {
+      notifications.show({
+        title: t("cannot_add_certificate_item"),
+        message: t("select_certificate_type_first"),
+        color: "red",
+      });
+      return;
+    }
+
+    importCertificateModal.onOpen();
+  };
+
   const handleEditCertificate = (certificateItem: CertificateItemFormType) => {
     setCurrentCertificate(certificateItem);
     certificateItemModal.onOpen();
@@ -531,9 +570,16 @@ export const CreateUpdateCertificate = ({
     );
   };
 
-  const handleCheckExistAuthorCardId = (cardId: string, action: FORM_MODES) => {
+  const handleCheckExistCertificate = (
+    code: string,
+    type: CERTIFICATE_TEMPLATES,
+    action: FORM_MODES
+  ) => {
     const certificateItem = listCertificates?.find(
-      (item) => item.authorIdCard === cardId
+      (item) =>
+        (type === CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE &&
+          item.reg_no === code) ||
+        (type === CERTIFICATE_TEMPLATES.IELTS && item.test_report === code)
     );
     if (!certificateItem) return false;
 
@@ -549,8 +595,21 @@ export const CreateUpdateCertificate = ({
     certificateItem: CertificateItemFormType,
     action: FORM_MODES
   ) => {
-    const isExistAuthor = handleCheckExistAuthorCardId(
-      certificateItem.authorIdCard,
+    if (!certificateCategory) return;
+    let code = "";
+    switch (certificateCategory) {
+      case CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE:
+        code = certificateItem.reg_no ?? "";
+        break;
+      case CERTIFICATE_TEMPLATES.IELTS:
+        code = certificateItem.test_report ?? "";
+        break;
+      default:
+        break;
+    }
+    const isExistAuthor = handleCheckExistCertificate(
+      code,
+      certificateCategory,
       action
     );
 
@@ -599,7 +658,28 @@ export const CreateUpdateCertificate = ({
   ) => {
     if (isUpdateMode) return;
 
-    setListCertificates((prev) => [...prev, ...certificates]);
+    const certificateArray = [...listCertificates, ...certificates];
+
+    const newArray = certificateArray.map((item, index) => {
+      for (const c in certificateArray) {
+        if (Number(c) === index) continue;
+        if (
+          (certificateCategory ===
+            CERTIFICATE_TEMPLATES.GRADUATION_CERTIFICATE &&
+            certificateArray[c].reg_no === item.reg_no) ||
+          (certificateCategory === CERTIFICATE_TEMPLATES.IELTS &&
+            certificateArray[c].test_report === item.test_report)
+        ) {
+          return {
+            ...item,
+            isError: true,
+          };
+        }
+      }
+      return item;
+    });
+
+    setListCertificates(newArray);
   };
 
   const handleSearchCertificate = (keyword: string) => {
@@ -767,7 +847,7 @@ export const CreateUpdateCertificate = ({
             onClick={handleSubmitFromHeader}
             disabled={isProcessing}
           >
-            {isProcessing ? t("processing") : t("save")}
+            {isProcessing ? t("processing") : t("save_changes")}
           </Button>
         </Group>
       </PageHeader>
@@ -903,7 +983,7 @@ export const CreateUpdateCertificate = ({
                     />
                     {!isUpdateMode && (
                       <>
-                        <ButtonImport onClick={importCertificateModal.onOpen} />
+                        <ButtonImport onClick={handleOpenImportCertificate} />
                         <ButtonAdd onClick={handleCreateCertificate} />
                       </>
                     )}
@@ -925,18 +1005,18 @@ export const CreateUpdateCertificate = ({
                     <Grid gutter="md">
                       {paginatedCertificates.map((certificate) => (
                         <Grid.Col
-                            span={{ base: 12, md: 6 }}
-                            key={certificate.authorIdCard}
-                          >
-                            <AddCertificateItem
-                              certificate={certificate}
-                              onUpdate={handleEditCertificate}
-                              onDelete={
-                                isUpdateMode ? undefined : handleDeleteCertificate
-                              }
-                              certificateCategory={certificateCategory}
-                            />
-                          </Grid.Col>
+                          span={{ base: 12, md: 6 }}
+                          key={certificate.authorIdCard}
+                        >
+                          <AddCertificateItem
+                            certificate={certificate}
+                            onUpdate={handleEditCertificate}
+                            onDelete={
+                              isUpdateMode ? undefined : handleDeleteCertificate
+                            }
+                            certificateCategory={certificateCategory}
+                          />
+                        </Grid.Col>
                       ))}
                     </Grid>
                   )}
@@ -962,7 +1042,7 @@ export const CreateUpdateCertificate = ({
         opened={certificateItemModal.isOpen}
         onClose={handleCloseCertificateItemModal}
         certificateItem={currentCertificate}
-        onCheckExistedAuthorId={handleCheckExistAuthorCardId}
+        onCheckExistedCertificate={handleCheckExistCertificate}
         onSaveCertificateItem={handleSaveCertificateItem}
         certificateCategory={certificateCategory}
       />
@@ -971,6 +1051,7 @@ export const CreateUpdateCertificate = ({
         opened={importCertificateModal.isOpen}
         onClose={importCertificateModal.onClose}
         onImportCertificate={handleImportCertificates}
+        certificateCategory={certificateCategory}
       />
     </Box>
   );

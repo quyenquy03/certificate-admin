@@ -23,7 +23,9 @@ import { useTranslations } from "next-intl";
 import { useZxing } from "react-zxing";
 import { FiCornerUpLeft, FiSearch, FiUploadCloud } from "react-icons/fi";
 import { useRouter } from "next/navigation";
+import { BrowserMultiFormatReader } from "@zxing/library";
 import { PAGE_URLS } from "@/constants";
+import { envs } from "@/constants/envs";
 
 type LookupMode = "qr" | "code";
 
@@ -38,6 +40,7 @@ export const CertificateLookup = () => {
   const [scannerPaused, setScannerPaused] = useState(true);
   const [hasMediaDevices, setHasMediaDevices] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const decodeSessionRef = useRef(0);
 
   const isQrMode = mode === "qr";
   const isScannerPaused = !isQrMode || scannerPaused || !hasMediaDevices;
@@ -51,6 +54,10 @@ export const CertificateLookup = () => {
     if (!file) return;
     setFileName(file.name);
     setMode("qr");
+    setScannerPaused(true);
+    setCameraError(null);
+    void decodeQrFromFile(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const getErrorMessage = (error: unknown) => {
@@ -75,6 +82,74 @@ export const CertificateLookup = () => {
     });
   };
 
+  const extractCertificateCode = (rawValue: string) => {
+    const trimmed = rawValue.trim();
+    const baseUrl = envs.FRONTEND_URL.trim().replace(/\/+$/, "");
+    if (!trimmed || baseUrl === "no value") return null;
+    if (!trimmed.startsWith(baseUrl)) return null;
+
+    try {
+      const scannedUrl = new URL(trimmed);
+      const base = new URL(baseUrl);
+      if (scannedUrl.origin !== base.origin) return null;
+
+      const basePath = base.pathname.replace(/\/+$/, "");
+      const lookupPath = `${basePath}${PAGE_URLS.CERTIFICATE_LOOKUP}`;
+      if (!scannedUrl.pathname.startsWith(`${lookupPath}/`)) return null;
+
+      const codeSegment = scannedUrl.pathname.slice(lookupPath.length + 1);
+      const code = codeSegment.split("/")[0];
+      return code ? decodeURIComponent(code) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const decodeQrFromFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      setCameraError(
+        t("certificate_lookup_qr_invalid", {
+          default: "Please upload an image file.",
+        })
+      );
+      if (hasMediaDevices) setScannerPaused(false);
+      return;
+    }
+
+    decodeSessionRef.current += 1;
+    const currentSession = decodeSessionRef.current;
+    const reader = new BrowserMultiFormatReader();
+    const imageUrl = URL.createObjectURL(file);
+
+    try {
+      const result = await reader.decodeFromImageUrl(imageUrl);
+      if (currentSession !== decodeSessionRef.current) return;
+      const extractedCode = extractCertificateCode(result.getText());
+      if (!extractedCode) {
+        setCameraError(
+          t("certificate_lookup_qr_invalid", {
+            default: "QR code is not a valid certificate link.",
+          })
+        );
+        return;
+      }
+      setCameraError(null);
+      setCodeValue(extractedCode);
+      setMode("code");
+    } catch {
+      if (currentSession !== decodeSessionRef.current) return;
+      setCameraError(
+        t("certificate_lookup_qr_invalid", {
+          default: "Unable to read QR from the image. Please try another photo.",
+        })
+      );
+      if (hasMediaDevices) setScannerPaused(false);
+    } finally {
+      reader.reset();
+      URL.revokeObjectURL(imageUrl);
+    }
+  };
+
   const { ref: videoRef } = useZxing({
     paused: isScannerPaused,
     timeBetweenDecodingAttempts: 200,
@@ -84,8 +159,10 @@ export const CertificateLookup = () => {
       },
     },
     onDecodeResult: (result) => {
+      const extractedCode = extractCertificateCode(result.getText());
+      if (!extractedCode) return;
       setCameraError(null);
-      setCodeValue(result.getText());
+      setCodeValue(extractedCode);
       setMode("code");
     },
     onDecodeError: () => {

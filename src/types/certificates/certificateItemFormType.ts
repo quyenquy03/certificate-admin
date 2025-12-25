@@ -9,6 +9,7 @@ export type CertificateItemFormType = {
   authorImage?: string;
   grantLevel: string | number;
   domain?: string;
+  isError?: boolean;
 
   // additional field
   [CERTIFICATE_ADDITIONAL_FIELD.SERIAL_NUMBER]?: string;

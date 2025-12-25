@@ -8,4 +8,5 @@ export type RegisterOrganizationRequestType = {
   organizationDescription: string;
   website: string;
   countryCode: string;
+  additionalInfo?: string;
 };
